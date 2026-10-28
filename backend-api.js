@@ -27,6 +27,22 @@
     sectors: () => request('/api/sectorcards-10m'),
     journal: () => request('/api/v1/trade-journal'),
     positions: () => request('/api/trading/positions'),
+    orders: () => request('/api/trading/orders'),
+    executions: () => request('/api/trading/executions'),
+    fibLevels: (symbol='ES', tf='1h') => request(`/api/v1/fib-levels?symbol=${encodeURIComponent(symbol)}&tf=${encodeURIComponent(tf)}`),
+    activeWaves: (symbol='ES') => request(`/api/v1/waves/active?symbol=${encodeURIComponent(symbol)}`),
+    reactionQuality: (symbol='ES') => request(`/api/v1/reaction-quality?symbol=${encodeURIComponent(symbol)}`),
+    strategyState: (symbol='ES') => request(`/api/v1/strategy-state?symbol=${encodeURIComponent(symbol)}`),
+    tradePermission: (symbol='ES') => request(`/api/v1/trade-permission?symbol=${encodeURIComponent(symbol)}`),
+    engine25: (symbol='ES') => request(`/api/v1/engine25/full-dashboard?symbol=${encodeURIComponent(symbol)}`),
+    engine25Composite: (symbol='ES') => request(`/api/v1/engine25/composite-overlay-6mo?symbol=${encodeURIComponent(symbol)}`),
+    engine29: (symbol='ES') => request(`/api/v1/engine29/cross-market-stress?symbol=${encodeURIComponent(symbol)}`),
+    engine29Summary: (symbol='ES') => request(`/api/v1/engine29/cross-market-stress/summary?symbol=${encodeURIComponent(symbol)}`),
+    alerts: () => request('/api/v1/alerts'),
+    chartOverlay: (symbol='ES') => request(`/api/v1/chart-overlay?symbol=${encodeURIComponent(symbol)}`),
+    morningFib: (symbol='ES') => request(`/api/v1/morning-fib?symbol=${encodeURIComponent(symbol)}`),
+    replayDates: () => request('/api/v1/replay/dates'),
+    gauges: (index='ES') => request(`/api/v1/gauges?index=${encodeURIComponent(index)}`),
     status: async () => { if (!base) return { configured: false, reachable: false, reason: 'No backend URL configured' }; try { const result = await api.health(); return { configured: true, reachable: true, result }; } catch (error) { return { configured: true, reachable: false, reason: error.message }; } }
   };
   window.redlineApi = api;
