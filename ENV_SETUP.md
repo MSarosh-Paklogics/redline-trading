@@ -20,6 +20,7 @@ Add the frontend variables in Vercel Project Settings → Environment Variables.
 
 ## Backend hosting
 
-Add the backend variables in the backend Render service Environment settings. The frontend only needs the public backend base URL. The backend owns all third-party credentials and calls Polygon/Massive, FMP, Finnhub, Finlight, FRED, OpenAI, Schwab, Pushover and GitHub.
+Add the backend variables in the backend Render service Environment settings. The frontend only needs the public backend base URL. The backend will run as an independently deployed service under your control. The backend owns all third-party credentials and calls Polygon/Massive, FMP, Finnhub, Finlight, FRED, OpenAI, Schwab, Pushover and GitHub.
 
 The new Redline frontend can remain on demo data until the backend URL, CORS origin and field-level API contract are confirmed.
+
