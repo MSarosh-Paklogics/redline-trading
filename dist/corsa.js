@@ -1,13 +1,13 @@
 'use strict';
 /* FRYE CORSA: motorsport-inspired presentation, without third-party branding. */
-document.body.classList.add('corsa-theme');
+document.body.classList.add('corsa-theme');\nconst liveTelemetry={};
 const raceMetrics=()=>{
  const committed=state.positions.reduce((a,p)=>a+p.entry*p.qty,0)+state.orders.reduce((a,p)=>a+p.limit*p.qty,0);
  const load=equity()>0?committed/equity()*100:0;
  const signal=signalFixtures.find(s=>s.symbol===symbol)||signalFixtures[0];
  return [
- {id:'drive',name:'Market drive',code:'MKT',value:76,max:100,unit:'ALIGNMENT / 100',status:'CONSTRUCTIVE',detail:'The overview’s hypothetical regime alignment score. This is a presentation fixture, not an engine calculation.',source:'Market context fixture',destination:'xray'},
- {id:'breadth',name:'Participation',code:'BRD',value:68.4,max:100,unit:'ADVANCING / %',status:'BROADENING',detail:'Illustrative share of advancing constituents in the mock universe. It matches the Market X-Ray breadth fixture.',source:'Breadth fixture',destination:'xray'},
+ {id:'drive',name:'Market drive',code:'MKT',value:liveTelemetry.score ?? 76,max:100,unit:'ALIGNMENT / 100',status:'CONSTRUCTIVE',detail:'The overview’s hypothetical regime alignment score. This is a presentation fixture, not an engine calculation.',source:'Market context fixture',destination:'xray'},
+ {id:'breadth',name:'Participation',code:'BRD',value:liveTelemetry.breadth ?? 68.4,max:100,unit:'ADVANCING / %',status:'BROADENING',detail:'Illustrative share of advancing constituents in the mock universe. It matches the Market X-Ray breadth fixture.',source:'Breadth fixture',destination:'xray'},
  {id:'volatility',name:'Volatility',code:'VOL',value:18.42,max:40,unit:'INDEX / 0–40',status:'MODERATE',detail:'The fictional volatility index shown in Market X-Ray. Gauge range is a display choice, not a predictive risk model.',source:'Volatility context fixture',destination:'xray'},
  {id:'capital',name:'Capital load',code:'CAP',value:load,max:100,unit:'COMMITTED / %',status:load>80?'HIGH LOAD':load>0?'CAPITAL ENGAGED':'UNCOMMITTED',detail:'Open-position entry notional plus pending-order limit notional, divided by current paper equity. This shows capital commitment, not maximum loss or stop-based risk.',source:'Local simulated paper ledger',destination:'paper'},
  {id:'trend',name:'Trend alignment',code:'TRD',value:75,max:100,unit:'3 OF 4 / TIMEFRAMES',status:'TREND SUPPORT',detail:'Three of four timeframes are bullish in the existing X-Ray fixture; one is consolidating. No live trend engine is connected.',source:'Multi-timeframe fixture',destination:'xray'},
@@ -29,6 +29,7 @@ action=function(value){if(value==='meters'){closeModal();go('meters');return}if(
 const beforeRaceBind=bindPage;
 bindPage=function(){beforeRaceBind();document.body.classList.toggle('race-dashboard',page==='overview');const brand=$('.terminal-brand-copy>small');if(brand)brand.textContent='PERFORMANCE TRADING';const status=$('.terminal-status-brand');if(status)status.innerHTML='REDLINE<span>PRO</span>';const meterSelect=$('#raceSymbol');if(meterSelect)meterSelect.onchange=e=>{symbol=e.target.value;render()};if(page==='chart'&&chartTab==='watchlist'){const watch=$('.terminal-watch-table');if(watch){const metrics=raceMetrics();watch.insertAdjacentHTML('afterend',`<section class="race-chart-telemetry"><div class="race-chart-telemetry-title"><strong>COCKPIT TELEMETRY</strong><a href="#/meters" title="Open performance meters" aria-label="Open performance meters">${icon('expand',12)}</a></div><div>${raceMeter(metrics[0],0,true)}${raceMeter(metrics[3],3,true)}</div></section>`);bindActions($('.race-chart-telemetry'));}}};
 route();
+
 
 
 
