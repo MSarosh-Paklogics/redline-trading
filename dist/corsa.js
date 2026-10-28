@@ -1,6 +1,7 @@
 'use strict';
 /* FRYE CORSA: motorsport-inspired presentation, without third-party branding. */
-document.body.classList.add('corsa-theme');\nconst liveTelemetry={};
+document.body.classList.add('corsa-theme');
+const liveTelemetry={};
 const raceMetrics=()=>{
  const committed=state.positions.reduce((a,p)=>a+p.entry*p.qty,0)+state.orders.reduce((a,p)=>a+p.limit*p.qty,0);
  const load=equity()>0?committed/equity()*100:0;
@@ -29,6 +30,7 @@ action=function(value){if(value==='meters'){closeModal();go('meters');return}if(
 const beforeRaceBind=bindPage;
 bindPage=function(){beforeRaceBind();document.body.classList.toggle('race-dashboard',page==='overview');const brand=$('.terminal-brand-copy>small');if(brand)brand.textContent='PERFORMANCE TRADING';const status=$('.terminal-status-brand');if(status)status.innerHTML='REDLINE<span>PRO</span>';const meterSelect=$('#raceSymbol');if(meterSelect)meterSelect.onchange=e=>{symbol=e.target.value;render()};if(page==='chart'&&chartTab==='watchlist'){const watch=$('.terminal-watch-table');if(watch){const metrics=raceMetrics();watch.insertAdjacentHTML('afterend',`<section class="race-chart-telemetry"><div class="race-chart-telemetry-title"><strong>COCKPIT TELEMETRY</strong><a href="#/meters" title="Open performance meters" aria-label="Open performance meters">${icon('expand',12)}</a></div><div>${raceMeter(metrics[0],0,true)}${raceMeter(metrics[3],3,true)}</div></section>`);bindActions($('.race-chart-telemetry'));}}};
 route();
+
 
 
 
