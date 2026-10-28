@@ -18,7 +18,7 @@ try{state=JSON.parse(localStorage.getItem('frye-demo-v2'))||defaultState();if(!s
 const save=()=>{try{localStorage.setItem('frye-demo-v2',JSON.stringify(state))}catch{storageOK=false}};
 if(!state.settings.brianProfileApplied){state.settings.name='Brian';state.settings.brianProfileApplied=true;save()}
 let page='overview',symbol=state.settings.defaultSymbol,tf=state.settings.defaultTf,period='1M',sectorPeriod='Day',selectedSector=0,signalFilter='All',signalSearch='',journalSearch='',notificationTab='signals',unreadOnly=false,degree='All degrees',strategySearch='',chartTab='setup',indicators={ma:true,wave:true,levels:false},barCount=65,chartOffset=0,drawMode=false,drawings=[],guideStep=-1;
-const quote=s=>{const base=symbols.find(x=>x[0]===s)||symbols[0];const live=window.redlineLiveBars?.[${s}:];if(live?.length)return Number(live.at(-1).c);return base[2]+(state.step?Math.sin(state.step*1.7+symbols.indexOf(base))*.006*base[2]:0)};
+const quote=s=>{const base=symbols.find(x=>x[0]===s)||symbols[0];const live=window.redlineLiveBars?.[`${s}:${tf}`];if(live?.length)return Number(live.at(-1).c);return base[2]+(state.step?Math.sin(state.step*1.7+symbols.indexOf(base))*.006*base[2]:0)};
 const meta=s=>symbols.find(x=>x[0]===s)||symbols[0];
 const priceLevels=(s,side='Long')=>{let p=quote(s),d=side==='Long'?1:-1;return {entry:p,stop:p*(1-d*.008),target:p*(1+d*.018)}};
 const pnl=(p,exit=quote(p.symbol))=>(exit-p.entry)*p.qty*(p.side==='Long'?1:-1);
