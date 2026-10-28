@@ -3,7 +3,8 @@
 (() => {
   const stored = (() => { try { return localStorage.getItem('redline-api-base') || ''; } catch { return ''; } })();
   const clean = value => String(value || '').trim().replace(/\/+$/, '');
-  const queryBase = (() => { try { return new URLSearchParams(location.search).get('api') || ''; } catch { return ''; } })();\n  const base = clean(window.REDLINE_API_BASE || queryBase || stored || 'https://frye-market-backend-1.onrender.com');
+  const queryBase = (() => { try { return new URLSearchParams(location.search).get('api') || ''; } catch { return ''; } })();
+  const base = clean(window.REDLINE_API_BASE || queryBase || stored || 'https://frye-market-backend-1.onrender.com');
   const url = path => `${base}${String(path).startsWith('/') ? path : `/${path}`}`;
   async function request(path, options = {}) {
     const controller = new AbortController();
@@ -47,6 +48,7 @@
   };
   window.redlineApi = api;
 })();
+
 
 
 
