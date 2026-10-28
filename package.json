@@ -8,7 +8,7 @@
     "start": "node server.mjs",
     "build": "node build.mjs",
     "preview": "node server.mjs --dist",
-    "check": "node --check app.js && node --check engines.js && node --check motion.js && node --check navigation.js && node --check chart-tools.js && node --check terminal.js && node --check corsa.js && node --check protection.js"
+    "check": "node --check backend-api.js && node --check app.js && node --check engines.js && node --check motion.js && node --check navigation.js && node --check chart-tools.js && node --check terminal.js && node --check corsa.js && node --check protection.js"
   },
   "engines": {
     "node": ">=18"
