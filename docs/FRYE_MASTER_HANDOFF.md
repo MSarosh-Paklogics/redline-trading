@@ -65,7 +65,7 @@ Dashboard, Charts, Strategies and General.
 | --- | --- | --- |
 | **Dashboard** | `/api/v1/dashboard-snapshot`, `/api/v1/futures/market-meter`, `/api/sectorcards-10m`, `/api/v1/engine25/market-health/summary`, `/api/v1/engine29/cross-market-stress/summary` | It shows the same ES state and timestamp as Frye. Cards match the API. Stale or unavailable data is visibly marked. Nothing simulated is labelled LIVE. |
 | **Charts** | `/api/v1/futures/ohlc` (ES), `/api/v1/ohlc` (equities), SSE `/stream/futures/agg` and `/stream/agg` on Backend 2, private Engine 11 history, Engine 22 overlays and Fib levels | OHLCV and the physical contract are correct. LIVE bars aren't blocked by history loading. Older candles load on scroll. Overlays match Engine 22. Switching timeframe never shows stale data. |
-| **Strategies** | `/api/v1/dashboard-snapshot` (strategies, including Engine 26 output), `/api/v1/waves/active`, `/api/v1/trade-permission-v2` | Direction and warnings are exactly what the engines supply. Structure, readiness and permission are shown separately. There are no invented percentages and no trade actions. |
+| **Strategies** | `/api/v1/dashboard-snapshot` → `strategies[id]`: `engine23Interpretation` (structure), `engine15` (readiness), `engine26ProposedGeometry` (geometry), `permission` (Engine 6 final, `engine6.finalFromEngine15.v1`) | Direction and warnings are exactly what the engines supply. Structure, readiness and permission are shown separately. There are no invented percentages and no trade actions. |
 | **General** | UNKNOWN. A likely source is Frye `src/pages/redline/ControlsPage.jsx`. | Brian approves a field-by-field mapping first. Don't invent features. |
 
 **Frye source map:**
@@ -211,8 +211,6 @@ inside `dashboard-snapshot`.
 | `GET /api/v1/ohlc` | Same shape, for equities (default SPY) | 502 |
 | `GET /api/sectorcards-10m` | → `ok`, `version`, `sectorCards[{sector,tilt,outlook,grade,nl,up,down}]` | 200 with `ok:false, fallback:true` |
 | `GET /api/v1/waves/active` | `symbol=ES` → persisted active-wave doc | 400 `UNSUPPORTED_SYMBOL`, 404 `ACTIVE_WAVE_STATE_NOT_FOUND` |
-| `GET /api/v1/trade-permission-v2` | `strategyId`, `symbol`, … → `engine:"engine6.marketMind.v2"`, `asOf`, decision | 500 `ENGINE6_V2_ERROR` |
-| `GET /api/v1/trade-permission` | v1, legacy (`engine6.tradePermission.v1`) | 500 `ENGINE6_V1_ERROR` |
 | `GET /api/v1/volume-behavior` | `symbol`, `tf`, … → `volumeRegime`, `pressureBias`, `flowSummary`, `nextConfirm`, `raw` | 500 |
 | `GET /api/v1/es-volume-behavior` | `symbol`, `tf`, `limit` | 200 with `ok:false` |
 | `GET /api/v1/fib-levels` | `symbol`, `tf`, `degree`, `wave` | Fallback or error; never invent values |
@@ -289,9 +287,9 @@ Changing any of these requires Brian's explicit approval.
 | P0 | Confirm data redistribution rights for subscribers | UNKNOWN |
 | P0 | Decide who owns the Redline backend, SQL and auth | UNCERTAIN |
 | P1 | **[Claude]** Fix the Redline adapter bugs below | Open |
-| P1 | Dashboard: replace fixtures with canonical data and freshness states | Not done |
+| P1 | Dashboard: replace fixtures with canonical data and freshness states | Live panel added; demo cards below it still fixtures |
 | P1 | Charts: real candles, history, SSE, overlays | Not done |
-| P1 | Strategies: real Engine 22/26/27 output and conflict warnings | Not done |
+| P1 | Strategies: real Engine 22/26/27 output and conflict warnings | Live panel added (E23/E15/E26/E6); Engine 27 not shown yet |
 | P1 | General: get the scope approved | UNKNOWN |
 | P1 | Capture sanitized schema fixtures for every route the four pages use | Partial |
 | P1 | Decide what to do about the unmounted `strategy-state`, `reaction-quality` and `gauges` | Pending |
@@ -320,6 +318,26 @@ Changing any of these requires Brian's explicit approval.
   backend marks as placeholders.
 - **Unloaded script:** `live-surfaces.js` is copied by `build.mjs` but never loaded by
   `index.html`.
+
+
+**[Claude] Verified against live responses on 2026-11-04:**
+- **Engine 6 permission:** the authoritative value is `dashboard-snapshot` →
+  `strategies[id].permission` (`engine6.finalFromEngine15.v1`). The snapshot's own
+  `engine6v2` block says `authority:false`, `ignoredForES:true`, reason
+  `ENGINE6_V2_STALE_USES_ENGINE5_SCORE_NOT_ENGINE15`. The `/trade-permission[-v2]` GET
+  routes compute a result from caller-supplied inputs (defaults when none are sent), so
+  Redline must never call them.
+- **Stale route:** `/api/v1/waves/active` returned `updatedAt: 2026-09-28 08:55`, which is
+  stale. Current wave context comes from the snapshot (`engine23Interpretation`,
+  `engine22WaveStrategy`, `engine27Strategies`).
+- **Snapshot size:** `dashboard-snapshot` is about 18 MB with or without `includeContext`.
+  Redline fetches it at most once a minute and shares it across pages.
+- **Fib levels:** `/api/v1/fib-levels?symbol=ES&tf=1h` returned `ok:false`, `NO_ANCHORS`.
+- **Strategy IDs in the snapshot:** `intraday_scalp@10m`, `minor_swing@1h`,
+  `intermediate_long@4h`, `subminute_scalp@10m`.
+- **Now live in Redline:** the Dashboard panel (Market Mind, Engine 25, Engine 29, news
+  risk and sector cards), the Strategies panel (structure, readiness, geometry and
+  permission per strategy), the Chart engine panel, and real ES candles.
 
 **Recommended order:**
 1. Use a Redline feature branch. Demo mode stays only as a labelled fallback.

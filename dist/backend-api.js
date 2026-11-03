@@ -23,8 +23,19 @@
       return { ok: true, data, status: response.status };
     } finally { clearTimeout(timer); }
   }
+  // dashboard-snapshot is ~18 MB, so every page shares one request per symbol per minute.
+  const snapshotCache = {};
+  const snapshotShared = (symbol = 'ES', maxAgeMs = 60000) => {
+    const hit = snapshotCache[symbol];
+    if (hit && Date.now() - hit.at < maxAgeMs) return hit.promise;
+    const promise = request(`/api/v1/dashboard-snapshot?symbol=${q(symbol)}`, { timeout: 45000 });
+    snapshotCache[symbol] = { at: Date.now(), promise };
+    promise.catch(() => { if (snapshotCache[symbol]?.promise === promise) delete snapshotCache[symbol]; });
+    return promise;
+  };
   const api = {
     base,
+    snapshotShared,
     enabled: Boolean(base),
     request,
     health: () => request('/api/health'),
