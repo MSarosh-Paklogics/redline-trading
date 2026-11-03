@@ -54,7 +54,8 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `backend-api.js` | `window.redlineApi` — the only place backend routes are defined |
 | `app.js` | Core app, hash router (`#/overview`, `#/chart`, `#/signals`, `#/sectors`, `#/xray`, `#/strategies`, `#/journal`, `#/settings`, …), demo fixtures |
 | `engines.js` | Engine Room / reference-aware engine views |
-| `live-surfaces.js` | Live ES market-meter (`#/meters`) and engine-context (`#/chart`) panels — **currently not referenced by index.html** |
+| `market-xray.js` | First page (`#/overview`): Engine 25 Market X-Ray + Engine 29, mirroring Frye `src/pages/engine25/Engine25MarketXrayPreview.jsx` |
+| `live-surfaces.js` | Live panels per route (overview, strategies, chart, meters); re-attaches them after app.js re-renders |
 | `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
 
 Backend base URL resolution in `backend-api.js`: `window.REDLINE_API_BASE` →

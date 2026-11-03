@@ -339,6 +339,24 @@ Changing any of these requires Brian's explicit approval.
   risk and sector cards), the Strategies panel (structure, readiness, geometry and
   permission per strategy), the Chart engine panel, and real ES candles.
 
+**[Claude] First page = Engine 25 Market X-Ray (Brian's request, 2026-11-04):**
+- **Source:** Frye's home route `/` renders `Engine25MarketXrayPreview` inside
+  `RedlineAppShell`. Redline's `#/overview` now mirrors it in `market-xray.js`, using the
+  same sources: `/api/v1/engine25/full-dashboard`, `/api/v1/futures/market-meter?symbol=ES`,
+  `/live/hourly`, `/live/eod-shadow` and `/api/v1/engine29/cross-market-stress/summary`.
+- **Frontend math to move server-side:** Brian's page computes some values in the
+  frontend:
+  - hourly sector totals
+  - strong/weak sector counts (breadth and momentum ≥55 / ≤45)
+  - broader-market strength (60/25/15)
+  - the **65/20/15 trade-permission score** (master / 4H / reconstructed EOD) and its
+    thresholds
+
+  Redline copies this math as-is, labelled MIRRORED. Ask Brian to publish these
+  values from the backend so the UI only displays them.
+- **News feed down:** `newsEvents` currently returns HTTP 429 from Finlight (token limit).
+  Redline shows "News feed unavailable".
+
 **Recommended order:**
 1. Use a Redline feature branch. Demo mode stays only as a labelled fallback.
 2. Build the Redline backend-for-frontend.

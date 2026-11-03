@@ -100,7 +100,11 @@
   }
 
   const SURFACES = {
-    overview: ['LIVE DASHBOARD', 'ES market state from the Frye engines', dashboard],
+    overview: ['LIVE MARKET X-RAY', 'Engine 25 market health · Engine 29 market character', async el => {
+      if (!window.redlineMarketXray) return dashboard(el);
+      const r = await window.redlineMarketXray(el);
+      stamp(el, r.stamp); setStatus(el, r.okCount, r.total);
+    }],
     strategies: ['LIVE STRATEGIES', 'Canonical ES strategy decisions', strategies],
     chart: ['LIVE ENGINE CONTEXT', 'Canonical ES engine evidence', chartEngines],
     meters: ['LIVE CLIENT MARKET METER', 'ES multi-timeframe condition', meters]
@@ -110,6 +114,7 @@
   function place() {
     const main = document.querySelector('#main'); if (!main) return;
     const key = routeKey();
+    document.body.classList.toggle('live-xray-page', key === 'overview' && Boolean(surfaces.overview));
     for (const [k, el] of Object.entries(surfaces)) {
       if (k === key && !main.contains(el)) main.prepend(el);
       if (k !== key) el.remove();
