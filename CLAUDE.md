@@ -41,7 +41,8 @@ ask — do not guess which is current.
    Finnhub, OpenAI, Pushover etc. keys belong only in the backend's Render
    secret store. The frontend knows only the public backend base URL.
    Never commit `.env*`, tokens, broker account numbers or subscriber data.
-6. Don't present demo/fixture data as live. Live surfaces are labelled
+6. **Keep Redline's own UI.** Feed live data into the existing components (corsa gauges, `stat()` cards); don't replace pages with new generic box layouts.
+7. Don't present demo/fixture data as live. Live surfaces are labelled
    `LIVE BACKEND`; anything else is illustrative.
 
 ## Stack and layout
@@ -54,8 +55,9 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `backend-api.js` | `window.redlineApi` — the only place backend routes are defined |
 | `app.js` | Core app, hash router (`#/overview`, `#/chart`, `#/signals`, `#/sectors`, `#/xray`, `#/strategies`, `#/journal`, `#/settings`, …), demo fixtures |
 | `engines.js` | Engine Room / reference-aware engine views |
-| `market-xray.js` | First page (`#/overview`): Engine 25 Market X-Ray + Engine 29, mirroring Frye `src/pages/engine25/Engine25MarketXrayPreview.jsx` |
-| `live-surfaces.js` | Live panels per route (overview, strategies, chart, meters); re-attaches them after app.js re-renders |
+| `market-xray.js` | Loads the live Engine 25 Market X-Ray + Engine 29 model (`window.redlineXray.model`), mirroring Frye `src/pages/engine25/Engine25MarketXrayPreview.jsx`. Display only, no markup. |
+| `corsa.js` | Redline's own car-style first page and meters (hero, speedometer gauges, stat cards); reads `window.redlineXray.model`, falls back to labelled fixtures |
+| `live-surfaces.js` | Live panels for strategies, chart and meters; re-attaches them after app.js re-renders |
 | `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
 
 Backend base URL resolution in `backend-api.js`: `window.REDLINE_API_BASE` →
