@@ -71,7 +71,16 @@ If not, none of these are needed.
 4. Build the small Redline server for history and stream access. Add SQL, logins and entitlements only if you confirm you want them.
 5. Run security and data checks, have you approve the four pages side by side with Frye, then launch.
 
-We won't change anything in your Frye repositories. If we find something the backend needs, we'll send it to you as a separate request.
+**Keeping Redline in sync with your changes**
+
+We've set up a daily scheduled check of your two Frye GitHub repositories (Frye-Dashboard and frye-market-backend). Each day it pulls your latest commits and reports anything that affects Redline:
+- new, changed or removed API endpoints and response fields
+- engine updates
+- dashboard, chart and strategy page changes
+
+We then apply the matching changes to the new Redline dashboard. You don't need to send us anything: just push your work to GitHub as usual. If a change needs a decision (for example, a renamed field or a new engine output), we'll ask you before implementing it.
+
+This check only reads your repositories. We won't change anything in your Frye repositories. If we find something the backend needs, we'll send it to you as a separate request.
 
 Thanks,
 Muhammad
