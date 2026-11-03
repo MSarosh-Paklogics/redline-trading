@@ -34,37 +34,41 @@ Redline is strictly read-only. It has no order buttons and never calls any tradi
    - **Fib levels:** `/api/v1/fib-levels` returns "NO_ANCHORS" for ES 1H. Which degree and wave should Redline request?
 6. **Snapshot size (optional):** the dashboard snapshot is about 18 MB. A smaller summary endpoint would make Redline much faster for subscribers. We can send a field list if you'd like to add one.
 
-**SQL and accounts: we'll handle this on our side**
+**Do you want a SQL database for Redline? Please confirm before we build anything**
 
-We'll build a separate Redline backend for:
-- subscriber login
-- subscriptions and entitlements
-- saved preferences and watchlists
-- alert settings
-- an audit log
+Today Redline needs no database. It only reads your backend, and any personal settings stay in each visitor's browser.
 
-It will use a managed PostgreSQL database. It will never store or recalculate engine decisions or market data; your Frye backend stays the single source of truth. It will also hold the Engine 11 and stream access from the server side, so no keys ever reach the browser.
+A SQL database (for example PostgreSQL) would only be needed if Redline should have any of these:
+- subscriber logins and accounts
+- paid subscriptions, or controlling who can see which pages
+- saved preferences, watchlists or alert settings that follow a user across devices
+- an audit log of who viewed or changed what
 
-We need you to confirm:
-- **Hosting:** Render, next to your services, or a separate provider.
-- **Account:** whose account it runs under and who pays for it.
+It would never store or recalculate engine decisions or market data; your Frye backend stays the single source of truth.
+
+There's one related point. Engine 11 history and the live streams need a small Redline server even without a database, so their access keys never reach the browser.
+
+Please tell us:
+1. Does Redline need logins and subscriptions, or will it be open, or protected some other way?
+2. If you want accounts: should we build the database, and where should it be hosted (Render next to your services, or elsewhere), under whose account?
+3. If not: should Redline stay database-free, with only a small server for history and stream access?
 
 **Third-party APIs**
 
 - **Redline frontend:** needs no third-party API keys. Market data, Schwab and the other providers stay inside your backend.
-- **Redline backend:** will only need:
-  - our own database
+- **Redline backend:** if you choose accounts and subscriptions, it would also need:
+  - the database
   - an email provider for logins and notifications
-  - a payment provider (for example Stripe) once subscriptions launch
+  - a payment provider (for example Stripe)
 
-These will be set up and paid for on our side unless you'd prefer otherwise.
+If not, none of these are needed.
 
 **Next steps**
 
 1. Finish the Dashboard and Charts: live candle stream, older history on scroll, and wave and Fib overlays once access is confirmed.
 2. Add Engine 27 intelligence and the cross-engine warnings to Strategies.
 3. Build the General page once you've approved the field list.
-4. Build the Redline backend: SQL, login, entitlements, and a secure proxy for history and streams.
+4. Build the small Redline server for history and stream access. Add SQL, logins and entitlements only if you confirm you want them.
 5. Run security and data checks, have you approve the four pages side by side with Frye, then launch.
 
 We won't change anything in your Frye repositories. If we find something the backend needs, we'll send it to you as a separate request.
