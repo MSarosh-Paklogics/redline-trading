@@ -1,0 +1,82 @@
+# Redline / Frye Platform — Claude Code guide
+
+Redline is a new frontend for the existing **Frye** trading platform. This repo
+(`MSarosh-Paklogics/redline-trading`) holds only the Redline frontend. The client's
+repos are cloned read-only under `frye/` (git-ignored, pulled daily):
+
+- `frye/Frye-Dashboard` — `bfrye1973/Frye-Dashboard`, React reference UI.
+- `frye/frye-market-backend` — `bfrye1973/frye-market-backend`, engines + APIs.
+  `services/core/server.js` is the source of truth for which routes are mounted.
+
+**Never edit, commit, push or deploy anything in `frye/`.** If Redline needs a
+backend change, write it up as a request for Brian. Daily change notes are in
+`docs/frye-changes/`.
+
+Project knowledge that is not in code (engine decisions, superseded designs,
+approvals, open tasks) lives in [docs/FRYE_MASTER_HANDOFF.md](docs/FRYE_MASTER_HANDOFF.md).
+Read it before touching engine-related UI. If the handoff and the code disagree,
+ask — do not guess which is current.
+
+## Rules that must never be violated
+
+1. **Signal-only frontend.** Redline displays signals and engine state. It never
+   places, routes, or simulates broker orders against the live backend
+   (see commit 61d4993, "Remove buy sell controls"). Don't reintroduce order controls.
+2. **Engine decisions stay on the server.** The frontend reads canonical engine
+   output; it never recomputes, overrides, or "fills in" an engine result.
+   Missing data renders as `UNAVAILABLE` / `—`, never as zero or a fabricated value.
+3. **Engine authority boundaries** (full table in the handoff, §3):
+   - Engine 22 = sole Elliott Wave structural authority.
+   - Engine 27 = read-only interpretation; never overrides E22, never creates execution.
+   - Engines 3, 4, 25, 29 = independent market evidence; never grant permission.
+   - Engine 26/26B = proposes location/geometry only. Engine 6 = final trade permission.
+   - "Wave developing", "strategy ready" and "trade permitted" are separate fields;
+     contradictions between engines must stay visible. Ready ≠ authorized.
+4. **Only call read endpoints that are mounted.** Never call admin/refresh/write
+   routes, `/api/trading/*`, or `POST /api/v1/engine26/manual-hard-signal` from
+   Redline. `strategy-state`, `reaction-quality` and `gauges` are not served.
+   Treat `ok:false`, 4xx/5xx and empty arrays as unavailable, never as a signal.
+   REST is Backend 1; LIVE SSE (`/stream/futures/agg`, `/stream/agg`) is Backend 2.
+5. **No secrets in this repo or the frontend.** Schwab, Polygon/Massive, FMP,
+   Finnhub, OpenAI, Pushover etc. keys belong only in the backend's Render
+   secret store. The frontend knows only the public backend base URL.
+   Never commit `.env*`, tokens, broker account numbers or subscriber data.
+6. Don't present demo/fixture data as live. Live surfaces are labelled
+   `LIVE BACKEND`; anything else is illustrative.
+
+## Stack and layout
+
+Buildless vanilla JS/HTML/CSS, Node ≥18, no runtime dependencies.
+Scripts load in order from [index.html](index.html), each an IIFE attaching to `window`:
+
+| File | Role |
+| --- | --- |
+| `backend-api.js` | `window.redlineApi` — the only place backend routes are defined |
+| `app.js` | Core app, hash router (`#/overview`, `#/chart`, `#/signals`, `#/sectors`, `#/xray`, `#/strategies`, `#/journal`, `#/settings`, …), demo fixtures |
+| `engines.js` | Engine Room / reference-aware engine views |
+| `live-surfaces.js` | Live ES market-meter (`#/meters`) and engine-context (`#/chart`) panels — **currently not referenced by index.html** |
+| `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
+
+Backend base URL resolution in `backend-api.js`: `window.REDLINE_API_BASE` →
+`?api=` query param → `localStorage['redline-api-base']` → default
+`https://frye-market-backend-1.onrender.com`. All calls are GET with an 8s timeout.
+
+Asset cache-busting uses `?v=` query strings in index.html — bump them when
+changing a script that's deployed.
+
+## Commands
+
+```bash
+npm run dev      # static server on http://127.0.0.1:4173 (PORT env to change)
+npm run check    # node --check on all scripts — run after every JS edit
+npm run build    # copies app into dist/ (Vercel serves dist/)
+```
+
+`qa*.cjs` are Playwright checks against a running dev server; Playwright is not
+a project dependency.
+
+## Repo hygiene
+
+The repo root also contains client deliverables (`*.docx`, `build_*.py`,
+`make_*.py`, `docx_tmp/`, `sow_render/`, the release zip). They are not part of
+the app — don't modify or commit them unless asked.
