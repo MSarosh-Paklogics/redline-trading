@@ -22,33 +22,6 @@
   // Backend marks the 4H and EOD meter formulas as placeholders (futures-market-meter-v2-spy-style-10m-30m-1h).
   const PLACEHOLDER_TFS = new Set(['4h', '1d', 'EOD']);
 
-  /* ---------- #/overview — Dashboard ---------- */
-  async function dashboard(el) {
-    const api = window.redlineApi;
-    const [snap, e25, e29, sectors] = await settle([api.snapshotShared('ES'), api.engine25Summary(), api.engine29Summary(), api.sectors()]);
-    const mm = snap?.marketMind || {};
-    const meters = [['10m', 'score10m', 'state10m'], ['30m', 'score30m', 'state30m'], ['1h', 'score1h', 'state1h'], ['4h', 'score4h', 'state4h'], ['EOD', 'scoreEOD', 'stateEOD']];
-    const d29 = e29?.data || {};
-    const cards = sectors?.sectorCards || [];
-    el.querySelector('[data-live-body]').innerHTML = `
-      <div class="live-section-title">MARKET MIND · ES ${snap ? '' : '· UNAVAILABLE'}</div>
-      <div class="live-meter-grid">${meters.map(([tf, sk, stk]) => `<div class="live-meter-cell"><span>${tf}${PLACEHOLDER_TFS.has(tf) ? ' · FORMULA PENDING' : ''}</span><strong>${num(mm[sk])}</strong><small class="live-${tone(mm[stk])}">${esc(label(mm[stk] ?? 'UNAVAILABLE'))}</small></div>`).join('')}</div>
-      <div class="live-section-title">MARKET CONFIRMATION</div>
-      <div class="live-engine-grid">
-        ${cell('E25 MARKET HEALTH', e25 ? e25.regime : 'UNAVAILABLE', e25 ? `Score ${num(e25.score, 0)} · ${label(e25.bias)}` : '')}
-        ${cell('E25 RISK', e25?.riskLevel ?? 'UNAVAILABLE', e25?.esPermission ? `Size ×${e25.esPermission.sizeMultiplier}` : '')}
-        ${cell('E25 ES MODE', e25?.esPermission?.mode ?? 'UNAVAILABLE', e25?.esPermission?.technicalState ? label(e25.esPermission.technicalState) : '')}
-        ${cell('E29 CROSS-MARKET', e29 ? d29.overallState : 'UNAVAILABLE', e29 ? `Tactical ${label(d29.tacticalState)}${d29.dataDegraded ? ' · DATA DEGRADED' : ''}` : '')}
-        ${cell('E29 ES/NQ BACKDROP', e29 ? d29.esNqBackdrop : 'UNAVAILABLE', e29 ? `${label(d29.moveCharacter)} · ${label(d29.moveConfidence)}` : '')}
-        ${cell('NEWS RISK', snap?.newsRisk ? (snap.newsRisk.stale ? 'STALE' : snap.newsRisk.riskLevel) : 'UNAVAILABLE', snap?.newsRisk ? `${label(snap.newsRisk.category)} · ${snap.newsRisk.headline || ''}` : '')}
-      </div>
-      ${e25?.summary?.plainEnglish ? `<p class="live-note">${esc(e25.summary.plainEnglish)}</p>` : ''}
-      <div class="live-section-title">SECTORS · 10M ${sectors ? `· ${esc(sectors.version || '')}` : '· UNAVAILABLE'}</div>
-      ${cards.length ? `<div class="table-wrap"><table class="live-table"><thead><tr><th>Sector</th><th>Breadth %</th><th>Momentum %</th><th>NH / NL</th><th>Up / Down</th><th>Outlook</th></tr></thead><tbody>${cards.map(c => `<tr><td>${esc(c.sector)}</td><td class="number">${num(c.breadth_pct)}</td><td class="number">${num(c.momentum_pct)}</td><td class="number">${esc(c.nh ?? '—')} / ${esc(c.nl ?? '—')}</td><td class="number">${esc(c.up ?? '—')} / ${esc(c.down ?? '—')}</td><td class="live-${tone(c.outlook)}">${esc(label(c.outlook))}</td></tr>`).join('')}</tbody></table></div>` : '<p class="live-note">Sector cards unavailable.</p>'}`;
-    stamp(el, `Snapshot ${snap?.now || '—'} · E25 ${e25?.servedAt || '—'} · E29 ${d29.timestamp || '—'}`);
-    setStatus(el, [snap, e25, e29, sectors].filter(Boolean).length, 4);
-  }
-
   /* ---------- #/strategies — Strategies ---------- */
   async function strategies(el) {
     const [snap] = await settle([window.redlineApi.snapshotShared('ES')]);
@@ -100,7 +73,6 @@
   }
 
   const SURFACES = {
-    overview: ['LIVE DASHBOARD', 'ES market state from the Frye engines', dashboard],
     strategies: ['LIVE STRATEGIES', 'Canonical ES strategy decisions', strategies],
     chart: ['LIVE ENGINE CONTEXT', 'Canonical ES engine evidence', chartEngines],
     meters: ['LIVE CLIENT MARKET METER', 'ES multi-timeframe condition', meters]
