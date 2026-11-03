@@ -31,7 +31,23 @@
     return ['STRONG DEFENSIVE / BEARISH', 'NO NORMAL LONGS'];
   }
 
-  function buildModel(e25, meter, hourly, eod, e29) {
+  // SPY market meter (MIRRORED from Frye RowMarketOverview): live 10m/30m/1H/4H/EOD scores,
+  // master = 20% 1H + 35% 4H + 45% EOD, re-weighted over the scores that are available.
+  function spyMeter(i10, m30, h1, h4, eodLive) {
+    const tf = {
+      '10m': [n(i10?.intraday?.overall10m?.score ?? i10?.engineLights?.['10m']?.score), i10?.intraday?.overall10m?.state || i10?.engineLights?.['10m']?.state],
+      '30m': [n(m30?.thirtyMin?.overall30m?.score ?? m30?.metrics?.overall_30m_score), m30?.thirtyMin?.overall30m?.state || m30?.metrics?.overall_30m_state],
+      '1h': [n(h1?.hourly?.overall1h?.score), h1?.hourly?.overall1h?.state],
+      '4h': [n(h4?.fourHour?.overall4h?.score ?? h4?.metrics?.trend_strength_4h_pct), h4?.fourHour?.overall4h?.state],
+      eod: [n(eodLive?.daily?.overallEOD?.score ?? eodLive?.metrics?.overall_eod_score), eodLive?.daily?.overallEOD?.state || eodLive?.metrics?.overall_eod_state]
+    };
+    const parts = [[tf['1h'][0], 0.20], [tf['4h'][0], 0.35], [tf.eod[0], 0.45]].filter(([v]) => v != null);
+    const w = parts.reduce((a, [, x]) => a + x, 0);
+    const master = w > 0 ? parts.reduce((a, [v, x]) => a + v * x / w, 0) : null;
+    return Object.values(tf).some(([v]) => v != null) ? { lights: Object.fromEntries(Object.entries(tf).map(([k, [score, state]]) => [k, { score, state: state || null }])), master } : null;
+  }
+
+  function buildModel(e25, meter, hourly, eod, e29, spy) {
     const headline = e25?.headline || {};
     const artifact = e25?.participationArtifact || {};
     const part = artifact.participation || {};
@@ -74,7 +90,33 @@
       meter: meter ? { master, masterState: meter.master?.state || null, lights: meter.lights || {}, updatedAt: meter.updated_at_utc || null } : null,
       eod: eod ? { score: recon, state: eod.state || null } : null,
       permission: { score: permScore, label: permLabel, sizing: permSizing, master, m4h, recon },
-      e29: e29?.data ? { ...e29.data, servedAt: e29.servedAt } : null
+      e29: e29?.data ? { ...e29.data, servedAt: e29.servedAt, esResolvedSymbol: e29.data.esResolvedSymbol || e29.data.display?.oneWeek?.esPriceAction?.resolvedSymbol || e29.data.esPriceAction?.resolvedSymbol || null } : null,
+      // Detail sections of the Frye X-Ray page (rendered by xray-sections.js).
+      spy,
+      blended: e25?.blendedParticipation || artifact.blendedParticipation || null,
+      fastParticipation: e25?.fastParticipation || artifact.fastParticipation || null,
+      sourceDiagnostics: e25?.sourceDiagnostics || artifact.sourceDiagnostics || {},
+      hourlyNhNl: hourlyFresh ? { nh: sum('nh'), nl: sum('nl') } : null,
+      distributionDetail: {
+        components: dist.structural4h?.components || {},
+        frames: ['structural4h', 'tactical1h', 'confirmation30m', 'acceleration10m'].map(k => ({ key: k, available: dist[k]?.available === true, pressure: dist[k]?.available === true ? n(dist[k]?.pressure) : null, label: dist[k]?.label || null, display: dist[k]?.display || null })),
+        history: dist.history || {}
+      },
+      briefs: { current: e25?.redlineCurrentMarketBrief?.paragraphs || [], intraday: e25?.redlineIntradayBrief?.paragraphs || [] },
+      sectorGroups: {
+        '1H': e25?.sectorBreadth?.tactical1h?.groups || null,
+        '4H': e25?.sectorBreadth?.regime4h?.groups || null,
+        EOD: (part.sectorParticipation?.eod?.cards || []).reduce((g, c) => { const b = String(c.bias || '').toLowerCase(); (b === 'bullish' ? g.strong : b === 'bearish' ? g.weak : g.neutral).push(c.sector); return g; }, { strong: [], neutral: [], weak: [], available: true, complete: true })
+      },
+      macroTrends: e25?.intradayMacro?.trendComparisons || {},
+      macroFresh: String(e25?.intradayMacro?.freshness?.status || '').toUpperCase() === 'FRESH',
+      changes: e25?.underTheHood?.rows || [],
+      trend: (e25?.overlay?.rows || []).map(r => ({ date: r.date, score: n(r.engine25CompositeScore) })).filter(r => r.score != null),
+      zonePriority: e25?.zoneDecisionRead?.priorityRead || null,
+      nearestZone: e25?.zoneRead?.nearestZone?.id || null,
+      newsEvents: Array.isArray(e25?.newsEvents?.activeMaterialEvents) ? e25.newsEvents.activeMaterialEvents : [],
+      newsOk: e25?.newsEvents?.ok !== false,
+      freshness: artifact.freshness || {}
     };
   }
 
@@ -83,10 +125,10 @@
     if (!window.redlineApi) return Promise.resolve(null);
     if (xray.loading) return xray.loading;
     const api = window.redlineApi;
-    xray.loading = Promise.allSettled([api.engine25(), api.marketMeter('ES'), api.hourlySectors(), api.eodShadow(), api.engine29Summary()])
+    xray.loading = Promise.allSettled([api.engine25(), api.marketMeter('ES'), api.hourlySectors(), api.eodShadow(), api.engine29(), api.spyIntraday(), api.spy30m(), api.spy4h(), api.spyEod()])
       .then(rs => {
-        const [e25, meter, hourly, eod, e29] = rs.map(r => r.status === 'fulfilled' ? r.value.data : null);
-        xray.model = e25 || meter || e29 ? buildModel(e25, meter, hourly, eod, e29) : null;
+        const [e25, meter, hourly, eod, e29, i10, m30, h4, eodLive] = rs.map(r => r.status === 'fulfilled' ? r.value.data : null);
+        xray.model = e25 || meter || e29 ? buildModel(e25, meter, hourly, eod, e29, spyMeter(i10, m30, hourly, h4, eodLive)) : null;
         // Re-render the first page / meters so the existing UI picks up the new values.
         if (typeof render === 'function' && /^#\/(overview|meters)?($|\?)/.test(location.hash || '#/')) render();
         return xray.model;

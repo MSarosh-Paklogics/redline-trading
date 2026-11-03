@@ -117,3 +117,29 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 @media (max-width:900px){.live-engine-grid.live-strategy-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.live-engine-grid.live-strategy-grid,.live-surface .live-meter-grid{grid-template-columns:minmax(0,1fr)}}
 
+
+/* First-page detail sections (xray-sections.js) */
+.xr-muted{color:var(--muted);font-size:11px}
+.xr-strips{display:grid;gap:10px;margin-bottom:18px}
+.xr-strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:12px 16px;border:1px solid var(--line);background:var(--panel);border-radius:4px}
+.xr-strip-title{min-width:150px;color:var(--yellow);font:800 11px Bahnschrift,Arial;letter-spacing:.08em}
+.xr-light-cell{display:flex;align-items:center;gap:7px}
+.xr-light-cell b{font:700 15px Bahnschrift,Arial}
+.xr-light-cell small{color:var(--muted);font:9px Consolas,monospace}
+.xr-master{margin-left:auto;padding-left:14px;border-left:1px solid var(--line)}
+.xr-dot{width:11px;height:11px;border-radius:50%;background:#555;flex:none}
+.xr-dot.up{background:var(--green)}.xr-dot.down{background:var(--down)}.xr-dot.yellow{background:var(--yellow)}
+.xr-tabs{display:inline-flex;margin:4px 0 10px}
+.xr-tabs button{padding:6px 12px;border:0;background:transparent;color:var(--muted);font:700 10px Bahnschrift,Arial;letter-spacing:.06em;cursor:pointer}
+.xr-tabs button.active{background:var(--red);color:#fff}
+.xr-para{margin:0 0 10px;color:#cdd3dc;font-size:12px;line-height:1.7}
+.xr-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.xr-groups b{display:block;margin-bottom:6px;font:800 10px Bahnschrift,Arial;letter-spacing:.06em}
+.xr-chip{display:block;margin:0 0 4px;color:#cdd3dc;font-size:11px}
+.xr-trend{width:100%;height:160px;display:block}
+.xr-trend-line{fill:none;stroke:var(--red);stroke-width:2;vector-effect:non-scaling-stroke}
+.xr-guide{stroke:#333;stroke-dasharray:3 4;vector-effect:non-scaling-stroke}
+.xr-guide-label{fill:var(--muted);font:9px Consolas,monospace}
+.xr-trend-axis{display:flex;justify-content:space-between;color:var(--muted);font:9px Consolas,monospace;margin-top:4px}
+.xr-why{margin:0;padding-left:16px;color:#cdd3dc;font-size:11px;line-height:1.7}
+@media (max-width:700px){.xr-groups{grid-template-columns:1fr}.xr-master{margin-left:0;border-left:0;padding-left:0}}
