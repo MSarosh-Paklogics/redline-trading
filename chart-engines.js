@@ -15,6 +15,8 @@
   const kv = (k, v, t) => `<div class="ce-kv"><span>${esc(k)}</span><b class="${t ?? tone(v)}">${E(v)}</b></div>`;
   const card = (num, title, body, accent = '') => `<section class="ce-card ${accent}"><h4>${num ? `<i>${num}</i>` : ''}${esc(title)}</h4>${body}</section>`;
   const ui = { degree: 'minute' };
+  // The chart terminal and the dashboard (overview, also the default route) both show this read.
+  const onEnginePage = () => /^#\/(chart|overview)/.test(location.hash) || location.hash === '' || location.hash === '#' || location.hash === '#/';
 
   // Pill formatting MIRRORED from Frye Engine17Badges.jsx (display only).
   const simplifyAlignment = v => { const s = String(v || '').toUpperCase(); if (!s) return '—'; if (s.includes('FULL')) return 'FULL'; if (s.includes('PARTIAL')) return 'PARTIAL'; if (s.includes('NO ALIGNMENT') || s.includes('NONE')) return 'NO ALIGNMENT'; if (s.includes('BULL')) return 'BULL'; if (s.includes('BEAR')) return 'BEAR'; return L(v); };
@@ -67,7 +69,7 @@
       .then(rs => {
         const [snap, e3, e4, smz, shelves] = rs.map(r => r.status === 'fulfilled' ? r.value.data : null);
         chart.model = build(snap, e3, e4, smz, shelves);
-        if (typeof render === 'function' && location.hash.startsWith('#/chart')) render();
+        if (typeof render === 'function' && onEnginePage()) render();
         return chart.model;
       })
       .finally(() => { chart.loading = null; });
@@ -89,16 +91,17 @@
     return tabs + card('', `Engine 22 — ${d.label || L(ui.degree)} market structure`, `<div class="ce-tags"><span>ES</span><span>ENGINE 22 DEGREE STACK</span><span>NO EXECUTION</span><span>NO PERMISSION CREATED</span></div><div class="ce-head ${tone(d.direction)}">${esc(d.headline || '')}</div><p class="ce-muted">${esc(d.subtitle || '')} · Badge ${E(d.badge)} · Direction ${E(d.direction)}</p>${rows}${levels}${rules}`);
   }
 
-  chart.panel = () => {
+  // The engine read in separate parts, so the dashboard can show each engine group on its own tab.
+  chart.parts = () => {
     const m = chart.model;
-    if (!m) return `<div class="ce-empty">Loading the live ES engine read…</div>`;
+    if (!m) return null;
     const tr = m.timelineRead || {}, tcs = m.tcs || {}, e6 = m.e6 || {}, e27 = m.e27 || {}, e26 = m.e26 || {}, tl = m.timeline || {}, e15 = m.e15 || {};
     const lines = arr => (arr || []).map(x => String(x).split('\n').filter(Boolean).map(s => `<p>${esc(s)}</p>`).join('')).join('');
     const listOf = arr => Array.isArray(arr) && arr.length ? `<ul class="ce-list">${arr.map(x => `<li>${esc(typeof x === 'string' ? x.replace(/_/g, ' ') : x?.label || x?.headline || x?.code || JSON.stringify(x))}</li>`).join('')}</ul>` : '';
     const r3 = m.e3?.reaction || {}, v4 = m.e4?.engine4EsVolume || {};
     const smz = (m.smz || []).slice(0, 8);
-    return `<div class="ce-panel">
-      <div class="ce-live"><span class="pill green">LIVE BACKEND</span><small>ES · ${esc(STRATEGY)} · snapshot ${esc(m.snapshotTime || '—')}</small></div>
+    return {
+      strategy: `<div class="ce-live"><span class="pill green">LIVE BACKEND</span><small>ES · ${esc(STRATEGY)} · snapshot ${esc(m.snapshotTime || '—')}</small></div>
       <div class="ce-strip">${kv('Market bias', tcs.direction && tcs.direction !== 'NONE' ? tcs.direction : e27.direction || 'NEUTRAL')}${kv('Setup', e15.readiness || tl.state || '—')}${kv('Trade permission', e6.permission || '—')}</div>
       ${card('', 'Trade context', `<div class="ce-head ${tone(tcs.bias)}">${esc(tcs.headline || tr.headline || '—')}</div><p class="ce-muted">${esc(tcs.subheadline || tr.subheadline || '')}</p><p class="ce-stack">${esc(tr.waveStackText || '')}</p>${kv('Action', tcs.action || tr.action)}${kv('Chase allowed', tcs.chaseAllowed == null ? '—' : tcs.chaseAllowed ? 'YES' : 'NO')}${kv('Top candidate', tcs.topCandidate ?? '—', '')}${kv('Hard invalidation', tcs.hardInvalidation ?? '—', 'down')}${kv('Next allowed setup', tcs.nextAllowedSetup)}${kv('Current price', m.currentPrice ?? '—', '')}`)}
       ${degreeCard(m)}
@@ -106,18 +109,23 @@
       ${card('3', 'Trader intelligence — Engine 27', `${kv('State', e27.decisionState || 'IDLE')}${kv('Direction', e27.direction || 'NEUTRAL')}${kv('Current wave', e27.currentWave)}${kv('Next wave', e27.nextExpectedWave)}${kv('Internal wave', e27.internalWave)}${kv('Next internal', e27.nextExpectedInternalWave)}${kv('Setup', `${L(e27.setupType)} · ${e27.setupGrade || '—'}`, '')}${kv('Executable', tl.executable == null ? 'NO' : tl.executable ? 'YES' : 'NO')}${e27.waitingFor?.length ? `<div class="ce-sub">Waiting for</div>${listOf(e27.waitingFor)}` : ''}${e27.blockers?.length ? `<div class="ce-sub">Blockers</div>${listOf(e27.blockers)}` : '<p class="ce-muted">No active Engine 27 blockers reported.</p>'}${e27.warnings?.length ? `<div class="ce-sub">Warnings</div>${listOf(e27.warnings)}` : ''}`)}
       ${card('4', 'Final permission — Engine 6', `${kv('Real permission', e6.permission)}${kv('Executable', e6.executable == null ? '—' : e6.executable ? 'YES' : 'NO')}${kv('Watch only', e6.watchOnly == null ? '—' : e6.watchOnly ? 'YES' : 'NO')}${kv('Paper state', e6.paper?.decision)}${kv('Paper direction', e6.paper?.direction)}${kv('Paper allowed', e6.paper?.allowed == null ? '—' : e6.paper.allowed ? 'YES' : 'NO')}${kv('Size multiplier', e6.sizeMultiplier == null ? '—' : `×${e6.sizeMultiplier}`, '')}${kv('Authority', e6.authority, '')}${kv('Authority source', e6.authoritySource, '')}${kv('Provenance', e6.engine, '')}${kv('As of', e6.asOf || '—', '')}${e6.reasonCodes?.length ? `<div class="ce-sub">Reason codes</div>${listOf(e6.reasonCodes)}` : ''}<p class="ce-muted">Engine 6 is the final permission authority. Redline creates no orders.</p>`, 'red')}
       ${card('5', 'Next action levels', `${kv('Next action', tl.nextAction || tr.action)}${kv('Needs', tr.needs)}${Array.isArray(tl.levels) && tl.levels.length ? tl.levels.slice(0, 8).map(l => kv(l.label || l.kind || 'Level', l.price ?? l.value ?? '—', '')).join('') : ''}`)}
-      ${card('6', 'Canonical minute stage timeline', Array.isArray(tl.stages) && tl.stages.length ? tl.stages.map(s => `<div class="ce-stage"><b class="${tone(s.status)}">${E(s.status)}</b><div><strong>${esc(s.label || '')}</strong><p>${esc(s.headline || '')}</p><small>${esc(s.detail || '')}</small></div></div>`).join('') : '<p class="ce-muted">Timeline not attached yet.</p>')}
-      <div class="ce-section">MARKET CONTEXT</div>
-      ${(tr.mainSections || []).map((s, i) => card(String(i + 1), s.title, lines(s.lines), s.severity === 'warning' ? 'gold' : s.severity === 'danger' ? 'red' : '')).join('')}
-      ${card('', 'Engine 3 — current level action', m.e3 ? `${kv('State', r3.state)}${kv('Quality', r3.quality)}${kv('Bias', r3.bias)}${kv('Zone', `${m.e3.zone?.lo ?? '—'} – ${m.e3.zone?.hi ?? '—'}`, '')}${kv('Price', m.e3.price ?? '—', '')}<p class="ce-muted">${esc(r3.reason || '')} No permission or execution created.</p>` : '<p class="ce-muted">UNAVAILABLE</p>', 'green')}
-      ${card('', 'Engine 4 — current scalp volume', m.e4 ? `${kv('Participation', v4.participationState)}${kv('Quality', v4.participationQuality)}${kv('Volume trend', v4.volumeTrend)}${kv('Relative volume', v4.relativeVolume ?? '—', '')}${kv('Confirmed', v4.volumeConfirmed ? 'YES' : 'NO')}${listOf(v4.reasonCodes)}` : '<p class="ce-muted">UNAVAILABLE</p>', 'red')}
-      ${(tr.sideSections || []).map(s => card('', s.title, lines(s.lines))).join('')}
-      <div class="ce-section">SMART MONEY ZONES · ES</div>
+      ${card('6', 'Canonical minute stage timeline', Array.isArray(tl.stages) && tl.stages.length ? tl.stages.map(s => `<div class="ce-stage"><b class="${tone(s.status)}">${E(s.status)}</b><div><strong>${esc(s.label || '')}</strong><p>${esc(s.headline || '')}</p><small>${esc(s.detail || '')}</small></div></div>`).join('') : '<p class="ce-muted">Timeline not attached yet.</p>')}`,
+      context: `${(tr.mainSections || []).map((s, i) => card(String(i + 1), s.title, lines(s.lines), s.severity === 'warning' ? 'gold' : s.severity === 'danger' ? 'red' : '')).join('')}`,
+      evidence: `${card('', 'Engine 3 — current level action', m.e3 ? `${kv('State', r3.state)}${kv('Quality', r3.quality)}${kv('Bias', r3.bias)}${kv('Zone', `${m.e3.zone?.lo ?? '—'} – ${m.e3.zone?.hi ?? '—'}`, '')}${kv('Price', m.e3.price ?? '—', '')}<p class="ce-muted">${esc(r3.reason || '')} No permission or execution created.</p>` : '<p class="ce-muted">UNAVAILABLE</p>', 'green')}
+      ${card('', 'Engine 4 — current scalp volume', m.e4 ? `${kv('Participation', v4.participationState)}${kv('Quality', v4.participationQuality)}${kv('Volume trend', v4.volumeTrend)}${kv('Relative volume', v4.relativeVolume ?? '—', '')}${kv('Confirmed', v4.volumeConfirmed ? 'YES' : 'NO')}${listOf(v4.reasonCodes)}` : '<p class="ce-muted">UNAVAILABLE</p>', 'red')}`,
+      side: `${(tr.sideSections || []).map(s => card('', s.title, lines(s.lines))).join('')}`,
+      zones: `<div class="ce-section">SMART MONEY ZONES · ES</div>
       ${m.smz?.length ? smz.map(l => card('', `${L(l.type)}${l.tier ? ' · ' + L(l.tier) : ''}`, `${kv('Range', Array.isArray(l.displayPriceRange || l.priceRange) ? (l.displayPriceRange || l.priceRange).join(' – ') : l.price ?? '—', '')}${kv('Strength', l.strength ?? '—', '')}${kv('Source', l.rangeSource || '—', '')}`)).join('') : '<p class="ce-muted">ES smart-money structures unavailable.</p>'}
       <div class="ce-section">ACC / DIST LEVELS · ES</div>
       ${m.shelves?.length ? m.shelves.map(l => { const lo = n(l.lo), hi = n(l.hi), p = m.shelvesPrice; const side = p != null && lo != null && hi != null ? (lo > p ? 'DISTRIBUTION' : hi < p ? 'ACCUMULATION' : L(l.type)) : L(l.type); return card('', side, `${kv('Range', `${l.lo ?? '—'} – ${l.hi ?? '—'}`, '')}${kv('Strength', l.strength ?? '—', '')}${kv('Timeframe', `${l.timeframe || '—'} · confirm ${l.confirmTimeframe || '—'}`, '')}`, side === 'DISTRIBUTION' ? 'red' : side === 'ACCUMULATION' ? 'green' : ''); }).join('') : '<p class="ce-muted">No active ES shelves.</p>'}
-      ${m.smzMeta ? `<p class="ce-muted">Zones ${esc(m.smzMeta.source || '')} · ${esc(m.smzMeta.generated_at_utc || '—')}. Shelves entirely above price read as distribution, below as accumulation.</p>` : ''}
-    </div>`;
+      ${m.smzMeta ? `<p class="ce-muted">Zones ${esc(m.smzMeta.source || '')} · ${esc(m.smzMeta.generated_at_utc || '—')}. Shelves entirely above price read as distribution, below as accumulation.</p>` : ''}`
+    };
+  };
+
+  chart.panel = () => {
+    const p = chart.parts();
+    if (!p) return `<div class="ce-empty">Loading the live ES engine read…</div>`;
+    return `<div class="ce-panel">${p.strategy}<div class="ce-section">MARKET CONTEXT</div>${p.context}${p.evidence}${p.side}${p.zones}</div>`;
   };
 
   document.addEventListener('click', ev => {
@@ -125,7 +133,7 @@
     ui.degree = b.dataset.ceDegree;
     if (typeof render === 'function') render();
   });
-  const kick = () => { if (location.hash.startsWith('#/chart')) chart.load(); };
+  const kick = () => { if (onEnginePage()) chart.load(); };
   window.addEventListener('hashchange', () => setTimeout(kick, 50));
   setTimeout(kick, 200);
   setInterval(kick, 60000);

@@ -161,6 +161,15 @@
   }
 
   window.redlineXraySections = x => engine25(x) + engine29(x);
+  window.redlineXraySections.e25 = engine25;
+  window.redlineXraySections.e29 = engine29;
+  // Headline Engine 29 read for the dashboard signal board (same label maps as the full section).
+  window.redlineXraySections.signal29 = x => {
+    const e = x?.e29; if (!e) return null;
+    const d = e.display || {}, lm = d.liveMonitor || {};
+    const health = OVERALL_HEALTH[String(e.overallState || d.overall || '').toUpperCase()] || L(e.overallState || d.overall);
+    return { value: health, sub: `10m ${L(lm.state)} · ${L(lm.direction)}`, tone: tone29(health), at: e.timestamp };
+  };
 
   document.addEventListener('click', ev => {
     const b = ev.target.closest?.('[data-xr-tab]'); if (!b) return;
