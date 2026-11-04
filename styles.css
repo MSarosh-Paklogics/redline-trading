@@ -357,3 +357,49 @@ body{background:#000}
 .pill.gold{background:#1f1d00;color:#fff200;border-color:#5c5700}
 .pill.green{background:#00210f;color:#009a4e;border-color:#00592d}
 .pill.red{background:#2a0507;color:#ffffff;border-color:#ed1c24}
+/* ===== Professional motion (motion-pro.js) — presentation only ===== */
+@media (prefers-reduced-motion: no-preference){
+  /* page entry: staggered rise + fade */
+  body:not(.reduced) .mp-reveal{animation:mpRise .62s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--mp-delay,0ms)}
+  body:not(.reduced) .mp-row{animation:mpSlide .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--mp-delay,0ms)}
+  /* gauge needles sweep from rest to their reading */
+  body.mp-entering:not(.reduced) .race-needle{animation:mpNeedle 1.25s cubic-bezier(.22,1.2,.36,1) both}
+  /* live value changed */
+  body:not(.reduced) .mp-flash{animation:mpFlash 1.25s ease-out}
+  /* live indicators breathe */
+  body:not(.reduced) .pill.green{position:relative;padding-left:16px}
+  body:not(.reduced) .pill.green:before{content:'';position:absolute;left:6px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:#009a4e;box-shadow:0 0 0 0 #009a4e99;animation:mpPing 1.8s ease-out infinite}
+  /* hero: slow light sweep across the red panel */
+  body:not(.reduced) .race-hero{overflow:hidden}
+  body:not(.reduced) .race-hero>.mp-sheen{position:absolute;width:35%;left:-40%;background:linear-gradient(100deg,transparent,#ffffff0d 45%,#ed1c2414 55%,transparent);transform:skewX(-18deg);animation:mpSheen 7s ease-in-out 1.2s infinite;pointer-events:none;z-index:0;top:0;bottom:0}
+  body:not(.reduced) .race-hero h1{animation:mpTitle .9s cubic-bezier(.2,.8,.2,1) both}
+  body:not(.reduced) .race-hero h1>span{animation:mpTitle .9s .12s cubic-bezier(.2,.8,.2,1) both}
+  /* AI badge: subtle glow pulse */
+  body:not(.reduced) .ai-badge{animation:mpGlow 3.2s ease-in-out infinite}
+  /* strategy chain arrows travel */
+  body:not(.reduced) .db-chain-row .db-signal:not(:last-child):after{animation:mpNudge 1.8s ease-in-out infinite}
+}
+/* hover: lift + Ferrari red edge glow (all motion users) */
+.db-signal,.sl-rung,.sl-card,.jr-account,.race-meter,.stat,.db-step,.ce-card{transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s,border-color .25s}
+.db-signal:hover,.sl-card:hover,.stat:hover,.db-step:hover,.ce-card:hover{transform:translateY(-3px);border-color:#ed1c2499;box-shadow:0 10px 28px #0009,0 0 0 1px #ed1c2433,0 0 22px #ed1c2422}
+.sl-rung:hover,.jr-account:hover{transform:translateY(-2px);box-shadow:0 8px 22px #0008,0 0 16px #ed1c2426}
+.db-tabs button,.jl-filters button,.sl-rung,.jr-account{transition:background .25s,color .25s,border-color .25s,box-shadow .25s,transform .25s}
+.sl-table tbody tr td{transition:background .2s}
+/* tab selection: animated red underline */
+.db-tabs button{position:relative;overflow:hidden}
+.db-tabs button:after{content:'';position:absolute;left:12px;right:12px;bottom:0;height:2px;background:#ed1c24;transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.db-tabs button.selected:after{transform:scaleX(1)}
+.db-tabs button.selected{box-shadow:none}
+/* section labels get a short red rule that draws in */
+.race-section-label>span:first-child{position:relative;padding-left:12px}
+.race-section-label>span:first-child:before{content:'';position:absolute;left:0;top:50%;width:6px;height:2px;margin-top:-1px;background:#ed1c24}
+@keyframes mpRise{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes mpSlide{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes mpNeedle{from{transform:rotate(-135deg)}to{transform:rotate(var(--needle-angle))}}
+@keyframes mpFlash{0%{color:#fff200;text-shadow:0 0 14px #fff20099;background:#fff2001f}100%{text-shadow:none;background:transparent}}
+@keyframes mpPing{0%{box-shadow:0 0 0 0 #009a4e99}70%{box-shadow:0 0 0 7px #009a4e00}100%{box-shadow:0 0 0 0 #009a4e00}}
+@keyframes mpSheen{0%,70%{left:-40%}100%{left:120%}}
+@keyframes mpTitle{from{opacity:0;transform:translateX(-18px);letter-spacing:4px}to{opacity:1;transform:none}}
+@keyframes mpGlow{0%,100%{box-shadow:0 0 0 1px #000,0 4px 16px #ed1c2455}50%{box-shadow:0 0 0 1px #000,0 4px 26px #ed1c24aa}}
+@keyframes mpNudge{0%,100%{transform:translate(0,-50%);opacity:.6}50%{transform:translate(3px,-50%);opacity:1}}
+body.reduced .mp-reveal,body.reduced .mp-row{animation:none!important;opacity:1;transform:none}
