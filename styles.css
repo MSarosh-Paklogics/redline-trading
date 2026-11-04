@@ -185,3 +185,5 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 .ce-live small,.ce-head,.ce-kv b{overflow-wrap:anywhere}
 .ce-kv{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr)}
 .ce-panel p,.ce-panel small,.ce-panel li{overflow-wrap:anywhere}
+.orange{color:#f97316!important}
+.cyan{color:#22d3ee!important}

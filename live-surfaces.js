@@ -54,13 +54,28 @@
     setStatus(el, m ? 1 : 0, 1);
   }
 
-  /* ---------- #/meters — market meter ---------- */
+  /* ---------- #/meters — ES futures meter + SPY market meter (Frye MarketMeterPage) ---------- */
+  // Staleness limits per frame; SPY tones follow Frye RowMarketOverview (master ≥70 / ≥45, alignment ≥75 / ≥50).
+  const STALE_MIN = { '10m': 30, '30m': 90, '1h': 180, '4h': 720, eod: 2160, '1d': 2160 };
+  const ageMin = t => { const d = Date.parse(t || ''); return Number.isFinite(d) ? (Date.now() - d) / 60000 : null; };
+  const meterCell = (title, d, frame, toneOverride) => {
+    const age = ageMin(d?.updatedAt), stale = age != null && age > (STALE_MIN[frame] || 90);
+    return cell(title, d?.score == null ? 'UNAVAILABLE' : num(d.score), `${label(d?.state) || '—'}${d?.updatedAt ? ` · ${String(d.updatedAt).replace('T', ' ').slice(5, 16)}` : ''}${stale ? ' · STALE' : ''}`, stale ? 'warn' : toneOverride ?? tone(d?.state));
+  };
+  const band = (v, hi, lo) => v == null ? '' : v >= hi ? 'good' : v >= lo ? 'warn' : 'bad';
   async function meters(el) {
-    const [m] = await settle([window.redlineApi.marketMeter('ES')]);
-    const lights = m?.lights || {};
-    el.querySelector('[data-live-body]').innerHTML = `<div class="live-meter-grid">${['10m', '30m', '1h', '4h', '1d'].map(tf => { const d = lights[tf] || {}; return `<div class="live-meter-cell"><span>${tf.toUpperCase()}${PLACEHOLDER_TFS.has(tf) ? ' · FORMULA PENDING' : ''}</span><strong>${num(d.score)}</strong><small class="live-${tone(d.state)}">${esc(label(d.state ?? 'UNAVAILABLE'))}</small></div>`; }).join('')}</div>${m?.master ? `<p class="live-note">Master ${num(m.master.score)} · ${esc(label(m.master.state))} (weighted; includes the pending 4H/EOD formulas)</p>` : ''}`;
-    stamp(el, `Updated ${m?.updated_at_utc || '—'}`);
-    setStatus(el, m ? 1 : 0, 1);
+    const x = window.redlineXray?.model || await window.redlineXray?.load();
+    const es = x?.meter, spy = x?.spy;
+    const esLight = k => es?.lights?.[k] ? { score: es.lights[k].score, state: es.lights[k].state, updatedAt: es.lights[k].updated_at_utc || es.updatedAt } : null;
+    el.querySelector('[data-live-body]').innerHTML = `
+      <div class="live-section-title">ES FUTURES METER · /api/v1/futures/market-meter</div>
+      ${es ? `<div class="live-engine-grid">${[['10m', '10m'], ['30m', '30m'], ['1h', '1H'], ['4h', '4H · FORMULA PENDING'], ['1d', 'EOD · FORMULA PENDING']].map(([k, t]) => meterCell(t, esLight(k), k)).join('')}${cell('ES MASTER', num(es.master), `${label(es.masterState)} · weights 10/15/25/30/20`)}</div>` : '<p class="live-note">ES market meter unavailable.</p>'}
+      <div class="live-section-title">SPY MARKET METER · /live/intraday · 30m · hourly · 4h · eod</div>
+      ${spy ? `<div class="live-engine-grid">${[['10m', '10m'], ['30m', '30m'], ['1h', '1H'], ['4h', '4H'], ['eod', 'EOD']].map(([k, t]) => meterCell(t, spy.lights[k], k)).join('')}${cell('SPY MASTER', num(spy.master), `${spy.masterParts}/3 components (1H 20% · 4H 35% · EOD 45%)${spy.masterParts < 3 ? ' · PARTIAL' : ''}`, band(spy.master, 70, 45))}</div>
+      <div class="live-engine-grid">${meterCell('ALIGNMENT 10 · ENGINE 21', spy.alignment10 && { ...spy.alignment10 }, '10m', band(spy.alignment10?.score, 75, 50))}${meterCell('ALIGNMENT 30 · ENGINE 21', spy.alignment30 && { ...spy.alignment30 }, '30m', band(spy.alignment30?.score, 75, 50))}</div>` : '<p class="live-note">SPY market meter unavailable.</p>'}
+      <p class="live-note">The SPY master is re-weighted over the frames that are available (Frye weightedBlend); fewer than 3 components means a partial read. ES 4H and EOD lights use the backend's placeholder formulas.</p>`;
+    stamp(el, `ES ${es?.updatedAt || '—'} · SPY 10m ${spy?.lights?.['10m']?.updatedAt || '—'}`);
+    setStatus(el, [es, spy].filter(Boolean).length, 2);
   }
 
   const SURFACES = {

@@ -447,3 +447,67 @@ from here.
 `frye/Frye-Dashboard` and `frye/frye-market-backend` are git-ignored clones. They are pulled
 daily, and each day's changes are summarized in `docs/frye-changes/YYYY-MM-DD.md`. Use those
 notes to update §2, §3, §6 and §8.
+
+## 13. Client spec of 2026-11-04 (from the client's ChatGPT project, verified in source)
+
+The full answer is kept in the client conversation. This section records what Redline acts on.
+
+**Chart modes:**
+
+| Mode | Symbol | Timeframe | Strategy |
+| --- | --- | --- | --- |
+| SPY SCALP | SPY | 10m | `intraday_scalp@10m` |
+| SPY SWING | SPY | 1h | `minor_swing@1h` |
+| ES SCALP | ES | 10m | `intraday_scalp@10m` |
+| ES SWING | ES | 1h | `minor_swing@1h` |
+
+**Engine 17 pills** (S = `strategies[id]`):
+- STATE, STRUCTURE, EXECUTION, READINESS, WAVE ← `S.engine16`.
+- STATUS, BIAS, QUALITY ← `S.engine15Decision`.
+- ALIGNMENT 10/30 ← `engine21Alignment`.
+- If ES Engine 16 is null, show it as missing. Never fill it from Engine 22.
+
+**Engine 22:** `S.engine22WaveStrategy.engine22Display.degrees[degree]` is the canonical source for the degree card. `timelineRead.mainSections` and `tradeContextSummary` drive the wave read. `S.strategyTimeline.stages[]` is the stage timeline.
+
+**Engine 6 display:**
+- Fields: `S.permission.{permission, executable, watchOnly, authority, authoritySource, reasonCodes, paper.{decision, direction, allowed}}`.
+- Show it with its provenance (`engine6.finalFromEngine15.v1`).
+- Never use `engine6v2` or `/trade-permission-v2` for ES.
+- Brian must confirm the authority before anything order-capable is built.
+
+**Smart-money zones (ES):**
+- `/api/v1/es-smz-levels?symbol=ES`: use `structures_sticky` when `levels` is empty.
+- `/api/v1/es-smz-shelves?symbol=ES`: a shelf above price is distribution, below price is accumulation.
+- SPY uses `/api/v1/smz-levels` and `/api/v1/smz-shelves`.
+
+**Live SSE:**
+- Routes: `/stream/futures/agg?symbol=ES&tf=..&mode=eth`; `/stream/agg?symbol=SPY&tf=..&mode=rth`.
+- Only `type:"bar"` updates candles.
+- Time may arrive in seconds or milliseconds; normalise to seconds.
+- Keep `resolvedSymbol` / `bar.sourceContract`.
+
+**Market Meter:**
+- ES lights come from `futures/market-meter`.
+- SPY comes from `/live/intraday`, `/live/30m`, `/live/hourly`, `/live/4h`, `/live/eod`.
+- SPY master = re-weighted 1H 20 / 4H 35 / EOD 45. Report how many components are present.
+- SPY tones: master ≥70 / ≥45; alignment ≥75 / ≥50.
+
+**Index Sectors:**
+- Fixed order: IT, Materials, Health Care, Comm Services, Real Estate, Energy, Staples, Discretionary, Financials, Utilities, Industrials.
+- Use the backend `outlook` when published; otherwise breadth and momentum both ≥55 = bullish, both ≤45 = bearish, else neutral.
+- Deltas from `/live/pills`.
+
+**Engine 29 dictionary (built into Redline):**
+- **FORMING:** PRESSURE BUILDING (rates), STRESS BUILDING (energy), VOLATILITY RISING (volatility), WEAKENING (others).
+- **CONFIRMED:** BREAKING (breadth, leadership, indexes), VOLATILITY CONFIRMED (volatility), STRESS CONFIRMED (others).
+- **SEVERE:** SEVERE STRESS.
+- Bigger-picture, overall-health, price-breadth and distribution labels follow the spec. Redline checks EXTREME before HIGH, which fixes an inconsistency in Frye.
+
+**General:** the closest source is `/controls` (`ControlsPage` → `RowModeToggle`): view mode, replay date/time/events, AI Listen (text-to-speech of `aiTradeCopilot`). It is not confirmed as "General". Wait for Brian.
+
+**SQL:** PostgreSQL proposal with tables `sources`, `engine_readings` (raw JSONB plus `event_at` / `published_at` / `ingested_at`), `engine_latest`, `engine_events`, `engine_outcomes` and `ingestion_runs`. User tables come later. Purpose, hosting, retention and writer are all UNKNOWN until Brian decides. Engine 11 stays in its own archive.
+
+**[Claude] Stale sources seen on 2026-11-04:**
+- `/live/30m` last updated 2026-10-08 (affects the SPY 30m light and Alignment 30).
+- `/live/pills` 5m stamp 2026-10-31.
+- `/api/v1/waves/active` 2026-09-28.

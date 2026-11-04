@@ -44,7 +44,9 @@
     const parts = [[tf['1h'][0], 0.20], [tf['4h'][0], 0.35], [tf.eod[0], 0.45]].filter(([v]) => v != null);
     const w = parts.reduce((a, [, x]) => a + x, 0);
     const master = w > 0 ? parts.reduce((a, [v, x]) => a + v * x / w, 0) : null;
-    return Object.values(tf).some(([v]) => v != null) ? { lights: Object.fromEntries(Object.entries(tf).map(([k, [score, state]]) => [k, { score, state: state || null }])), master } : null;
+    const ts = { '10m': i10?.updated_at_utc || i10?.updated_at, '30m': m30?.updated_at_utc || m30?.updated_at, '1h': h1?.updated_at_utc || h1?.updated_at, '4h': h4?.updated_at_utc || h4?.updated_at, eod: eodLive?.updated_at_utc || eodLive?.updated_at };
+    const align = d => d?.engine21Alignment?.alignmentScore != null || d?.engine21Alignment?.alignmentState ? { score: n(d.engine21Alignment.alignmentScore), state: d.engine21Alignment.alignmentState || null, updatedAt: d.engine21Alignment.updatedAt || null } : null;
+    return Object.values(tf).some(([v]) => v != null) ? { lights: Object.fromEntries(Object.entries(tf).map(([k, [score, state]]) => [k, { score, state: state || null, updatedAt: ts[k] || null }])), master, masterParts: parts.length, alignment10: align(i10), alignment30: align(m30) } : null;
   }
 
   function buildModel(e25, meter, hourly, eod, e29, spy) {

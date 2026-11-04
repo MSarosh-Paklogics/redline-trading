@@ -114,6 +114,26 @@
     ${panel('Data confidence & Engine 25 detail', body(`${kv('Scanner status', x.dataStatus, tone(x.dataStatus))}${kv('Volume coverage', pct(hb.coverage, 1))}${kv('Source time', x.freshness?.intraday?.sourceTimestamp || '—')}${note(x.deskNote)}`))}`;
   }
 
+  /* Engine 29 presentation dictionary, MIRRORED from Frye Engine29FullDashboard.jsx
+     (plainGroupState, plainBiggerPictureCharacter, plainOverallMarketHealth, plainDistribution,
+     stateColor). Raw backend states are unchanged; only the display text and tone are mapped. */
+  const GROUP_LABEL = (group, state) => {
+    const s = String(state || '').toUpperCase();
+    if (!s) return null;
+    if (s === 'HEALTHY' || s === 'RECOVERING') return s;
+    if (s === 'SEVERE') return 'SEVERE STRESS';
+    if (s === 'FORMING') return { ratesDuration: 'PRESSURE BUILDING', energyInflation: 'STRESS BUILDING', volatility: 'VOLATILITY RISING' }[group] || 'WEAKENING';
+    if (s === 'CONFIRMED') return ['breadth', 'leadership', 'headlineIndex'].includes(group) ? 'BREAKING' : group === 'volatility' ? 'VOLATILITY CONFIRMED' : 'STRESS CONFIRMED';
+    return L(s);
+  };
+  const BIGGER_PICTURE = { SUPPORTIVE: 'HEALTHY', NARROWING: 'WAIT — MIXED MARKET', DISTRIBUTION_PRESSURE: 'DOWNWARD PRESSURE', BROAD_DETERIORATION: 'STRONG DOWNWARD PRESSURE', STRUCTURE_ONLY: 'WAIT — MIXED MARKET', MIXED: 'WAIT — MIXED MARKET' };
+  const OVERALL_HEALTH = { NORMAL: 'HEALTHY', EARLY_WARNING: 'SOME WEAKNESS SHOWING', BROAD_DETERIORATION: 'BROAD WEAKNESS', RISK_OFF_CONFIRMED: 'DOWNWARD PRESSURE', SYSTEMIC_STRESS: 'STRONG DOWNWARD PRESSURE' };
+  const PRICE_BREADTH = { HEALTHY: 'BROAD PARTICIPATION', RECOVERING: 'IMPROVING PARTICIPATION', FORMING: 'MIXED PARTICIPATION', CONFIRMED: 'WEAK PARTICIPATION', SEVERE: 'WEAK PARTICIPATION' };
+  // EXTREME is checked before HIGH (Frye's full page checks HIGH first, so EXTREME_HIGH would read HIGH there).
+  const DISTRIBUTION = v => { const s = String(v || '').toUpperCase(); return !s ? 'UNAVAILABLE' : s.includes('EXTREME') ? 'VERY HIGH' : s.includes('HIGH') ? 'HIGH' : /WATCH|ELEVATED/.test(s) ? 'BUILDING' : s.includes('LOW') ? 'LOW' : L(s); };
+  const TREND = v => { const s = String(v || '').toUpperCase(); return s.startsWith('WAIT_') ? `WAIT — ${s.slice(5).replace(/_/g, ' ')}` : L(s); };
+  const tone29 = v => { const s = String(v || '').toUpperCase().replace(/_/g, ' '); return /FAILED|SYSTEMIC|RISK OFF|BREAKING|CONFIRMED BREAK|SELLOFF|NEGATIVE|OPPOSES/.test(s) ? 'down' : /BROAD DETERIORATION|STRESS CONFIRMED|STRESS BUILDING|WEAKENING|FADING|COUNTERTREND|TRAP WATCH|SEVERE|STRONG DOWNWARD|VERY HIGH/.test(s) ? 'orange' : /CAUTION|FORMING|WARNING|STABILIZING|MIXED|WAIT|MISSING|PARTIAL|NARROW|BUILDING|RISING/.test(s) ? 'yellow' : /HEALTHY|RECOVERING|POSITIVE|ACCELERATING|HOLDING|SUPPORTS|CONFIRMED/.test(s) ? 'up' : /SWEEP|RECLAIM/.test(s) ? 'cyan' : ''; };
+
   function engine29(x) {
     const e = x.e29; if (!e) return '';
     const d = e.display || {}, w = d.oneWeek || {}, ep = w.esPriceAction || {}, sp = w.structuralParticipation || {}, lm = d.liveMonitor || {}, lmFull = e.liveMonitor || {}, mc = d.marketCharacter || {}, mv = mc.move || {}, liq = mc.liquidity || {}, trap = mc.trap || {}, uth = d.underTheHood || {};
@@ -121,8 +141,8 @@
     const groupRows = [['headlineIndex', 'Indexes', 'largeIndexes'], ['breadth', 'Breadth', 'breadth'], ['leadership', 'Leadership', 'techLeadership'], ['credit', 'Credit', 'credit'], ['ratesDuration', 'Rates', 'ratesBonds'], ['energyInflation', 'Energy', 'oil'], ['volatility', 'Volatility', 'volatility'], ['financialConditions', 'Financials', 'financialConditions']];
     return `
     <div class="race-section-label"><span>ENGINE 29 · MARKET CHARACTER</span><small>WHAT KIND OF MOVE IS HAPPENING RIGHT NOW? · ${esc(when(e.timestamp))}${e.dataDegraded ? ' · DATA DEGRADED' : ''} · ES ${esc(e.esResolvedSymbol || '')}</small></div>
-    <div class="stats">${stat('1W bigger picture', E(w.state), esc(w.summary || ''), 'structural', 'scan', tone(w.state))}${stat('ES daily trend', E(ep.daily?.state), E(ep.daily?.color), 'current contract', 'chart', tone(ep.daily?.state))}${stat('ES weekly trend', E(ep.weekly?.state), E(ep.weekly?.color), 'recent candles only', 'chart', tone(ep.weekly?.state))}${stat('Overall market health', E(d.overall), esc(d.overallSummary || ''), 'Engine 29', 'shield', tone(d.overall))}</div>
-    <div class="stats">${stat('Participation', E(w.character?.participationDiagnostic?.state), E(w.priceBreadth?.state), 'price breadth', 'sectors', tone(w.character?.participationDiagnostic?.state))}${stat('Selling pressure', E(sp.distributionLabel), sp.distributionPressure == null ? '—' : `${f(sp.distributionPressure, 1)} / 100`, 'structural participation', 'target', tone(sp.distributionLabel))}${stat('Stocks participating', E(sp.breadth?.label), sp.breadth?.score == null ? '—' : `score ${sp.breadth.score}`, 'Engine 25 read-only', 'spark', tone(sp.breadth?.label))}${stat('1H current pressure', E(d.oneHour?.state), esc(d.oneHour?.summary || ''), 'tactical', 'spark', tone(d.oneHour?.state))}</div>
+    <div class="stats">${(() => { const bp = BIGGER_PICTURE[String(w.character?.state || w.state || '').toUpperCase()] || L(w.character?.state || w.state); const oh = OVERALL_HEALTH[String(e.overallState || d.overall || '').toUpperCase()] || L(e.overallState || d.overall); return stat('1W bigger picture', esc(bp), esc(w.summary || ''), 'structural', 'scan', tone29(bp)) + stat('ES daily trend', esc(TREND(ep.daily?.state)), E(ep.daily?.color), 'current contract', 'chart', tone29(ep.daily?.state)) + stat('ES weekly trend', esc(TREND(ep.weekly?.state)), E(ep.weekly?.color), 'recent candles only', 'chart', tone29(ep.weekly?.state)) + stat('Overall market health', esc(oh), esc(d.overallSummary || ''), 'Engine 29', 'shield', tone29(oh)); })()}</div>
+    <div class="stats">${(() => { const pb = PRICE_BREADTH[String(w.priceBreadth?.state || '').toUpperCase()] || L(w.priceBreadth?.state); const sell = DISTRIBUTION(sp.distributionLabel); const part = String(sp.breadth?.label || '').toUpperCase().replace(/^BREADTH_PARTICIPATION_/, ''); return stat('How much of the market is participating', esc(pb), E(w.character?.participationDiagnostic?.state), 'participation diagnostic', 'sectors', tone29(pb)) + stat('Selling pressure', esc(sell), sp.distributionPressure == null ? '—' : `${f(sp.distributionPressure, 1)} / 100`, 'structural participation', 'target', tone29(sell)) + stat('Stocks participating', E(part || null), sp.breadth?.score == null ? '—' : `score ${sp.breadth.score}`, 'Engine 25 read-only', 'spark', tone29(part)) + stat('1H current pressure', E(d.oneHour?.state), esc(d.oneHour?.summary || ''), 'tactical', 'spark', tone29(d.oneHour?.state)); })()}</div>
     <div class="notice">Weekly ES read uses recent current-contract candles only; it is not long-term continuous-contract authority.</div>
     <div class="grid cols-2">
       ${panel('30m fast shift · ES parent move', body(`${kv('30m fast shift', L(d.thirtyMinute?.state), tone(d.thirtyMinute?.state))}${kv('ES parent move', L(d.thirtyMinute?.status))}${note(d.thirtyMinute?.summary)}`))}
@@ -137,7 +157,7 @@
       ${panel('Move authority', body(`${kv('Parent', mv.parent?.active ? 'ACTIVE' : 'NO ACTIVE MOVE')}${kv('Parent direction', L(mv.parent?.direction))}${kv('Move character', L(mv.character || mv.moveCharacter))}${kv('Live condition', L(mv.liveCondition))}${kv('Fast state', L(mv.fastState))}${kv('Underlying pressure', L(uth.pressure?.state), tone(uth.pressure?.state))}`))}
       ${panel('Trap detection', body(`${kv('State', L(trap.state))}${kv('Side', L(trap.side))}${kv('Location quality', L(trap.locationQuality))}${kv('Confirmation', L(trap.confirmationQuality))}${kv('Blocked by', (trap.confirmationBlockedBy || []).length ? trap.confirmationBlockedBy.join(', ') : '—')}`))}
     </div>
-    ${panel('Market internals map', body(`<div class="table-wrap"><table><thead><tr><th>Internal</th><th>1W</th><th>1H</th><th>30m</th><th>Now</th></tr></thead><tbody>${groupRows.map(([g, label, now]) => { const gr = e.groups?.[g] || {}; const cell = v => `<td class="${tone(v)}">${esc(v ? L(v) : '—')}</td>`; return `<tr><td>${label}</td>${cell(gr.structural?.state)}${cell(gr.tactical?.state)}${cell(gr.fastTactical?.state)}${cell(uth[now])}</tr>`; }).join('')}</tbody></table></div>`), btn('Open strategies / Engine 26 planner', 'strategies', false, 'arrow'))}`;
+    ${panel('Market internals map', body(`<div class="table-wrap"><table><thead><tr><th>Internal</th><th>State</th><th>1W</th><th>1H</th><th>30m</th><th>Now</th></tr></thead><tbody>${groupRows.map(([g, label, now]) => { const gr = e.groups?.[g] || {}; const cell = v => `<td class="${tone29(v)}">${esc(v || '—')}</td>`; const w1 = GROUP_LABEL(g, gr.structural?.state); return `<tr><td>${label}</td>${cell(w1 || uth[now])}${cell(w1)}${cell(GROUP_LABEL(g, gr.tactical?.state))}${cell(GROUP_LABEL(g, gr.fastTactical?.state))}${cell(uth[now])}</tr>`; }).join('')}</tbody></table></div>`), btn('Open strategies / Engine 26 planner', 'strategies', false, 'arrow'))}`;
   }
 
   window.redlineXraySections = x => engine25(x) + engine29(x);
