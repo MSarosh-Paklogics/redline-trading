@@ -187,3 +187,5 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 .ce-panel p,.ce-panel small,.ce-panel li{overflow-wrap:anywhere}
 .orange{color:#f97316!important}
 .cyan{color:#22d3ee!important}
+.chart-frame{touch-action:none;cursor:crosshair}
+.chart-frame.is-dragging{cursor:grabbing}

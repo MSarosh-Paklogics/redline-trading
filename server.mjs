@@ -1,4 +1,5 @@
 import http from 'node:http';
+import https from 'node:https';
 import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -6,7 +7,15 @@ const directory=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(directory,process.argv.includes('--dist')?'dist':'.');
 const port=Number(process.env.PORT||4173);
 const mime={'.svg':'image/svg+xml','.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.md':'text/plain; charset=utf-8','.json':'application/json'};
+// Same-origin proxy for Backend 2 live streams (Backend 2 only sends CORS headers to Frye's own origins).
+const STREAM_ORIGIN='https://frye-market-backend-2.onrender.com';
+function proxyStream(req,res){
+ const upstream=https.get(STREAM_ORIGIN+req.url,{headers:{Accept:'text/event-stream'}},up=>{res.writeHead(up.statusCode||502,{'Content-Type':up.headers['content-type']||'text/event-stream','Cache-Control':'no-store'});up.pipe(res)});
+ upstream.on('error',()=>{if(!res.headersSent)res.writeHead(502);res.end()});
+ req.on('close',()=>upstream.destroy());
+}
 const server=http.createServer(async(req,res)=>{
+ if(req.url.startsWith('/stream/')){proxyStream(req,res);return}
  try{
   const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
   const file=path.resolve(root,'.'+pathname+(pathname.endsWith('/')?'index.html':''));

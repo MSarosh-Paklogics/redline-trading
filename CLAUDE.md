@@ -61,12 +61,16 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `chart-engines.js` | Chart terminal engine read (`window.redlineChart`): Engine 17 pills, Engine 22 degree tabs, trade context, 26A/27/6, stage timeline, market context, E3/E4, SPY acc/dist levels; mirrors Frye `RowChart` (Engine17Badges / Engine17DecisionTimeline) |
 | `live-quotes.js` | Live last price + daily change for every symbol (search, watchlist, ticker) from 10m/1d OHLC, batched 3 at a time with one retry (the backend 502s on bursts) |
 | `sectors-live.js` | Live Sectors page (`window.fryePages.sectors`): 10m/1H/4H/EOD sector cards in Frye's fixed order + `/live/pills` deltas; loads after engines.js (which resets `fryePages`) |
+| `live-stream.js` | Real-time candles: Backend 2 SSE bars merged into the live bar cache, chart SVG redrawn ≤1/s; requested same-origin `/stream/...` (proxied by `server.mjs` and the `vercel.json` rewrite, because Backend 2 only allows Frye's origins); 5 s Backend 1 polling fallback |
+| `chart-interact.js` | TradingView-style controls: drag pan (time + price), price-axis drag to scale, wheel zoom, Shift+wheel scroll, keys, double-click axis reset; `window.redlineChartView` feeds `chartGeometry()`; keeps panel scroll across re-renders |
 | `live-surfaces.js` | Live panels for strategies, chart and meters; re-attaches them after app.js re-renders |
 | `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
 
 Backend base URL resolution in `backend-api.js`: `window.REDLINE_API_BASE` →
 `?api=` query param → `localStorage['redline-api-base']` → default
 `https://frye-market-backend-1.onrender.com`. All calls are GET with an 8s timeout.
+
+History length is dynamic (`barTotal()`, up to 1,000 bars from `/ohlc?limit=1000`); never hard-code 180.
 
 Asset cache-busting uses `?v=` query strings in index.html — bump them when
 changing a script that's deployed.

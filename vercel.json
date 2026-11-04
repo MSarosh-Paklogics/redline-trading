@@ -1,5 +1,11 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/stream/:path*",
+      "destination": "https://frye-market-backend-2.onrender.com/stream/:path*"
+    }
+  ]
 }
