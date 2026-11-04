@@ -60,7 +60,8 @@
     engine25Composite: () => request('/api/v1/engine25/composite-overlay-6mo'),
     engine29: () => request('/api/v1/engine29/cross-market-stress', { timeout: 30000 }),
     engine29Summary: () => request('/api/v1/engine29/cross-market-stress/summary'),
-    chartOverlay: (symbol = 'ES', tf = '10m') => request(`/api/v1/chart-overlay?symbol=${q(symbol)}&tf=${q(tf)}`),
+    smzLevels: () => request('/api/v1/smz-levels'),
+    chartOverlay:(symbol = 'ES', tf = '10m') => request(`/api/v1/chart-overlay?symbol=${q(symbol)}&tf=${q(tf)}`),
     morningFib: (symbol = 'ES', tf = '30m') => request(`/api/v1/morning-fib?symbol=${q(symbol)}&tf=${q(tf)}`),
     replayDates: () => request('/api/v1/replay/dates'),
     status: async () => { if (!base) return { configured: false, reachable: false, reason: 'No backend URL configured' }; try { const result = await api.health(); return { configured: true, reachable: true, result }; } catch (error) { return { configured: true, reachable: false, reason: error.message }; } }

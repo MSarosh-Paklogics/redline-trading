@@ -45,22 +45,13 @@
     setStatus(el, snap ? 1 : 0, 1);
   }
 
-  /* ---------- #/chart — engine evidence ---------- */
+  /* ---------- #/chart — Engine 17 status pills (chart-engines.js) ---------- */
   async function chartEngines(el) {
-    const api = window.redlineApi;
-    const [e3, e4, waves, e25, e29] = await settle([api.engine3('ES'), api.engine4('ES'), api.activeWaves('ES'), api.engine25Summary(), api.engine29Summary()]);
-    const v4 = e4?.engine4EsVolume || {};
-    const waveAge = waves ? ageDays(waves.updatedAt) : null;
-    el.querySelector('[data-live-body]').innerHTML = `<div class="live-engine-grid">
-      ${cell('E3 REACTION', e3 ? e3.reaction?.state : 'UNAVAILABLE', e3 ? `${label(e3.reaction?.quality)} · ${label(e3.reaction?.bias)} · zone ${e3.zone?.lo ?? '—'}–${e3.zone?.hi ?? '—'}` : '')}
-      ${cell('E4 VOLUME', e4 ? v4.participationState : 'UNAVAILABLE', e4 ? `${label(v4.volumeTrend)} · RVOL ${num(v4.relativeVolume, 2)}` : '')}
-      ${cell('E22 ACTIVE WAVES', waves ? (waveAge != null && waveAge > 2 ? 'STALE' : 'CURRENT') : 'UNAVAILABLE', waves ? `As of ${waves.updatedAt} · ${(waves.activeDegreeKeys || []).join(', ')}` : '')}
-      ${cell('E25 MARKET HEALTH', e25 ? e25.regime : 'UNAVAILABLE', e25 ? `${label(e25.bias)} · risk ${label(e25.riskLevel)}` : '')}
-      ${cell('E29 STRESS', e29 ? e29.data?.overallState : 'UNAVAILABLE', e29 ? `Tactical ${label(e29.data?.tacticalState)}` : '')}
-      ${cell('ES PRICE · E3', e3 ? num(e3.price, 2) : 'UNAVAILABLE', e3?.meta?.resolvedSymbol ? `Contract ${e3.meta.resolvedSymbol}` : '', '')}
-    </div>`;
-    stamp(el, `Read ${new Date().toISOString()}`);
-    setStatus(el, [e3, e4, waves, e25, e29].filter(Boolean).length, 5);
+    const ce = window.redlineChart;
+    const m = ce?.model && Date.now() - ce.model.at < 55000 ? ce.model : await ce?.load();
+    el.querySelector('[data-live-body]').innerHTML = m ? ce.pills() : '<p class="live-note">Live ES strategy snapshot unavailable.</p>';
+    stamp(el, `ES ${'intraday_scalp@10m'} · snapshot ${m?.snapshotTime || '—'}`);
+    setStatus(el, m ? 1 : 0, 1);
   }
 
   /* ---------- #/meters — market meter ---------- */
@@ -74,7 +65,7 @@
 
   const SURFACES = {
     strategies: ['LIVE STRATEGIES', 'Canonical ES strategy decisions', strategies],
-    chart: ['LIVE ENGINE CONTEXT', 'Canonical ES engine evidence', chartEngines],
+    chart: ['ES CHART VIEW · LIVE', 'Engine 17 snapshot truth · full engine read in the Engine read panel', chartEngines],
     meters: ['LIVE CLIENT MARKET METER', 'ES multi-timeframe condition', meters]
   };
   const surfaces = {};
