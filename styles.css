@@ -310,3 +310,19 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 .jl-lock-icon{display:grid;place-items:center;width:46px;height:46px;flex-shrink:0;border:1px solid #6b5a33;border-radius:50%;color:#e6c95c}
 @media(max-width:1200px){.jl-stats{grid-template-columns:repeat(3,minmax(0,1fr))}.jl-detail{grid-template-columns:1fr 1fr}.jl-detail>.sl-card:first-child{grid-column:1/-1}}
 @media(max-width:700px){.jl-stats{grid-template-columns:1fr 1fr}.jl-detail{grid-template-columns:1fr}.jl-event{grid-template-columns:1fr 1fr 1fr}.jl-locked{flex-direction:column;padding:18px}}
+/* REAL journal preview (journal-real.js) */
+.jr-sample-banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:18px 0 16px;padding:11px 14px;border:1px dashed #b8902f;border-radius:4px;background:repeating-linear-gradient(135deg,#2a2112 0 10px,#211a0e 10px 20px)}
+.jr-sample-banner strong{font:700 11px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:1.2px;color:#ffe06a}.jr-sample-banner span{font-size:10px;color:#cdbf95}
+.jr-sample{position:relative;padding:14px;border:1px dashed #5d5033;border-radius:4px;background:repeating-linear-gradient(135deg,transparent 0 60px,#ffe06a05 60px 61px)}
+.jr-accounts{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;margin-bottom:18px}
+.jr-account{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0;padding:10px;border:1px solid #33362f;border-top:2px solid #5b5a4c;border-radius:3px;background:linear-gradient(150deg,#1a1d1e,#101415);color:#cfcab6;text-align:left;cursor:pointer}
+.jr-account small{font:8px Consolas,monospace;letter-spacing:.5px;color:#8a8b7f}.jr-account small b{color:#c8a95a;font-weight:600}
+.jr-account strong{font:650 13px Bahnschrift,'Arial Narrow',sans-serif;color:#ece7d6}.jr-account strong em{font-style:normal;font-size:9px;margin-left:4px}
+.jr-account span{font-size:8px;color:#8f9188;white-space:nowrap}.jr-account span b{font-weight:600}
+.jr-account .up{color:#5fe39a}.jr-account .down{color:#ff6f80}
+.jr-account:hover{border-color:#7a6430}.jr-account.selected{border-color:#9b7c34;background:linear-gradient(150deg,#33261c,#1a1a17);box-shadow:inset 0 -2px #e7c52e}
+.jr-id{font:9px Consolas,monospace;color:#8a8b80}
+.jr-contracts td{background:#0e1213}.jr-contracts table{width:100%}.jr-contracts th{font-size:8px}
+.panel-title .pill{margin-left:6px;font-size:7px;vertical-align:middle}
+@media(max-width:1200px){.jr-accounts{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){.jr-accounts{grid-template-columns:1fr 1fr}.jr-sample{padding:8px}}

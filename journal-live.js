@@ -68,7 +68,7 @@
   }
 
   function modeTabs() {
-    const tabs = [['paper', 'PAPER TRADING', 'Engine 8 · live backend'], ['real', 'REAL TRADING', 'Locked · awaiting approval'], ['practice', 'PRACTICE JOURNAL', 'Local demo · your notes']];
+    const tabs = [['paper', 'PAPER TRADING', 'Engine 8 · live backend'], ['real', 'REAL TRADING', 'Locked · sample preview'], ['practice', 'PRACTICE JOURNAL', 'Local demo · your notes']];
     return `<nav class="db-tabs jl-modes" role="tablist" aria-label="Journal mode">${tabs.map(([id, name, sub]) => `<button type="button" role="tab" data-jl-mode="${id}" aria-selected="${id === ui.mode}" class="${id === ui.mode ? 'selected' : ''}"><small>${esc(sub)}</small>${esc(name)}</button>`).join('')}</nav>`;
   }
 
@@ -122,7 +122,8 @@
   }
 
   function realView() {
-    return `<section class="jl-locked"><div class="jl-lock-icon">${typeof icon === 'function' ? icon('shield', 22) : ''}</div><div><h2>Real trading is locked</h2><p>The Frye journal also records real Schwab trading: account numbers, open positions, contract IDs and realized and unrealized P&L. Redline is not showing it yet, because the site has no sign-in and the client has not approved who may see real-account results.</p><p>When the client confirms access rules, this tab will show the seven strategy accounts, open positions, performance and complete trade history, read-only.</p><span class="pill gold">AWAITING CLIENT APPROVAL</span></div></section>`;
+    return `<section class="jl-locked"><div class="jl-lock-icon">${typeof icon === 'function' ? icon('shield', 22) : ''}</div><div><h2>Real trading is locked</h2><p>The Frye journal also records real Schwab trading: account numbers, open positions, contract IDs and realized and unrealized P&L. Redline is not showing it yet, because the site has no sign-in and the client has not approved who may see real-account results.</p><p>When the backend requires sign-in and the client approves who may see it, this tab will show the seven strategy accounts, open positions, performance and complete trade history, read-only. The layout below is ready for that and uses made-up sample data.</p><span class="pill gold">AWAITING BACKEND AUTH + CLIENT APPROVAL</span></div></section>`
+      + (window.redlineRealJournal ? `<div class="jr-sample-banner"><strong>SAMPLE DATA PREVIEW</strong><span>Made-up accounts, prices and IDs in Engine 10's data format. These are not Brian's accounts or real results, and nothing is read from the broker.</span></div><div class="jr-sample">${window.redlineRealJournal.view(window.redlineRealJournal.sample(), { sample: true })}</div>` : '');
   }
 
   function page() {

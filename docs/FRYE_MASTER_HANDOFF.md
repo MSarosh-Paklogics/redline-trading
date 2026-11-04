@@ -511,3 +511,58 @@ The full answer is kept in the client conversation. This section records what Re
 - `/live/30m` last updated 2026-10-08 (affects the SPY 30m light and Alignment 30).
 - `/live/pills` 5m stamp 2026-10-31.
 - `/api/v1/waves/active` 2026-09-28.
+
+## 14. Real Trading Journal — audit of 2026-11-04 (client ChatGPT, verified against source)
+
+**Release decision: NO-GO** for showing real-account data on the public Redline site. The Real
+tab stays locked until (a) the backend enforces authorization on every route that can return
+REAL data and (b) Brian approves exactly who may see it. The paper journal stays live.
+
+**Security finding (backend, independent of Redline):** `GET /api/v1/trade-journal`,
+`GET /api/v1/trade-journal/real-performance` and `GET /api/v1/trade-journal/:tradeId` in
+`services/core/routes/tradeJournal.js` have no auth middleware. Only `POST /trade-journal/real-fill`
+is protected (`requireEngine8Admin` — an Engine 8 admin secret that must never be reused as a
+browser credential). Omitting `accountMode` returns REAL trades, so filtering is not a boundary.
+Request written up in `docs/BACKEND_REQUEST_REAL_JOURNAL_AUTH.md`.
+
+**Verified data contract (Engine 10):**
+- `GET /api/v1/trade-journal/real-performance` → schema `engine10.realPerformanceSections.v1`:
+  `{ ok, schema, sections, allReal, unknownRealCampaigns }`. `sections` keys: SWING, INTRADAY,
+  SUBMICRO, MICRO, SUBMINUTE, MINUTE, MINOR, INTERMEDIATE, PRIMARY. Each: group, campaigns,
+  openContracts, closedContracts, grossRealized/fees/netRealized (USD), winning/losing/breakeven
+  Contracts, winRate (0–1|null), profitFactor (|null), maxDrawdown (USD|null, from available net
+  outcomes only — not audited). Aggregates only; positions/history come from the trade list.
+- `GET /api/v1/trade-journal?accountMode=REAL` → campaigns: `tradeId, status, entry.{time,price},
+  qty.remainingQty, performanceGroup, brokerAccountLabel | realBroker.brokerAccountLabel,
+  summary.{grossRealizedPnL, actualFees, netRealizedPnL}, realBroker.{dollarsPerPoint,
+  futuresContractCode, remainingLots[], contracts[]{contractId,status,entryPrice,exitPrice,
+  closingBrokerTransactionId,totalFees|attributedFees|allocatedFees}}, events[]{eventType,
+  brokerTransactionId, ts, fillTime, totalFees}`.
+- Strategy ownership = stored `performanceGroup` (never infer from account digits). Seven
+  accounts map one-to-one to Submicro…Primary (registry: backend
+  `logic/journal/realAccountClassification.js`; cutover `2026-10-22T07:00:00.000Z`; SWING/INTRADAY
+  are pre-cutover history and must be preserved). Account digits are not stored in this repo.
+- REAL money fields are USD. Multiplier: `realBroker.dollarsPerPoint` → `brokerImport` →
+  `riskBasis` → root map MES 5 / ES 50 / MNQ 2 / NQ 20. Do not apply REAL conversion to PAPER.
+  Paper `realizedPnL` equalled `realizedPoints` on every trade observed (Redline labels it points)
+  but no cross-mode unit contract is approved.
+- Broker executions = `REAL_ENTRY_FILL`, `REAL_SCALE_IN_FILL`, `REAL_PARTIAL_EXIT`,
+  `REAL_FINAL_EXIT` with a non-empty `brokerTransactionId`. `TRADE_CLOSED` is not a fill.
+- Daily account P&L is computed by Frye from journal data + live mark (not a Schwab balance).
+  Futures trading day rolls at 18:00 America/New_York; display times are America/Phoenix.
+- Unrealized P&L is computed in the browser from the position's own physical contract mark
+  (`/api/v1/futures/ohlc?symbol=<contract>&tf=1m`, last close) × remaining qty × multiplier.
+  Never assume MESZ26. Backend-authoritative valuation: not decided.
+- Missing fee attribution, starting capital, equity series, return/drawdown stay `—`. Legacy
+  INTRADAY 10000 / SWING 20000 / ALL 30000 capital constants are NOT approved for the seven accounts.
+- Manual paper accounts (`/api/trading/manual-paper/*`) are operator-authorized and under
+  `/api/trading/*`, which Redline never calls. No trade ticket in Redline.
+- Frye refresh rates: journal 15 s, marks 5 s, sections 30 s. Redline rates not approved.
+
+**Release gates (all open):** viewer approval · backend auth on all REAL reads · identity/token
+contract · account-level authorization + identifier disclosure rules · frozen Engine 10 schema
+and units · agreed live-mark/P&L policy · security test of read-only REAL tab.
+
+**Allowed now:** UI structure, PAPER/REAL separation, seven-account components, contract history
+rendering and REAL schema adapters using clearly labelled synthetic sample data
+(`journal-real.js`).
