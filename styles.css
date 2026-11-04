@@ -502,15 +502,3 @@ body:not(.reduced) .btn.primary:hover,.corsa-theme .btn.primary:hover{border-col
 .corsa-theme .side-link.is-current .side-icon{color:#fff200;background:#3a0a0c;filter:drop-shadow(0 0 5px #fff20088)}
 .corsa-theme .side-link:hover .side-icon,body:not(.reduced) .side-link:hover .side-icon{color:#fff200}
 aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
-/* ===== Speedometers: Ferrari yellow + colour animation ===== */
-.race-dial-code{fill:#fff200}
-.race-meter-status{color:#fff200}
-.race-meter-status>i{background:#fff200}
-.race-dial-progress{filter:drop-shadow(0 0 3px #ed1c2466)}
-@media (prefers-reduced-motion: no-preference){
-  body:not(.reduced) .race-dial-progress{animation:mpArcGlow 3s ease-in-out infinite}
-  body:not(.reduced) .race-needle-blade{animation:mpNeedleGlow 3s ease-in-out infinite}
-  body:not(.reduced) .race-meter-status>i{animation:mpPing 1.8s ease-out infinite;box-shadow:0 0 0 0 #fff20099}
-}
-@keyframes mpArcGlow{0%,100%{filter:drop-shadow(0 0 2px #ed1c2455)}50%{filter:drop-shadow(0 0 7px #fff200aa)}}
-@keyframes mpNeedleGlow{0%,100%{filter:drop-shadow(0 0 1px #fff20066)}50%{filter:drop-shadow(0 0 5px #fff200)}}
