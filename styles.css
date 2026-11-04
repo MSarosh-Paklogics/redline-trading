@@ -326,3 +326,10 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 .panel-title .pill{margin-left:6px;font-size:7px;vertical-align:middle}
 @media(max-width:1200px){.jr-accounts{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.jr-accounts{grid-template-columns:1fr 1fr}.jr-sample{padding:8px}}
+/* "Powered by AI" branding (top bar + dashboard hero) */
+.ai-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border:1px solid #6b5a33;border-radius:3px;background:linear-gradient(110deg,#3a1d24,#2a2418);color:#ffe06a;font:700 9px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:1.3px;white-space:nowrap}
+.ai-badge>i{width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#fff6c2,#e7c52e 55%,#e5233b);box-shadow:0 0 8px #e7c52e;animation:aiPulse 2.4s ease-in-out infinite}
+.ai-kicker{font-weight:700;color:#ffe06a;letter-spacing:1.7px}
+@keyframes aiPulse{0%,100%{opacity:.55;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.ai-badge>i{animation:none}}
+@media(max-width:700px){.ai-badge{display:none}}
