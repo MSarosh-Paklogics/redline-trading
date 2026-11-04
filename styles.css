@@ -502,3 +502,28 @@ body:not(.reduced) .btn.primary:hover,.corsa-theme .btn.primary:hover{border-col
 .corsa-theme .side-link.is-current .side-icon{color:#fff200;background:#3a0a0c;filter:drop-shadow(0 0 5px #fff20088)}
 .corsa-theme .side-link:hover .side-icon,body:not(.reduced) .side-link:hover .side-icon{color:#fff200}
 aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
+/* ===== Hero live candlestick backdrop (hero-candles.js) ===== */
+.race-hero{position:relative}
+.race-hero>.hero-candles{position:absolute;inset:0;z-index:0;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#0006 28%,#000 62%,#000 100%);mask-image:linear-gradient(90deg,transparent 0%,#0006 28%,#000 62%,#000 100%)}
+.race-hero>.race-hero-content,.race-hero>.race-hero-visual{position:relative;z-index:1}
+.hc-svg{position:absolute;inset:8% 0 10% 0;width:100%;height:82%;opacity:.42}
+.hc-grid{stroke:#ffffff10;stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:3 5}
+.hc-c line{stroke-width:1;vector-effect:non-scaling-stroke}
+.hc-c.up line{stroke:#009a4e}.hc-c.up rect{fill:#009a4e}
+.hc-c.dn line{stroke:#ed1c24}.hc-c.dn rect{fill:#ed1c24}
+.hc-price{stroke:#fff200;stroke-width:1;stroke-dasharray:4 4;vector-effect:non-scaling-stroke;opacity:.8}
+.hc-area{opacity:.9}
+.hc-tag{position:absolute;right:14px;top:10px;display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border:1px solid #ffffff1f;border-radius:3px;background:#000a;color:#fff;font:700 8px Consolas,monospace;letter-spacing:.8px}
+.hc-tag>i{width:6px;height:6px;border-radius:50%;background:#009a4e}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduced) .hc-grow .hc-c{transform-box:fill-box;transform-origin:50% 100%;animation:hcRise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 18ms + 200ms)}
+  body:not(.reduced) .hc-grow .hc-area{animation:hcFade 1.4s ease-out .4s both}
+  body:not(.reduced) .hc-c.last rect{animation:hcLast 1.6s ease-in-out infinite}
+  body:not(.reduced) .hc-price{animation:hcDash 1.2s linear infinite}
+  body:not(.reduced) .hc-tag>i{animation:mpPing 1.8s ease-out infinite;box-shadow:0 0 0 0 #009a4e99}
+}
+@keyframes hcRise{from{opacity:0;transform:scaleY(.05)}to{opacity:1;transform:none}}
+@keyframes hcFade{from{opacity:0}to{opacity:.9}}
+@keyframes hcLast{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes hcDash{to{stroke-dashoffset:-8}}
+@media(max-width:700px){.hc-svg{opacity:.3}.hc-tag{display:none}}
