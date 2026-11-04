@@ -333,3 +333,12 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 @keyframes aiPulse{0%,100%{opacity:.55;transform:scale(.85)}50%{opacity:1;transform:scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.ai-badge>i{animation:none}}
 @media(max-width:700px){.ai-badge{display:none}}
+/* Prominent "Powered by AI" (overrides the first version above) */
+.ai-badge{gap:8px;padding:8px 16px 8px 13px;border:1px solid #ff4d63;border-radius:4px;background:linear-gradient(135deg,#ef2b45 0%,#b4142c 100%);color:#fff;font:800 13px/1 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:.9px;text-transform:uppercase;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;box-shadow:0 0 0 1px #00000060,0 4px 18px #ef2b4555,inset 0 1px 0 #ffffff30}
+.ai-badge>b{font-weight:900;color:#ffe03a;letter-spacing:1.2px}
+.ai-badge>svg{color:#ffe03a;flex-shrink:0;filter:drop-shadow(0 0 4px #ffe03a);animation:aiPulse 2.4s ease-in-out infinite}
+.ai-badge>i{display:none}
+.ai-kicker{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:3px;background:#ffd330;color:#16130a;font:800 10px/1 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:1.1px;-webkit-font-smoothing:antialiased;box-shadow:0 0 14px #ffd33055;vertical-align:middle}
+.ai-kicker>svg{color:#e5233b}
+@media(max-width:700px){.ai-badge{display:inline-flex;padding:6px 9px;font-size:10px}.ai-badge>svg{width:12px;height:12px}}
+@media(max-width:420px){.ai-badge{font-size:0;gap:0;padding:7px}.ai-badge>b{font-size:11px;margin-left:4px}}
