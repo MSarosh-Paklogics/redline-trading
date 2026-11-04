@@ -21,7 +21,7 @@
         el.style.setProperty('--enter-delay', `${Math.min(i * 35, 250)}ms`);
         el.classList.add('motion-card');
       });
-      main.querySelectorAll('.equity-chart polyline[stroke="#f4495d"]').forEach(line => {
+      main.querySelectorAll('.equity-chart polyline[stroke="#ed1c24"]').forEach(line => {
         line.setAttribute('pathLength', '1');
         line.classList.add('motion-line');
       });
