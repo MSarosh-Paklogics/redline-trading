@@ -59,6 +59,7 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `xray-sections.js` | Rest of the Frye X-Ray + Engine 29 page (meters, participation, distribution, briefing, sectors, macro, trend, internals map) drawn with `panel()`/`stat()`; called from corsa.js |
 | `corsa.js` | Redline's own car-style first page and meters (hero, speedometer gauges, stat cards); reads `window.redlineXray.model`, falls back to labelled fixtures |
 | `chart-engines.js` | Chart terminal engine read (`window.redlineChart`): Engine 17 pills, Engine 22 degree tabs, trade context, 26A/27/6, stage timeline, market context, E3/E4, SPY acc/dist levels; mirrors Frye `RowChart` (Engine17Badges / Engine17DecisionTimeline) |
+| `live-quotes.js` | Live last price + daily change for every symbol (search, watchlist, ticker) from 10m/1d OHLC, batched 3 at a time with one retry (the backend 502s on bursts) |
 | `live-surfaces.js` | Live panels for strategies, chart and meters; re-attaches them after app.js re-renders |
 | `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
 
