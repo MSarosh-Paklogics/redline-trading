@@ -22,28 +22,7 @@
   // Backend marks the 4H and EOD meter formulas as placeholders (futures-market-meter-v2-spy-style-10m-30m-1h).
   const PLACEHOLDER_TFS = new Set(['4h', '1d', 'EOD']);
 
-  /* ---------- #/strategies — Strategies ---------- */
-  async function strategies(el) {
-    const [snap] = await settle([window.redlineApi.snapshotShared('ES')]);
-    const list = Object.entries(snap?.strategies || {});
-    el.querySelector('[data-live-body]').innerHTML = list.length ? `
-      <p class="live-note">Structure, readiness, geometry and permission are separate decisions. Only Engine 6 permission allows a trade; "ready" is not "permitted".</p>
-      ${list.map(([id, st]) => {
-        const e23 = st.engine23Interpretation || {}, e15 = st.engine15 || {}, e26 = st.engine26ProposedGeometry || {}, e6 = st.permission || {};
-        return `<div class="live-strategy">
-          <div class="live-strategy-head"><strong>${esc(id)}</strong><small>${esc(label(st.degree))} · ${esc(st.wave || '—')} · ${esc(st.tf || '')}</small></div>
-          <div class="live-engine-grid live-strategy-grid">
-            ${cell('STRUCTURE · E23', e23.state ?? 'UNAVAILABLE', [e23.health && `Health ${label(e23.health)}`, e23.activeDegree && `${label(e23.activeDegree)} degree`, e23.preferredEntry && label(e23.preferredEntry)].filter(Boolean).join(' · '))}
-            ${cell('READINESS · E15', e15.readiness ?? 'UNAVAILABLE', [e15.direction && `Dir ${e15.direction}`, e15.action && label(e15.action)].filter(Boolean).join(' · '))}
-            ${cell('GEOMETRY · E26', e26.status ?? 'UNAVAILABLE', e26.direction ? `Direction ${label(e26.direction)}` : '')}
-            ${cell('PERMISSION · E6', e6.permission ?? 'UNAVAILABLE', e6.permission ? `Size ×${e6.sizeMultiplier ?? '—'} · ${e6.asOf || ''}` : '')}
-          </div>
-          ${e15.summary ? `<p class="live-note">${esc(e15.summary)}</p>` : ''}
-        </div>`;
-      }).join('')}` : '<p class="live-note">Strategy snapshot unavailable.</p>';
-    stamp(el, `Snapshot ${snap?.now || '—'} · ${list.length} strategies`);
-    setStatus(el, snap ? 1 : 0, 1);
-  }
+  /* #/strategies is its own live page now (strategies-live.js). */
 
   /* ---------- #/chart — Engine 17 status pills (chart-engines.js) ---------- */
   async function chartEngines(el) {
@@ -79,7 +58,6 @@
   }
 
   const SURFACES = {
-    strategies: ['LIVE STRATEGIES', 'Canonical ES strategy decisions', strategies],
     chart: ['ES CHART VIEW · LIVE', 'Engine 17 snapshot truth · full engine read in the Engine read panel', chartEngines],
     meters: ['LIVE CLIENT MARKET METER', 'ES multi-timeframe condition', meters]
   };
