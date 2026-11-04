@@ -32,17 +32,20 @@ ask — do not guess which is current.
    - Engine 26/26B = proposes location/geometry only. Engine 6 = final trade permission.
    - "Wave developing", "strategy ready" and "trade permitted" are separate fields;
      contradictions between engines must stay visible. Ready ≠ authorized.
-4. **Only call read endpoints that are mounted.** Never call admin/refresh/write
+4. **Paper journal only.** Never read or show real-account journal data (`/api/v1/trade-journal`
+   without `accountMode=PAPER`, `/trade-journal/real-performance`, broker accounts, positions,
+   account masks) until Brian approves access rules and Redline has sign-in. Decided 2026-11-04.
+5. **Only call read endpoints that are mounted.** Never call admin/refresh/write
    routes, `/api/trading/*`, or `POST /api/v1/engine26/manual-hard-signal` from
    Redline. `strategy-state`, `reaction-quality` and `gauges` are not served.
    Treat `ok:false`, 4xx/5xx and empty arrays as unavailable, never as a signal.
    REST is Backend 1; LIVE SSE (`/stream/futures/agg`, `/stream/agg`) is Backend 2.
-5. **No secrets in this repo or the frontend.** Schwab, Polygon/Massive, FMP,
+6. **No secrets in this repo or the frontend.** Schwab, Polygon/Massive, FMP,
    Finnhub, OpenAI, Pushover etc. keys belong only in the backend's Render
    secret store. The frontend knows only the public backend base URL.
    Never commit `.env*`, tokens, broker account numbers or subscriber data.
-6. **Keep Redline's own UI.** Feed live data into the existing components (corsa gauges, `stat()` cards); don't replace pages with new generic box layouts.
-7. Don't present demo/fixture data as live. Live surfaces are labelled
+7. **Keep Redline's own UI.** Feed live data into the existing components (corsa gauges, `stat()` cards); don't replace pages with new generic box layouts.
+8. Don't present demo/fixture data as live. Live surfaces are labelled
    `LIVE BACKEND`; anything else is illustrative.
 
 ## Stack and layout
@@ -62,6 +65,7 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `live-quotes.js` | Live last price + daily change for every symbol (search, watchlist, ticker) from 10m/1d OHLC, batched 3 at a time with one retry (the backend 502s on bursts) |
 | `dashboard-board.js` | Dashboard layout (`#/overview`): live ES signal board (strategy chain E22→E27→E26A→E15→E6, evidence E25/E29/E3/E4), decision chain kept as three separate fields with contradictions shown, and engine tabs (E25 / E29 / strategy stack / evidence & zones) built from `redlineXraySections.e25/e29` and `redlineChart.parts()` |
 | `strategies-live.js` | Live Strategies page (`window.fryePages.strategies`): E22 seven-degree ladder + per-degree structure, fib levels with touch evidence, invalidation/protection; E27 alignment, story and direction checks; QQQ/VIX/E25/E29 confirmation; E26 location/geometry + E6. Backend fields only — Frye's frontend-hard-coded owner text and broker positions are deliberately not shown (open questions in `docs/CLIENT_CHATGPT_STRATEGIES_QUESTIONS.md`) |
+| `journal-live.js` | Journal page (`window.fryePages.journal`): Engine 8 PAPER trades only (`redlineApi.paperJournal`, rows not marked PAPER are dropped) — summary, open positions, history, selected-trade timeline; paper `realizedPnL` is in points, never shown as $. Real (Schwab) trading tab is locked until the client approves access; the old local journal is the labelled "Practice" tab |
 | `sectors-live.js` | Live Sectors page (`window.fryePages.sectors`): 10m/1H/4H/EOD sector cards in Frye's fixed order + `/live/pills` deltas; loads after engines.js (which resets `fryePages`) |
 | `live-stream.js` | Real-time candles: Backend 2 SSE bars merged into the live bar cache, chart SVG redrawn ≤1/s; requested same-origin `/stream/...` (proxied by `server.mjs` and the `vercel.json` rewrite, because Backend 2 only allows Frye's origins); 5 s Backend 1 polling fallback |
 | `chart-interact.js` | TradingView-style controls: drag pan (time + price), price-axis drag to scale, wheel zoom, Shift+wheel scroll, keys, double-click axis reset; `window.redlineChartView` feeds `chartGeometry()`; keeps panel scroll across re-renders |

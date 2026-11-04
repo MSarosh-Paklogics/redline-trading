@@ -44,7 +44,9 @@
     futuresOhlc: (symbol = 'ES', timeframe = '10m', limit = 500) => request(`/api/v1/futures/ohlc?symbol=${q(symbol)}&timeframe=${q(timeframe)}&limit=${limit}`),
     ohlc: (symbol = 'SPY', timeframe = '10m', limit = 500) => request(`/api/v1/ohlc?symbol=${q(symbol)}&timeframe=${q(timeframe)}&limit=${limit}`),
     sectors: () => request('/api/sectorcards-10m'),
-    journal: () => request('/api/v1/trade-journal'),
+    // Paper trades only. Real-account journal data (Schwab positions, P&L, account masks) is not
+    // read by Redline until the client approves who may see it; there is deliberately no route for it.
+    paperJournal: () => request('/api/v1/trade-journal?accountMode=PAPER', { timeout: 20000 }),
     fibLevels: (symbol = 'ES', tf = '1h') => request(`/api/v1/fib-levels?symbol=${q(symbol)}&tf=${q(tf)}`),
     activeWaves: (symbol = 'ES') => request(`/api/v1/waves/active?symbol=${q(symbol)}`),
     engine3: (symbol = 'ES', tf = '10m') => request(`/api/v1/es-reaction-score?symbol=${q(symbol)}&tf=${q(tf)}`),

@@ -58,6 +58,12 @@ If something is not decided yet, say "not decided". Do not guess.
    - Which fields are canonical: structural leg, Strategy 1 direction, or expected reversal?
 9. **Engine 27 wave learning and performance history.** What is the source endpoint or
    field, and is it ready to show?
-10. **Refresh rate.** Frye polls the ~18 MB snapshot every 20 s, and Redline refreshes every
+10. **Journal privacy.** Frye's Journal shows real Schwab trading: account masks, positions,
+    contract IDs and realized/unrealized P&L. It comes from `/api/v1/trade-journal` and
+    `/api/v1/trade-journal/real-performance`, which need no login.
+    - May Redline show that real-account journal, given it is a public site with no login yet?
+    - Or should Redline's Journal show only paper trades until login and access rules exist?
+    - Who is allowed to see the real accounts?
+11. **Refresh rate.** Frye polls the ~18 MB snapshot every 20 s, and Redline refreshes every
     60 s. Is there, or will there be, a lighter read-only endpoint for the Strategies page
     alone?
