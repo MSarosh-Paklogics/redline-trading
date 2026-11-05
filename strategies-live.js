@@ -167,7 +167,8 @@
   /* ---------- Shared market confirmation ---------- */
   function shared(m) {
     const lcr = m.e27.engine27LiveCrossMarketReactions || {}, u = m.e27.engine27UnifiedMarketContext || {}, inst = lcr.instruments || {};
-    const ev = i => { const e = (i?.events || []).at(-1); return e ? L(e.event) : L(i?.state || 'UNAVAILABLE'); };
+    // Same wording as Frye Engine27TraderIntelligenceV2: no qualified event reads "NO NEW REACTION".
+    const ev = i => { const e = (i?.events || []).at(-1); return e ? L(e.event) : i?.state === 'NO_QUALIFIED_EVENT' ? 'NO NEW REACTION' : L(i?.state || 'UNAVAILABLE'); };
     const p = u.participation || {}, t = u.tactical || {};
     return `<div class="stats sl-five">
       ${stat('QQQ · latest zone event', esc(ev(inst.QQQ)), inst.QQQ ? `${String(inst.QQQ.timeframe || '').toUpperCase()} · ${az(inst.QQQ.lastCompletedAt)}` : 'unavailable', 'completed hourly evidence', 'chart', 'yellow')}
@@ -181,13 +182,18 @@
   /* ---------- Engine 26: location / planner ---------- */
   function planner(m) {
     const loc = m.st.engine26LocationCandidate || {}, geo = m.st.engine26ProposedGeometry || {}, e6 = m.st.permission || {};
-    const same = loc.candidateId && geo.candidateId && loc.candidateId === geo.candidateId;
-    const zone = loc.activeZone || loc.zone || loc.promotedZone || null;
-    const targets = Array.isArray(geo.targets) ? geo.targets : Array.isArray(geo.targetMap) ? geo.targetMap : [];
+    // Identity and fields follow Frye WaveDegreesPage.jsx (MATCH / MISMATCH / UNVERIFIED).
+    const lid = String(loc.candidateId || '').trim(), gid = String(geo.candidateId || '').trim();
+    const identity = lid && gid ? (lid === gid ? 'MATCH' : 'MISMATCH') : 'UNVERIFIED';
+    const zone = loc.entryZone || loc.zone || loc.location || null;
+    const zLo = n(zone?.low ?? zone?.lo), zHi = n(zone?.high ?? zone?.hi);
+    const targets = Array.isArray(geo.proposedTargets) ? geo.proposedTargets : [];
+    // The backend publishes 0 for entry/stop/risk while geometry is waiting; that is "no price", not a price.
+    const geoPx = v => n(v) == null || (n(v) === 0 && geo.geometryReady !== true) ? '—' : px(v);
     return `<div class="sl-planner">
-      ${card('Identity', `${kv('Location candidate', loc.candidateId || '—', '')}${kv('Geometry candidate', geo.candidateId || '—', '')}<div class="sl-head ${same ? 'up' : 'yellow'}">${same ? 'IDENTITY VERIFIED' : 'IDENTITY UNVERIFIED'}</div><p class="sl-muted">${same ? 'Location and geometry refer to the same candidate.' : 'One or both candidate IDs are unavailable or differ, so identity cannot be confirmed.'}</p>`)}
-      ${card('Location · Engine 26A', `${kv('Status', L(loc.status || 'WAITING'))}${kv('Active', yn(loc.active))}${kv('Zone', loc.zoneId || '—', '')}${zone && n(zone.low) != null ? kv('Zone range', `${px(zone.low)} – ${px(zone.high)}`, '') : ''}${kv('Direction', L(loc.preferredDirection || loc.directionBias || 'NEUTRAL'))}${kv('Contact', L(loc.contactState))}${kv('Prior rotation', loc.priorRotationDirection ? `${L(loc.priorRotationDirection)} · ${L(loc.priorRotationCompletionState)}` : '—', '')}${kv('Completion boundary', px(loc.completionBoundary), '')}`, 'gold', chip('PROPOSES LOCATION ONLY', 'gold'))}
-      ${card('Proposed geometry · Engine 26B', `${kv('Status', L(geo.status || 'WAITING'))}${kv('Direction', L(geo.direction || 'NEUTRAL'))}${kv('Entry', px(geo.entry ?? geo.entryPrice), '')}${kv('Stop', px(geo.stop ?? geo.stopPrice), '')}${kv('Risk distance', px(geo.riskDistance ?? geo.risk), '')}${kv('Geometry ready', yn(geo.geometryReady))}${kv('Proposal only', 'YES', '')}<div class="sl-sub">Target map</div>${targets.length ? targets.slice(0, 6).map((t, i) => kv(t.label || `T${i + 1}`, px(t.price ?? t.level ?? t.midline), '')).join('') : '<p class="sl-muted">No proposed targets attached yet.</p>'}`, '', chip('PROPOSAL ONLY'))}
+      ${card('Identity', `${kv('Location candidate', lid || '—', '')}${kv('Geometry candidate', gid || '—', '')}<div class="sl-head ${identity === 'MATCH' ? 'up' : identity === 'MISMATCH' ? 'down' : 'yellow'}">ENGINE 26 IDENTITY — ${identity}</div><p class="sl-muted">${identity === 'MATCH' ? 'Location candidate and proposed geometry share the same candidate ID.' : identity === 'MISMATCH' ? 'Location and geometry refer to different candidates.' : 'One or both candidate IDs are unavailable, so identity cannot be confirmed.'}</p>`)}
+      ${card('Location · Engine 26A', `${kv('Status', L(loc.status || 'WAITING'))}${kv('Setup class', L(loc.setupClass))}${kv('Direction', L(loc.currentObservationDirection || loc.direction || 'NEUTRAL'))}${kv('Entry / alarm zone', zLo != null && zHi != null ? `${px(zLo)}–${px(zHi)}` : '—', '')}${kv('Setup grade', loc.setupGrade || '—', '')}${kv('Zone', loc.zoneId || '—', '')}${kv('Contact', L(loc.contactState))}${kv('Prior rotation', loc.priorRotationDirection ? `${L(loc.priorRotationDirection)} · ${L(loc.priorRotationCompletionState)}` : '—', '')}`, 'gold', chip('PROPOSES LOCATION ONLY', 'gold'))}
+      ${card('Proposed geometry · Engine 26B', `${kv('Lifecycle', L(geo.lifecycleStatus || geo.status || 'WAITING'))}${kv('Direction', L(geo.direction || 'NEUTRAL'))}${kv('Entry', geoPx(geo.proposedEntryPrice), '')}${kv('Stop', geoPx(geo.proposedStopPrice), 'down')}${kv('Risk distance', geoPx(geo.proposedStopDistancePoints) === '—' ? '—' : `${geoPx(geo.proposedStopDistancePoints)} pts`, '')}${kv('Geometry ready', yn(geo.geometryReady))}${kv('Proposal only', 'YES', '')}<div class="sl-sub">${identity === 'MISMATCH' ? 'Target map — geometry only' : 'Target map'}</div>${targets.length ? targets.slice(0, 4).map((t, i) => kv(t.label || `Target ${i + 1}`, px(t.price ?? t.level ?? t), 'up')).join('') : '<p class="sl-muted">No proposed targets attached yet.</p>'}`, '', chip('PROPOSAL ONLY'))}
       ${card('Final permission · Engine 6', `<div class="sl-head ${tone(e6.permission)}">${esc(L(e6.permission))}</div>${kv('Executable', yn(e6.executable))}${kv('Watch only', yn(e6.watchOnly))}${kv('Size multiplier', e6.sizeMultiplier == null ? '—' : `×${e6.sizeMultiplier}`, '')}${kv('As of', e6.asOf || '—', '')}<p class="sl-muted">Engine 6 is the only trade permission. A ready location or geometry is not authorization. Redline creates no orders.</p>`, 'red', chip('FINAL AUTHORITY', 'red'))}
     </div>`;
   }
