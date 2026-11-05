@@ -16,7 +16,7 @@
   const ORDER = ['submicro', 'micro', 'subminute', 'minute', 'minor', 'intermediate', 'primary'];
   const STRATEGY = 'intraday_scalp@10m';
   const REFRESH_MS = 60000;
-  const ui = { degree: 'minute', snap: null, at: null, loading: false, failed: false };
+  const ui = { view: 'interface', degree: 'minute', snap: null, at: null, loading: false, failed: false };
 
   const n = v => { const x = Number(v); return v == null || v === '' || !Number.isFinite(x) ? null : x; };
   const L = v => v == null || v === '' ? '—' : String(v).replace(/_/g, ' ').toUpperCase();
@@ -198,14 +198,82 @@
     </div>`;
   }
 
+  /* ---------- Strategies Full: Scalp 10m / Intermediate Swing 1h / Longer-Term 4h ----------
+     MIRRORED from Frye src/pages/StrategiesFull.jsx (same field priority, trigger-condition and
+     summary wording). Two Frye display bugs are not copied: an object "Context" printed as
+     [object Object] shows its state instead, and missing signal/current prices show "—", not 0.00. */
+  const FULL = [
+    { id: 'intraday_scalp@10m', title: 'Scalp', tf: '10m', kind: 'scalp' },
+    { id: 'minor_swing@1h', title: 'Intermediate Swing', tf: '1h', kind: 'intermediate' },
+    { id: 'intermediate_long@4h', title: 'Longer-Term', tf: '4h', kind: 'longer' }
+  ];
+  const U = v => String(v ?? '').trim().toUpperCase();
+  const P = v => { if (v && typeof v === 'object') v = v.state || v.label || v.context || v.direction || v.phase1Uses || null; const s = U(v); return s ? s.replace(/_/g, ' ') : '—'; };
+  const fx = {
+    readiness: nd => nd?.engine15?.readiness || nd?.engine15Decision?.readinessLabel || nd?.engine16?.readinessLabel || 'WAIT',
+    action: nd => nd?.engine15Decision?.action || 'NO_ACTION',
+    bias: nd => {
+      const e15 = nd?.engine15Decision || {}, e16 = nd?.engine16 || {};
+      for (const s of [U(e15.direction), U(e15.executionBias), U(e16.waveContext?.macroBias || e16.macroBias)]) { if (s.includes('SHORT')) return 'SHORT BIAS'; if (s.includes('LONG')) return 'LONG BIAS'; }
+      return e16.waveShortPrep === true ? 'SHORT BIAS' : e16.waveLongPrep === true ? 'LONG BIAS' : 'NEUTRAL';
+    },
+    execBias: nd => nd?.engine15Decision?.executionBias || nd?.engine15Decision?.direction || nd?.engine16?.macroBias || 'NONE',
+    lifecycle: nd => { const lc = nd?.engine15Decision?.lifecycle || {}; return { tp1: lc.tp1Open === true, tp2: lc.tp2Open === true, runner: lc.runnerOn === true, signal: n(lc.signalPrice), current: n(lc.currentPrice), progress: n(lc.progressPct), remain: n(lc.remainingPct), move: n(lc.movePts), state: lc.state || nd?.engine15Decision?.lifecycleState || nd?.engine15?.readiness || 'WATCH', next: lc.nextFocus || 'WAIT_FOR_TRIGGER' }; },
+    reasons: nd => [...new Set([...(nd?.engine15Decision?.blockers || []), ...(nd?.engine15Decision?.reasonCodes || []), ...(nd?.permission?.reasonCodes || [])].map(x => String(x || '').trim()).filter(Boolean))].slice(0, 10),
+    chain: nd => { const v = nd?.engine15Decision?.setupChain; return Array.isArray(v) ? v.filter(Boolean) : typeof v === 'string' && v.trim() ? [v.trim()] : []; },
+    waveCodes: nd => Array.isArray(nd?.engine16?.waveReasonCodes) ? nd.engine16.waveReasonCodes.filter(Boolean) : []
+  };
+  const marketLine = s => `${U(s?.marketRegime?.regime) || '—'} / ${U(s?.marketRegime?.directionBias) || '—'} / ${U(s?.marketRegime?.strictness) || '—'}`;
+  const scalpTrigger = e => e.waveShortPrep === true && e.continuationTriggerShort !== true && e.exhaustionTriggerShort !== true ? 'rejection + break'
+    : e.waveLongPrep === true && e.continuationTriggerLong !== true && e.exhaustionTriggerLong !== true ? 'support hold + break'
+    : e.exhaustionEarlyShort === true || e.exhaustionEarlyLong === true ? 'exhaustion confirm'
+    : e.continuationWatchShort === true || e.continuationWatchLong === true ? 'continuation trigger' : 'await trigger';
+  const interTrigger = (e, r) => e.wavePrep === true && U(e.intermediatePhase) === 'IN_C' ? 'C exhaustion + W3 trigger' : U(r) === 'WAIT' ? 'wait for structure' : 'await confirmation';
+  const waveMode = e => { const w = U(e.intermediateWaveMode || e.waveState || e.waveContext?.waveState); return w.includes('CORRECTION') || w.includes('C') ? 'CORRECTIVE' : w.includes('IMPULSE') || w.includes('W3') ? 'IMPULSE' : 'STRUCTURE'; };
+  const summaryText = (kind, nd, s) => { const r = P(fx.readiness(nd)).toLowerCase(), nx = P(fx.lifecycle(nd).next).toLowerCase(), mk = marketLine(s).toLowerCase(); return kind === 'scalp' ? `Scalp is ${r} with ${fx.bias(nd).toLowerCase()}. Focus is ${nx}. Market: ${mk}.` : kind === 'intermediate' ? `Intermediate is ${r}. Waiting for ${nx}. Market: ${mk}.` : `Longer-term is ${r}. Next focus is ${nx}. Market: ${mk}.`; };
+  const fTone = v => { const s = U(v); return /READY|TRIGGERED|CONFIRMED|ENTER_OK|^GO$|ALLOW|LONG/.test(s) ? 'up' : /BLOCK|STAND.DOWN|SHORT/.test(s) ? 'down' : /ARMING|PREP|REDUCE|WATCH|WAIT|NEUTRAL/.test(s) ? 'yellow' : ''; };
+  const badge = (t, tone = fTone(t)) => `<span class="sf-badge ${tone}">${esc(t)}</span>`;
+  const yesNo = v => badge(v ? 'YES' : 'NO', v ? 'up' : '');
+  const list = arr => arr.length ? `<ul class="sl-list">${arr.map(x => `<li>${esc(P(x))}</li>`).join('')}</ul>` : '<p class="sl-muted">—</p>';
+  const sec = (title, body) => `<div class="sf-sec"><div class="sl-sub">${esc(title)}</div>${body}</div>`;
+
+  function fullCard(def, s) {
+    const nd = s?.strategies?.[def.id];
+    if (!nd) return card(`${def.title} · ${def.tf}`, '<p class="sl-muted">This strategy is not published in the snapshot.</p>');
+    const e16 = nd.engine16 || {}, e15 = nd.engine15Decision || {}, lc = fx.lifecycle(nd), readiness = fx.readiness(nd), bias = fx.bias(nd);
+    const head = `<div class="sf-head"><div><h3>${esc(def.title)}</h3><small>${esc(def.tf)}</small></div><div class="sf-badges">${badge(U(readiness))}${badge(U(fx.action(nd)))}${badge(bias)}</div></div>
+      ${sec('Decision truth', kv('Next focus', P(lc.next), ''))}`;
+    const summary = sec('Summary', `${kv('Market', marketLine(s), '')}<p class="sl-story">${esc(summaryText(def.kind, nd, s))}</p>`);
+    if (def.kind === 'longer') return `<section class="sl-card sf-card ${fTone(readiness)}">${head}${sec('Passive view', `${kv('Next focus', P(lc.next), '')}${kv('Market', marketLine(s), '')}<p class="sl-story">${esc(summaryText(def.kind, nd, s))}</p>`)}</section>`;
+    const position = sec('Position status', `<div class="sf-grid4">${kv('TP1', lc.tp1 ? 'OPEN' : 'OFF')}${kv('TP2', lc.tp2 ? 'OPEN' : 'OFF')}${kv('Runner', lc.runner ? 'ON' : 'OFF')}${kv('State', P(lc.state))}${kv('Signal', px(lc.signal), '')}${kv('Current', px(lc.current), '')}${kv('Remain', lc.remain == null ? '—' : `${Math.round(lc.remain)}%`, '')}${kv('Progress', lc.progress == null ? '—' : `${Math.round(lc.progress)}%`, '')}${kv('Move', px(lc.move), '')}</div>`);
+    const core = def.kind === 'scalp'
+      ? sec('Structure core', `<div class="sf-grid2">${kv('Context', P(e16.context))}${kv('State', P(e16.state))}${kv('Wave state', P(e16.waveContext?.waveState || e16.waveState))}${kv('Macro bias', P(e16.waveContext?.macroBias || e16.macroBias || 'NONE'))}</div>`)
+      : sec('Structure core', `<div class="sf-grid2">${kv('Primary phase', P(e16.primaryPhase))}${kv('Intermed. phase', P(e16.intermediatePhase))}${kv('Wave state', P(e16.waveState))}${kv('Macro bias', P(e16.macroBias || 'NONE'))}</div>`);
+    const decision = sec('Decision', `${kv('Next focus', P(lc.next), '')}<div class="sl-kv"><span>Fresh entry</span>${yesNo(e15.freshEntryNow === true)}</div>${kv('Exec bias', P(fx.execBias(nd)))}<div class="sl-kv"><span>Permission</span>${badge(U(nd.permission?.permission) || 'UNKNOWN')}</div>`);
+    const quality = sec('Quality', `${kv('Band', P(e15.qualityBand))}${kv('Score', n(e15.qualityScore) == null ? '—' : String(e15.qualityScore), '')}<div class="sl-kv"><span>Grade</span>${badge(U(e15.qualityGrade) || '—', '')}</div>`);
+    const side = def.kind === 'scalp'
+      ? sec('Trigger path', `${kv('Trigger cond.', P(scalpTrigger(e16)))}<div class="sf-sides"><div><b class="down">SHORT</b>${[['Wave prep', e16.waveShortPrep], ['Cont. watch', e16.continuationWatchShort], ['Cont. trigger', e16.continuationTriggerShort], ['Exhaust. early', e16.exhaustionEarlyShort], ['Exhaust. trigger', e16.exhaustionTriggerShort]].map(([k, v]) => `<div class="sl-kv"><span>${k}</span>${yesNo(v === true)}</div>`).join('')}</div><div><b class="up">LONG</b>${[['Wave prep', e16.waveLongPrep], ['Cont. watch', e16.continuationWatchLong], ['Cont. trigger', e16.continuationTriggerLong], ['Exhaust. early', e16.exhaustionEarlyLong], ['Exhaust. trigger', e16.exhaustionTriggerLong]].map(([k, v]) => `<div class="sl-kv"><span>${k}</span>${yesNo(v === true)}</div>`).join('')}</div></div>${e16.waveCountertrendCaution != null ? `<div class="sl-kv"><span>Countertrend</span>${badge(e16.waveCountertrendCaution ? 'CAUTION' : 'CLEAR', e16.waveCountertrendCaution ? 'yellow' : 'up')}</div>` : ''}`)
+      : sec('Structure status', `<div class="sl-kv"><span>Wave prep</span>${yesNo(e16.wavePrep === true)}</div>${kv('Corr. dir.', P(e16.correctionDirection))}${kv('Wave mode', P(e16.intermediateWaveMode || waveMode(e16)))}${kv('Exec engine', e16.skipped === true ? 'STRUCTURE MODE' : 'ACTIVE')}${kv('Trigger cond.', P(interTrigger(e16, readiness)))}`);
+    const why = sec('Why / trust', `<div class="sl-sub">Not ready because</div>${list(fx.reasons(nd))}<div class="sl-sub">Setup chain</div>${list(fx.chain(nd))}${def.kind === 'scalp' ? `<div class="sl-sub">Wave reason codes</div>${list(fx.waveCodes(nd))}` : ''}`);
+    return `<section class="sl-card sf-card ${fTone(readiness)}">${head}${position}${core}<div class="sf-two">${`<div>${decision}${quality}</div>`}<div>${side}</div></div><div class="sf-two"><div>${why}</div><div>${summary}</div></div></section>`;
+  }
+
+  function fullView(m) {
+    const s = m.s;
+    return `<div class="sl-status sf-status"><span>Market <b>${esc(marketLine(s))}</b></span><span>Backend snapshot <b>${esc(s?.now ? az(s.now) : '—')}</b></span><span class="sl-muted">Deeper strategy analysis: structure, trigger path and why/trust. Read only — readiness is not permission; Engine 6 decides.</span></div>
+      <div class="sf-cards">${FULL.map(d => fullCard(d, s)).join('')}</div>`;
+  }
+
   function page() {
     if (!ui.snap && !ui.loading) setTimeout(load, 0);
     const m = model();
     const status = `<div class="sl-status">${m ? '<span class="pill green">LIVE BACKEND</span>' : ui.failed ? '<span class="pill red">UNAVAILABLE</span>' : '<span class="pill gold">CONNECTING</span>'}<span>Symbol <b>ES</b></span><span>Refresh <b>60s</b></span><span>Fetched <b>${esc(ui.at ? az(ui.at) : '—')}</b></span><span>Backend snapshot <b>${esc(m?.s?.now ? az(m.s.now) : '—')}</b></span><span>Engine 27 built <b>${esc(m?.e27?.builtAt ? az(m.e27.builtAt) : '—')}</b></span></div>`;
     const top = head('STRATEGIES', 'Engine 22 wave degrees and Engine 27 trader intelligence in one synchronized strategy view. Structure, readiness, location and permission stay separate.', '', 'REDLINE / DECISION INTERFACE') + status;
     if (!m) return top + `<div class="ce-empty">${ui.failed ? 'The strategy snapshot is unavailable. Nothing is shown rather than demo data.' : 'Loading the live ES strategy snapshot…'}</div>`;
-    if (!m.work) return top + '<div class="ce-empty">Engine 27 working seven degrees is not published in this snapshot.</div>';
-    return top
+    const views = `<nav class="db-tabs sf-views" role="tablist" aria-label="Strategies view">${[['interface', 'Decision interface', 'E22 · E27 · E26 · E6'], ['full', 'Strategies full', 'Scalp · Swing · Longer-term']].map(([id, name, sub]) => `<button type="button" role="tab" data-sl-view="${id}" aria-selected="${ui.view === id}" class="${ui.view === id ? 'selected' : ''}"><small>${sub}</small>${name}</button>`).join('')}</nav>`;
+    if (ui.view === 'full') return top + views + fullView(m);
+    if (!m.work) return top + views + '<div class="ce-empty">Engine 27 working seven degrees is not published in this snapshot.</div>';
+    return top + views
       + `<div class="race-section-label"><span>ENGINE 22 · SEVEN WAVE DEGREES</span><small>OWNER WORKING COUNT · STRUCTURAL DISPLAY ONLY · NO EXECUTION PERMISSION</small></div>${ladder(m)}${degreeDetail(m)}`
       + `<div class="race-section-label"><span>ENGINE 27 · TRADER INTELLIGENCE</span><small>SEVEN CURRENT OWNER WORKING INTERPRETATIONS · ENGINE 22 AUTHORITY PRESERVED</small>${chip('READ ONLY')}${chip('7 DEGREES', 'gold')}${chip('NO EXECUTION', 'red')}</div>${intelligence(m)}`
       + `<div class="race-section-label"><span>SHARED MARKET CONFIRMATION</span><small>ES · QQQ · VIX · ENGINE 25 · ENGINE 29 · CONTEXT, NOT AUTHORIZATION</small></div>${shared(m)}`
@@ -213,6 +281,8 @@
   }
 
   document.addEventListener('click', ev => {
+    const v = ev.target.closest?.('[data-sl-view]');
+    if (v) { ui.view = v.dataset.slView; if (typeof render === 'function') render(); return; }
     const b = ev.target.closest?.('[data-sl-degree]'); if (!b) return;
     ui.degree = b.dataset.slDegree;
     if (typeof render === 'function') render();

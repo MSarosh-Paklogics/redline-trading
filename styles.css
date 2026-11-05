@@ -550,3 +550,22 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 }
 @keyframes hcShift{from{transform:translateX(var(--hc-step-px,9.4px))}to{transform:none}}
 @keyframes hcTick{0%{filter:drop-shadow(0 0 6px #fff200)}100%{filter:none}}
+/* Strategies Full view (strategies-live.js) */
+.sf-views{position:static;margin-bottom:16px}
+.sf-status{flex-wrap:wrap}.sf-status .sl-muted{margin:0}
+.sf-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;margin-bottom:24px}
+.sf-card{border-top:3px solid #3a3a3a}.sf-card.up{border-top-color:#009a4e}.sf-card.down{border-top-color:#ed1c24}.sf-card.yellow{border-top-color:#fff200}
+.sf-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.sf-head h3{margin:0;font:700 16px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:.4px;color:#fff;text-transform:uppercase}
+.sf-head small{font:9px Consolas,monospace;color:#8d8d92}
+.sf-badges{display:flex;flex-wrap:wrap;gap:5px}
+.sf-badge{display:inline-block;padding:3px 8px;border:1px solid #333;border-radius:3px;background:#141414;color:#ddd;font:700 9px Consolas,monospace;letter-spacing:.4px;white-space:nowrap}
+.sf-badge.up{border-color:#00592d;background:#00210f;color:#20c46e}.sf-badge.down{border-color:#7a1015;background:#2a0507;color:#ff5a60}.sf-badge.yellow{border-color:#5c5700;background:#1f1d00;color:#fff200}
+.sf-sec{margin-top:10px;padding-top:6px;border-top:1px solid #1e1e1e}
+.sf-grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.sf-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.sf-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 14px}
+.sf-sides{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;margin-top:6px}.sf-sides b{display:block;font:700 9px Consolas,monospace;letter-spacing:.6px;margin:4px 0}
+.sf-sides b.up{color:#009a4e}.sf-sides b.down{color:#ed1c24}
+@media(max-width:1300px){.sf-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.sf-cards,.sf-two,.sf-sides,.sf-grid4,.sf-grid2{grid-template-columns:1fr}}
