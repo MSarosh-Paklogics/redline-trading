@@ -101,7 +101,7 @@
       hourlyNhNl: hourlyFresh ? { nh: sum('nh'), nl: sum('nl') } : null,
       distributionDetail: {
         components: dist.structural4h?.components || {},
-        frames: ['structural4h', 'tactical1h', 'confirmation30m', 'acceleration10m'].map(k => ({ key: k, available: dist[k]?.available === true, pressure: dist[k]?.available === true ? n(dist[k]?.pressure) : null, label: dist[k]?.label || null, display: dist[k]?.display || null })),
+        frames: ['structural4h', 'tactical1h', 'confirmation30m', 'acceleration10m'].map(k => ({ key: k, available: dist[k]?.available === true, pressure: dist[k]?.available === true ? n(dist[k]?.pressure) : null, label: dist[k]?.label || null, display: dist[k]?.display || null, state: dist[k]?.trend?.state || dist[k]?.confirmation?.state || dist[k]?.acceleration?.state || null })),
         history: dist.history || {}
       },
       briefs: { current: e25?.redlineCurrentMarketBrief?.paragraphs || [], intraday: e25?.redlineIntradayBrief?.paragraphs || [] },
@@ -116,6 +116,11 @@
       trend: (e25?.overlay?.rows || []).map(r => ({ date: r.date, score: n(r.engine25CompositeScore) })).filter(r => r.score != null),
       zonePriority: e25?.zoneDecisionRead?.priorityRead || null,
       nearestZone: e25?.zoneRead?.nearestZone?.id || null,
+      zonePlain: e25?.zoneRead?.plainEnglish || null,
+      zoneState: e25?.zoneDecisionRead?.label || null,
+      zoneAccumulation: e25?.zoneClassification?.accumulationRead?.state || null,
+      zoneDistribution: e25?.zoneClassification?.distributionRead?.state || null,
+      changeInterpretation: e25?.underTheHood?.interpretation || null,
       newsEvents: Array.isArray(e25?.newsEvents?.activeMaterialEvents) ? e25.newsEvents.activeMaterialEvents : [],
       newsOk: e25?.newsEvents?.ok !== false,
       freshness: artifact.freshness || {}

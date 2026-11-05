@@ -34,6 +34,15 @@
     return `${L(row.label)} changed ${v > 0 ? '+' : ''}${v} from yesterday.`;
   }
 
+  // Distribution frame read, MIRRORED from Frye distributionStateText (Engine25MarketXrayPreview.jsx).
+  const DIST_STATE = { BUYING_RECOVERY_CONFIRMED: 'BUYING RECOVERY', BUYING_RECOVERY_PENDING: 'BUYING RECOVERY — PENDING', SELLING_PRESSURE_CONFIRMED: 'SELLING PRESSURE', SELLING_PRESSURE_PENDING: 'SELLING PRESSURE — PENDING', FAST_BUYING_RECOVERY_CONFIRMED: 'FAST IMPROVEMENT', FAST_BUYING_RECOVERY_PENDING: 'FAST IMPROVEMENT — PENDING', FAST_SELLING_ACCELERATION_CONFIRMED: 'FAST SELLING', FAST_SELLING_ACCELERATION_PENDING: 'FAST SELLING — PENDING', NO_MATERIAL_CHANGE: 'NO MATERIAL CHANGE', NONE: 'NO MATERIAL CHANGE' };
+  const distRead = fr => {
+    const lastValid = fr.display?.lastValidEquityRead?.pressure ?? fr.display?.pressure;
+    if (!fr.available) return n(lastValid) != null ? 'LAST VALID EQUITY READ' : 'UNAVAILABLE';
+    const s = String(fr.state || '').toUpperCase();
+    return s ? DIST_STATE[s] || L(s) : L(fr.label);
+  };
+
   function trendChart(rows) {
     if (rows.length < 2) return '<p class="xr-muted">Historical trend unavailable.</p>';
     const W = 600, H = 150, xs = i => i / (rows.length - 1) * W, ys = v => H - v / 100 * H;
@@ -80,7 +89,7 @@
       ${panel('Selling / distribution pressure', body(`
         ${note('4H owns the structural pressure score. 1H shows direction, 30m confirms transitions and 10m flags acceleration.')}
         ${kv('Breadth pressure — 4H', comp.breadthPressure == null ? '—' : `${f(comp.breadthPressure)} / 100`)}${kv('Volume pressure — 4H', comp.volumePressure == null ? '—' : `${f(comp.volumePressure)} / 100`)}${kv('NH/NL pressure — 4H', comp.highLowPressure == null ? '—' : `${f(comp.highLowPressure)} / 100`)}${kv('Sector pressure — 4H', comp.sectorPressure == null ? '—' : `${f(comp.sectorPressure)} / 100`)}
-        <div class="table-wrap"><table><thead><tr><th>Frame</th><th>Role</th><th>Pressure</th><th>Read</th><th>Prior → current</th></tr></thead><tbody>${(dd.frames || []).map(fr => { const [tf, role, desc] = frameName[fr.key]; const p = prior(fr.key); const lastValid = fr.display?.lastValidEquityRead?.pressure ?? fr.display?.pressure; return `<tr><td>${tf}</td><td title="${esc(desc)}">${role}</td><td class="number">${fr.pressure == null ? '—' : f(fr.pressure, 1)}</td><td class="${tone(fr.label)}">${esc(L(fr.available ? fr.label : 'UNAVAILABLE'))}</td><td>${fr.pressure != null && p != null ? `${f(p, 1)} → ${f(fr.pressure, 1)} · ${signed(fr.pressure - p)} ${fr.pressure >= p ? 'more' : 'less'} selling` : !fr.available && n(lastValid) != null ? `Last valid ${f(lastValid, 1)}` : '—'}</td></tr>`; }).join('')}</tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Frame</th><th>Role</th><th>Pressure</th><th>Read</th><th>Prior → current</th></tr></thead><tbody>${(dd.frames || []).map(fr => { const [tf, role, desc] = frameName[fr.key]; const p = prior(fr.key); const lastValid = fr.display?.lastValidEquityRead?.pressure ?? fr.display?.pressure; return `<tr><td>${tf}</td><td title="${esc(desc)}">${role}</td><td class="number">${fr.pressure == null ? '—' : f(fr.pressure, 1)}</td><td class="${tone(distRead(fr))}">${esc(distRead(fr))}</td><td>${fr.pressure != null && p != null ? `${f(p, 1)} → ${f(fr.pressure, 1)} · ${signed(fr.pressure - p)} ${fr.pressure >= p ? 'more' : 'less'} selling` : !fr.available && n(lastValid) != null ? `Last valid ${f(lastValid, 1)}` : '—'}</td></tr>`; }).join('')}</tbody></table></div>
         ${kv('Distribution pressure', x.distribution?.raw == null ? '—' : `${f(x.distribution.raw)} / 100 · ${L(x.distribution.label)}`, tone(x.distribution?.label))}
       `))}
       ${panel('Index vs broader market', body(`
@@ -102,13 +111,18 @@
 
     <div class="grid cols-3">
       ${panel('Market leadership — new highs vs new lows', body(`${kv('New highs', f(x.hourlyNhNl?.nh), 'up')}${kv('New lows', f(x.hourlyNhNl?.nl), 'down')}${kv('Net new highs / lows', signed(x.nhnl?.intradayNetHighsLows, 0), n(x.nhnl?.intradayNetHighsLows) < 0 ? 'down' : 'up')}`))}
-      ${panel('Active event risk', body(x.newsEvents.length ? x.newsEvents.slice(0, 3).map(e => `<div class="notice">${esc(e.headline || e.title || e.summary || L(e.category))}</div>`).join('') : `<p class="xr-muted">${x.newsOk ? 'No active material Engine 25 event found.' : 'News feed unavailable.'}</p>`))}
-      ${panel('Price support / selling pressure', body(`${note(x.zonePriority)}${kv('Nearest zone', x.nearestZone || '—')}`), btn('Open price context on chart', 'workspace', false, 'arrow'))}
+      ${panel('Active event risk', body(`${note('Only material events that can meaningfully affect market risk belong here.')}${(() => {
+        // Same as Frye: the first active material Engine 25 event.
+        const ev = x.newsEvents[0];
+        if (!ev) return `<p class="xr-muted">${x.newsOk ? 'No active material Engine 25 event found.' : 'News feed unavailable.'}</p>`;
+        return `<div class="xr-event-type">${E(ev.eventType || ev.headlineSummary)}</div><p class="xr-para">${esc(ev.headlineSummary || 'Material event active.')}</p><div class="xr-event-tags"><span class="pill red">${E(ev.severity)}</span><span class="pill gold">${ev.material ? 'MATERIAL' : 'CONTEXT'}</span>${ev.primaryEntity ? `<span class="pill neutral">${E(ev.primaryEntity)}</span>` : ''}</div>`;
+      })()}`))}
+      ${panel('Price support / selling pressure', body(`${note('Connects market health to the ES price area currently being tested.')}<p class="xr-para">${esc(x.zonePriority || x.zonePlain || 'Price / zone context unavailable.')}</p>${kv('Zone state', L(x.zoneState), tone(x.zoneState))}${kv('Nearest zone', x.nearestZone || '—')}${kv('Buying support', L(x.zoneAccumulation), 'yellow')}${kv('Distribution in zone', L(x.zoneDistribution), 'down')}`), btn('Open price context on chart', 'workspace', false, 'arrow'))}
     </div>
 
     <div class="grid cols-main">
       ${panel('Market health trend — 6 months', body(trendChart(x.trend || [])))}
-      ${panel('What changed since yesterday?', body(`${(x.changes || []).filter(r => ['Breadth', 'Distribution', 'Credit Fragility', 'Macro Aware'].includes(r.label)).map(changeSentence).filter(Boolean).map(s => `<div class="kv"><span>${esc(s)}</span></div>`).join('') || '<p class="xr-muted">Comparison unavailable.</p>'}`))}
+      ${panel('What changed since yesterday?', body(`${(x.changes || []).filter(r => ['Breadth', 'Distribution', 'Credit Fragility', 'Macro Aware'].includes(r.label)).map(changeSentence).filter(Boolean).map(s => `<div class="kv"><span>${esc(s)}</span></div>`).join('') || '<p class="xr-muted">Comparison unavailable.</p>'}${note(x.changeInterpretation || 'No comparison interpretation available.')}`))}
     </div>
 
     ${panel('Data confidence & Engine 25 detail', body(`${kv('Scanner status', x.dataStatus, tone(x.dataStatus))}${kv('Volume coverage', pct(hb.coverage, 1))}${kv('Source time', x.freshness?.intraday?.sourceTimestamp || '—')}${note(x.deskNote)}`))}`;
@@ -134,10 +148,28 @@
   const TREND = v => { const s = String(v || '').toUpperCase(); return s.startsWith('WAIT_') ? `WAIT — ${s.slice(5).replace(/_/g, ' ')}` : L(s); };
   const tone29 = v => { const s = String(v || '').toUpperCase().replace(/_/g, ' '); return /FAILED|SYSTEMIC|RISK OFF|BREAKING|CONFIRMED BREAK|SELLOFF|NEGATIVE|OPPOSES/.test(s) ? 'down' : /BROAD DETERIORATION|STRESS CONFIRMED|STRESS BUILDING|WEAKENING|FADING|COUNTERTREND|TRAP WATCH|SEVERE|STRONG DOWNWARD|VERY HIGH/.test(s) ? 'orange' : /CAUTION|FORMING|WARNING|STABILIZING|MIXED|WAIT|MISSING|PARTIAL|NARROW|BUILDING|RISING/.test(s) ? 'yellow' : /HEALTHY|RECOVERING|POSITIVE|ACCELERATING|HOLDING|SUPPORTS|CONFIRMED/.test(s) ? 'up' : /SWEEP|RECLAIM/.test(s) ? 'cyan' : ''; };
 
+  // Engine 29 move / trap wording, MIRRORED from Frye Engine29FullDashboard.jsx (plainContext,
+  // plainSqueezeCampaign, plainTrapNeed) and engine29MoveV2ViewModel.js (parent move state).
+  const CONTEXT = { COUNTERTREND_TO_PARENT: 'COUNTERTREND TO 30M PARENT', ALIGNED_WITH_PARENT: 'ALIGNED WITH 30M PARENT', NO_ACTIVE_PARENT: 'NO ACTIVE 30M PARENT', COUNTERTREND_TO_30M: 'COUNTERTREND TO 30M', ALIGNED_WITH_30M: 'ALIGNED WITH 30M', FAST_NEUTRAL: '30M NEUTRAL', NO_LIVE_DIRECTION: 'NO LIVE DIRECTION' };
+  const TRAP_NEED = { COMPLETED_30M_FAILED_ACCEPTANCE_NOT_CONFIRMED: 'Completed 30m failed acceptance', '30M_1H_MOMENTUM_REPAIR_NOT_CONFIRMED': '30m / 1H momentum repair', MACRO_LOCATION_NOT_HIGH_QUALITY: 'Higher-quality macro location', ENGINE25_PRIMARY_PARTICIPATION_UNAVAILABLE: 'Engine25 participation data', ENGINE25_PRIMARY_PARTICIPATION_OPPOSES_TRAP: 'Engine25 participation must stop opposing the trap', ENGINE25_PRIMARY_PARTICIPATION_NOT_CONFIRMED: 'Engine25 breadth + volume confirmation', ENGINE29_SECONDARY_CONFIRMATION_OPPOSES_TRAP: 'Engine29 secondary evidence must stop opposing the trap', ENGINE29_SECONDARY_CONFIRMATION_NOT_CONFIRMED: 'Engine29 leadership / credit / financial confirmation' };
+  const squeezeText = c => { const s = String(c?.state || 'NO_ACTIVE_SQUEEZE').toUpperCase(); if (s === 'NO_ACTIVE_SQUEEZE') return 'NO ACTIVE SQUEEZE'; const d = String(c?.direction || '').toUpperCase(); return `${d === 'UP' || d === 'DOWN' ? d + ' — ' : ''}${L(s)}`; };
+  const parentMove = p => !p ? 'NO ACTIVE MOVE' : p.active === true && p.direction === 'UP' ? 'UPSIDE MOVE ACTIVE' : p.active === true && p.direction === 'DOWN' ? 'DOWNSIDE MOVE ACTIVE' : 'NO ACTIVE MOVE';
+  const pctMove = v => n(v) == null ? '—' : `${n(v) > 0 ? '+' : n(v) < 0 ? '-' : ''}${Math.abs(n(v)).toFixed(2)}%`;
+
   function engine29(x) {
     const e = x.e29; if (!e) return '';
     const d = e.display || {}, w = d.oneWeek || {}, ep = w.esPriceAction || {}, sp = w.structuralParticipation || {}, lm = d.liveMonitor || {}, lmFull = e.liveMonitor || {}, mc = d.marketCharacter || {}, mv = mc.move || {}, liq = mc.liquidity || {}, trap = mc.trap || {}, uth = d.underTheHood || {};
     const moves = Object.entries(lmFull.symbolMoves || {}).filter(([, v]) => v?.available);
+    // Frye reads the top-level marketCharacter / trapDetection first, then the display copy.
+    const mcTop = e.marketCharacter || mc, mvTop = mcTop.move || mv, liqTop = mcTop.liquidity || liq, trapTop = mcTop.trap || trap;
+    const live = mvTop.liveCondition || lm, metrics = live.metrics || lmFull.metrics || {}, squeeze = mcTop.squeezeCampaign || {};
+    const td = e.trapDetection || {}, auction = td.auctionEvent || {}, prim = td.participation?.primary || {}, secd = td.participation?.secondary || {};
+    const primaryRead = prim.primaryParticipationSupportsTrap ? 'SUPPORTS' : prim.primaryParticipationOpposesTrap ? 'OPPOSES' : prim.available ? 'NEUTRAL' : 'UNAVAILABLE';
+    const secondaryRead = secd.secondarySupportsTrap ? 'SUPPORTS' : secd.secondaryOpposesTrap ? 'OPPOSES' : 'NEUTRAL';
+    const liqState = String(liqTop.state || 'NO_LIQUIDITY_EVENT');
+    const liqNext = liqState === 'NO_LIQUIDITY_EVENT' ? 'Waiting for meaningful liquidity interaction' : liqState.startsWith('TEST_') ? 'Watch for a meaningful sweep or rejection' : liqState.startsWith('SWEEP_') ? 'Watch for reclaim / failed acceptance' : 'Watch whether the auction holds or fails';
+    const needs = (trapTop.confirmationBlockedBy || []).map(c => TRAP_NEED[String(c).toUpperCase()] || L(c));
+    const metricItems = [['Headline 10m', metrics.headline?.move10], ['Headline 20m', metrics.headline?.move20], ['Breadth 10m', metrics.breadth?.move10], ['Breadth 20m', metrics.breadth?.move20], ['Leadership 10m', metrics.leadership?.move10], ['Credit 10m', metrics.credit?.move10], ['Financials 10m', metrics.financials?.move10], ['VIX 10m', metrics.vix?.move10]];
     const groupRows = [['headlineIndex', 'Indexes', 'largeIndexes'], ['breadth', 'Breadth', 'breadth'], ['leadership', 'Leadership', 'techLeadership'], ['credit', 'Credit', 'credit'], ['ratesDuration', 'Rates', 'ratesBonds'], ['energyInflation', 'Energy', 'oil'], ['volatility', 'Volatility', 'volatility'], ['financialConditions', 'Financials', 'financialConditions']];
     return `
     <div class="race-section-label"><span>ENGINE 29 · MARKET CHARACTER</span><small>WHAT KIND OF MOVE IS HAPPENING RIGHT NOW? · ${esc(when(e.timestamp))}${e.dataDegraded ? ' · DATA DEGRADED' : ''} · ES ${esc(e.esResolvedSymbol || '')}</small></div>
@@ -146,16 +178,16 @@
     <div class="notice">Weekly ES read uses recent current-contract candles only; it is not long-term continuous-contract authority.</div>
     <div class="grid cols-2">
       ${panel('30m fast shift · ES parent move', body(`${kv('30m fast shift', L(d.thirtyMinute?.state), tone(d.thirtyMinute?.state))}${kv('ES parent move', L(d.thirtyMinute?.status))}${note(d.thirtyMinute?.summary)}`))}
-      ${panel('10m live condition — 20m diagnostic', body(`${kv('State', L(lm.state), tone(lm.direction))}${kv('Direction', L(lm.direction), tone(lm.direction))}${kv('Participation', L(lm.participation))}${kv('10m/20m vs parent', L(lm.contextVsParent))}${kv('30m parent', `${L(lm.parent30mState)} · ${L(lm.parent30mDirection)}`)}${kv('Authority', L(lm.authority))}${note(lm.headline)}`))}
+      ${panel('10m live condition — 20m diagnostic', body(`<div class="xr-live-state ${tone29(live.state)}">${E(live.state || lm.state)}</div>${kv('Squeeze v2', squeezeText(squeeze))}${kv('Participation', L(live.participation || lm.participation))}${kv('10m/20m vs parent', CONTEXT[String(live.contextVsParent || lm.contextVsParent || '').toUpperCase()] || L(live.contextVsParent || lm.contextVsParent))}${kv('30m parent move', parentMove(mvTop.parent), tone(parentMove(mvTop.parent)))}${kv('Authority', 'DIAGNOSTIC ONLY')}<div class="xr-metrics">${metricItems.map(([k, v]) => `<div><small>${esc(k)}</small><b class="${n(v) == null ? '' : n(v) < 0 ? 'down' : n(v) > 0 ? 'up' : ''}">${pctMove(v)}</b></div>`).join('')}</div>`))}
     </div>
     <div class="grid cols-2">
       ${panel('Live moves — 10m / 20m', body(moves.length ? `<div class="table-wrap"><table><thead><tr><th>Symbol</th><th>10m</th><th>20m</th><th>Last</th></tr></thead><tbody>${moves.map(([s, v]) => `<tr><td>${esc(s)}</td><td class="number ${n(v.move10) < 0 ? 'down' : 'up'}">${signed(v.move10, 2, '%')}</td><td class="number ${n(v.move20) < 0 ? 'down' : 'up'}">${signed(v.move20, 2, '%')}</td><td class="number">${f(v.latestClose, 2)}</td></tr>`).join('')}</tbody></table></div>` : '<p class="xr-muted">Live moves unavailable.</p>'))}
       ${panel('Why this state?', body((lm.why || []).length ? `<ul class="xr-why">${lm.why.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : '<p class="xr-muted">No explanation published.</p>'))}
     </div>
     <div class="grid cols-3">
-      ${panel('Liquidity', body(`${kv('State', L(liq.state))}${kv('Level', liq.level ?? '—')}${kv('Side', L(liq.side))}${kv('Auction', L(liq.auctionResult))}${kv('Reclaim', liq.reclaimObserved ? 'YES' : 'NO')}`))}
-      ${panel('Move authority', body(`${kv('Parent', mv.parent?.active ? 'ACTIVE' : 'NO ACTIVE MOVE')}${kv('Parent direction', L(mv.parent?.direction))}${kv('Move character', L(mv.character || mv.moveCharacter))}${kv('Live condition', L(mv.liveCondition))}${kv('Fast state', L(mv.fastState))}${kv('Underlying pressure', L(uth.pressure?.state), tone(uth.pressure?.state))}`))}
-      ${panel('Trap detection', body(`${kv('State', L(trap.state))}${kv('Side', L(trap.side))}${kv('Location quality', L(trap.locationQuality))}${kv('Confirmation', L(trap.confirmationQuality))}${kv('Blocked by', (trap.confirmationBlockedBy || []).length ? trap.confirmationBlockedBy.join(', ') : '—')}`))}
+      ${panel('Liquidity', body(`<div class="xr-live-state ${tone29(liqState)}">${E(liqState)}</div>${kv('Level', n(liqTop.level?.boundary) == null ? '—' : f(liqTop.level.boundary, 2))}${kv('Type', L(liqTop.level?.type))}${kv('Significance', L(liqTop.level?.significance))}${kv('Auction', L(liqTop.auctionResult))}${kv('Sweep amount', n(liqTop.sweep?.excursionPoints) == null ? '—' : `${f(liqTop.sweep.excursionPoints, 2)} pts`)}${kv('Reclaim', liqTop.reclaimObserved ? 'YES' : 'NO', liqTop.reclaimObserved ? 'up' : '')}${note(`Next: ${liqNext}`)}`))}
+      ${panel('Move authority', body(`<div class="xr-live-state ${tone(parentMove(mvTop.parent))}">${esc(parentMove(mvTop.parent))}</div>${kv('Parent direction', L(mvTop.parent?.direction))}${kv('Parent source', mvTop.parent ? 'marketCharacter.move.parent' : 'legacy fallback')}${kv('Move character', L(mvTop.character?.type || 'NONE'))}${kv('Squeeze v2 campaign', squeezeText(squeeze))}${kv('Legacy squeeze character', mvTop.character?.squeeze?.active ? `${L(mvTop.character.squeeze.direction)} POSSIBLE SQUEEZE` : 'NO ACTIVE SQUEEZE')}${kv('Broad confirmation', L(mvTop.character?.broadConfirmation?.state))}${kv('Broad target direction', L(mvTop.character?.broadConfirmation?.targetDirection))}${kv('Live condition', L(live.state))}${kv('30m fast pressure', L(d.thirtyMinute?.state))}${kv('Underlying pressure', L(e.moveCharacter?.underlyingPressure?.state || uth.pressure?.state), tone(uth.pressure?.state))}`))}
+      ${panel('Trap detection', body(`<div class="xr-live-state ${tone29(trapTop.state)}">${E(trapTop.state || 'NO_ACTIVE_TRAP')} <span class="pill ${trapTop.side === 'BEAR' ? 'green' : trapTop.side === 'BULL' ? 'red' : 'neutral'}">${E(trapTop.side || 'NONE')}</span></div>${kv('Swept level', n(auction.liquidityLevel?.boundary) == null ? '—' : f(auction.liquidityLevel.boundary, 2))}${kv('Failed acceptance', auction.failedAcceptance ? 'YES' : 'NO', auction.failedAcceptance ? 'up' : '')}${kv('Reclaim / rejection', auction.reclaimObserved ? 'SEEN' : 'NOT CONFIRMED')}${kv('30m failed hold', auction.acceptance30m?.failedHold ? 'YES' : 'NO')}${kv('Momentum repair', L(td.momentumRepair?.state))}${kv('Engine25 participation', primaryRead, tone29(primaryRead))}${kv('Engine29 secondary', secondaryRead, tone29(secondaryRead))}${note(`Still needs: ${needs.length ? needs.join(' · ') : trapTop.state === 'TRAP_CONFIRMED' ? 'Nothing — confirmed' : 'No active trap requirements'}`)}`))}
     </div>
     ${panel('Market internals map', body(`<div class="table-wrap"><table><thead><tr><th>Internal</th><th>State</th><th>1W</th><th>1H</th><th>30m</th><th>Now</th></tr></thead><tbody>${groupRows.map(([g, label, now]) => { const gr = e.groups?.[g] || {}; const cell = v => `<td class="${tone29(v)}">${esc(v || '—')}</td>`; const w1 = GROUP_LABEL(g, gr.structural?.state); return `<tr><td>${label}</td>${cell(w1 || uth[now])}${cell(w1)}${cell(GROUP_LABEL(g, gr.tactical?.state))}${cell(GROUP_LABEL(g, gr.fastTactical?.state))}${cell(uth[now])}</tr>`; }).join('')}</tbody></table></div>`), btn('Open strategies / Engine 26 planner', 'strategies', false, 'arrow'))}`;
   }

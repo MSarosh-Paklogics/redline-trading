@@ -527,3 +527,15 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 @keyframes hcLast{0%,100%{opacity:1}50%{opacity:.45}}
 @keyframes hcDash{to{stroke-dashoffset:-8}}
 @media(max-width:700px){.hc-svg{opacity:.3}.hc-tag{display:none}}
+/* Engine 25/29 parity panels (xray-sections.js) */
+.xr-live-state{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;font:650 18px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:.3px}
+.xr-live-state.up{color:#009a4e}.xr-live-state.down{color:#ed1c24}.xr-live-state.yellow{color:#fff200}
+.xr-live-state .pill{font-size:9px}
+.xr-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
+.xr-metrics>div{padding:7px 8px;border:1px solid #242424;border-radius:3px;background:#0b0b0b}
+.xr-metrics small{display:block;font:8px Consolas,monospace;color:#8d8d92;text-transform:uppercase;letter-spacing:.4px}
+.xr-metrics b{display:block;margin-top:3px;font:650 13px Bahnschrift,'Arial Narrow',sans-serif}
+.xr-metrics b.up{color:#009a4e}.xr-metrics b.down{color:#ed1c24}
+.xr-event-type{font:650 19px Bahnschrift,'Arial Narrow',sans-serif;color:#fff;margin:4px 0 6px}
+.xr-event-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+@media(max-width:700px){.xr-metrics{grid-template-columns:1fr 1fr}}
