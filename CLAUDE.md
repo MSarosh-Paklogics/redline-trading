@@ -59,7 +59,7 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `app.js` | Core app, hash router (`#/overview`, `#/chart`, `#/signals`, `#/sectors`, `#/xray`, `#/strategies`, `#/journal`, `#/settings`, …), demo fixtures |
 | `engines.js` | Engine Room / reference-aware engine views |
 | `market-xray.js` | Loads the live Engine 25 Market X-Ray + Engine 29 model (`window.redlineXray.model`), mirroring Frye `src/pages/engine25/Engine25MarketXrayPreview.jsx`. Display only, no markup. |
-| `hero-candles.js` | Live ES 10m candlestick backdrop in the dashboard hero (wraps `raceHero`), from the live bar cache or `futuresOhlc`; draws nothing without real bars; refreshes the backdrop only, every 60 s |
+| `hero-candles.js` | Live ES 10m candlestick backdrop in the dashboard hero (wraps `raceHero`): `futuresOhlc` history + Backend 2 SSE ticks (5 s poll fallback); newest candle and price line move in place, new bars slide in; draws nothing without real bars |
 | `xray-sections.js` | Rest of the Frye X-Ray + Engine 29 page (meters, participation, distribution, briefing, sectors, macro, trend, internals map) drawn with `panel()`/`stat()`; called from corsa.js |
 | `corsa.js` | Redline's own car-style first page and meters (hero, speedometer gauges, stat cards); reads `window.redlineXray.model`, falls back to labelled fixtures |
 | `chart-engines.js` | Chart terminal engine read (`window.redlineChart`): Engine 17 pills, Engine 22 degree tabs, trade context, 26A/27/6, stage timeline, market context, E3/E4, SPY acc/dist levels; mirrors Frye `RowChart` (Engine17Badges / Engine17DecisionTimeline) |

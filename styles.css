@@ -539,3 +539,14 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .xr-event-type{font:650 19px Bahnschrift,'Arial Narrow',sans-serif;color:#fff;margin:4px 0 6px}
 .xr-event-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 @media(max-width:700px){.xr-metrics{grid-template-columns:1fr 1fr}}
+/* Hero candles: live motion */
+.hc-c rect{transition:y .45s cubic-bezier(.2,.8,.2,1),height .45s cubic-bezier(.2,.8,.2,1),fill .3s}
+.hc-c line{transition:stroke .3s}
+.hc-price{transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduced) .hc-shift .hc-track{animation:hcShift .7s cubic-bezier(.2,.8,.2,1) both}
+  body:not(.reduced) .hc-shift .hc-c.last{transform-box:fill-box;transform-origin:50% 100%;animation:hcRise .6s .25s cubic-bezier(.2,.8,.2,1) both}
+  body:not(.reduced) .hc-c.last.hc-tick rect{animation:hcTick .6s ease-out}
+}
+@keyframes hcShift{from{transform:translateX(var(--hc-step-px,9.4px))}to{transform:none}}
+@keyframes hcTick{0%{filter:drop-shadow(0 0 6px #fff200)}100%{filter:none}}
