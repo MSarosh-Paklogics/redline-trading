@@ -671,3 +671,8 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .race-hero>.hero-ai>i{display:block;width:44px;height:1px;background:linear-gradient(90deg,transparent,#ed1c24 60%,#fff200)}
 .race-hero>.hero-ai>i:last-child{background:linear-gradient(90deg,#fff200,#ed1c24 40%,transparent)}
 @media(max-width:700px){.race-hero>.hero-ai{letter-spacing:3px;font-size:8.5px}.race-hero>.hero-ai>i{width:24px}}
+/* Hero video: let the car show through (left side stays dark for the copy) */
+.race-hero>.hero-video video{filter:saturate(1.1) contrast(1.05) brightness(.92)}
+.race-hero>.hero-video:after{background:linear-gradient(90deg,#000000eb 0%,#000000b3 30%,#00000033 58%,#00000000 78%),linear-gradient(0deg,#00000099,transparent 40%)}
+.race-hero:has(.hero-video.ready) .hc-svg{opacity:.18}
+.race-hero:has(.hero-video.ready) .race-hero-word{opacity:.35}
