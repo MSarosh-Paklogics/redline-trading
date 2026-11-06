@@ -372,8 +372,8 @@ body{background:#000}
   /* hero: slow light sweep across the red panel */
   body:not(.reduced) .race-hero{overflow:hidden}
   body:not(.reduced) .race-hero>.mp-sheen{position:absolute;width:35%;left:-40%;background:linear-gradient(100deg,transparent,#ffffff0d 45%,#ed1c2414 55%,transparent);transform:skewX(-18deg);animation:mpSheen 7s ease-in-out 1.2s infinite;pointer-events:none;z-index:0;top:0;bottom:0}
-  body:not(.reduced) .race-hero h1{animation:mpTitle .9s cubic-bezier(.2,.8,.2,1) both}
-  body:not(.reduced) .race-hero h1>span{animation:mpTitle .9s .12s cubic-bezier(.2,.8,.2,1) both}
+  body.mp-entering:not(.reduced) .race-hero h1{animation:mpTitle .9s cubic-bezier(.2,.8,.2,1) both}
+  body.mp-entering:not(.reduced) .race-hero h1>span{animation:mpTitle .9s .12s cubic-bezier(.2,.8,.2,1) both}
   /* AI badge: subtle glow pulse */
   body:not(.reduced) .ai-badge{animation:mpGlow 3.2s ease-in-out infinite}
   /* strategy chain arrows travel */
@@ -425,7 +425,7 @@ body.reduced .mp-reveal,body.reduced .mp-row{animation:none!important;opacity:1;
 @media (prefers-reduced-motion: no-preference){
   /* hero: red→yellow light that travels along the bottom edge */
   body.race-dashboard:not(.reduced) .race-hero{box-shadow:none}
-  body.race-dashboard:not(.reduced) .race-hero h1>span{background:linear-gradient(90deg,#ed1c24 0%,#ed1c24 40%,#fff200 50%,#ed1c24 60%,#ed1c24 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mpTitle .9s .12s cubic-bezier(.2,.8,.2,1) both,mpTextSweep 5.5s linear 1.4s infinite}
+  body.race-dashboard:not(.reduced) .race-hero h1>span{background:linear-gradient(90deg,#ed1c24 0%,#ed1c24 40%,#fff200 50%,#ed1c24 60%,#ed1c24 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mpTextSweep 5.5s linear 1.4s infinite}
   body.race-dashboard:not(.reduced) .race-hero:after{background:linear-gradient(90deg,transparent,#ed1c24,#fff200,#ed1c24,transparent);background-size:50% 100%;background-repeat:no-repeat;top:auto;bottom:0;left:0;right:0;width:auto;height:2px;z-index:1;animation:mpEdge 4.5s linear infinite}
   /* signal board header: underline that cycles red ↔ yellow */
   body.race-dashboard:not(.reduced) .race-section-label>span:first-child:before{animation:mpMarker 2.6s ease-in-out infinite}
@@ -576,3 +576,15 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 @media (prefers-reduced-motion: no-preference){body:not(.reduced) .race-hero>.hero-ai{animation:mpGlow 3.2s ease-in-out infinite}body:not(.reduced) .race-hero>.hero-ai svg{animation:aiPulse 2.4s ease-in-out infinite}}
 @media(max-width:1100px){.race-hero>.hero-ai{font-size:14px;padding:9px 14px}}
 @media(max-width:700px){.race-hero>.hero-ai{position:relative;left:auto;top:auto;transform:none;margin:0 0 14px;font-size:12px}}
+/* Hero AI tag — refined (replaces the large red badge above) */
+.race-hero>.hero-ai{top:22px;transform:translateX(-50%);gap:8px;padding:7px 16px 7px 12px;border:1px solid transparent;border-radius:999px;background:linear-gradient(#0b0b0bd9,#0b0b0bd9) padding-box,linear-gradient(90deg,#ed1c24,#fff200 50%,#ed1c24) border-box;color:#f2f2f2;font:700 10px/1 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:3px;box-shadow:0 4px 18px #0008;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-rendering:geometricPrecision}
+.race-hero>.hero-ai b{color:#fff200;font-weight:800}
+.race-hero>.hero-ai svg{color:#fff200;filter:none}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduced) .race-hero>.hero-ai{animation:heroAiBorder 6s linear infinite;background-size:auto,200% 100%}
+  body:not(.reduced) .race-hero>.hero-ai svg{animation:aiPulse 2.4s ease-in-out infinite}
+}
+@keyframes heroAiIn{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translateX(-50%)}}
+@keyframes heroAiBorder{from{background-position:0 0,0 0}to{background-position:0 0,200% 0}}
+@media(max-width:1100px){.race-hero>.hero-ai{font-size:9px;letter-spacing:2px;padding:6px 12px 6px 10px}}
+@media(max-width:700px){.race-hero>.hero-ai{position:relative;left:auto;top:auto;transform:none;margin:0 0 12px;animation:none}}
