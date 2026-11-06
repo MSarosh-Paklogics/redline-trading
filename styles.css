@@ -588,3 +588,10 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 @keyframes heroAiBorder{from{background-position:0 0,0 0}to{background-position:0 0,200% 0}}
 @media(max-width:1100px){.race-hero>.hero-ai{font-size:9px;letter-spacing:2px;padding:6px 12px 6px 10px}}
 @media(max-width:700px){.race-hero>.hero-ai{position:relative;left:auto;top:auto;transform:none;margin:0 0 12px;animation:none}}
+/* Hero background video (hero-video.js) — darkened, behind copy and candles */
+.race-hero>.hero-video{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+.race-hero>.hero-video.ready{opacity:1}
+.race-hero>.hero-video video{width:100%;height:100%;object-fit:cover;object-position:60% 55%;filter:saturate(1.15) contrast(1.05) brightness(.55)}
+.race-hero>.hero-video:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#000000f2 0%,#000000c7 34%,#0000006b 62%,#00000040 100%),linear-gradient(0deg,#000000b3,transparent 45%)}
+.race-hero>.hero-candles{z-index:1}
+@media(max-width:700px){.race-hero>.hero-video:after{background:linear-gradient(0deg,#000000e6,#00000080)}}
