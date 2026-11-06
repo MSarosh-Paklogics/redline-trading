@@ -651,3 +651,11 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 @keyframes ccBlink{50%{opacity:.55}}
 @media(max-width:1250px){.cc-dash{grid-template-columns:1fr 1fr 1fr;border-radius:40px 40px 18px 18px}.cc-tft{order:4}.cc-nav{order:5}.cc-tft,.cc-nav{grid-column:span 1}.cc-note{order:6}}
 @media(max-width:800px){.cc-dash{grid-template-columns:1fr 1fr;padding:18px 12px 12px;border-radius:24px}.cc-center{order:3;grid-column:1/-1;flex-direction:row;justify-content:center;flex-wrap:wrap}.cc-tft,.cc-nav{grid-column:1/-1}}
+/* All race meters now use the supercar dial (raceGauge in corsa.js) */
+.race-meter .race-dial.cc-dial{height:178px;max-width:none;margin:4px auto 2px;filter:drop-shadow(0 6px 14px #000)}
+.race-full-cluster .race-dial.cc-dial{height:250px}
+.race-meter-mini .race-dial.cc-dial{height:112px;margin:0 auto}
+.modal-body>.race-dial.cc-dial{height:240px}
+.cc-num-sm{font-size:12px!important}
+@media(max-width:1200px){.race-meter .race-dial.cc-dial{height:160px}.race-full-cluster .race-dial.cc-dial{height:210px}}
+@media(max-width:650px){.race-meter .race-dial.cc-dial{height:150px}.race-full-cluster .race-dial.cc-dial{height:160px}}
