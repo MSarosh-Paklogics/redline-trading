@@ -24,7 +24,16 @@
     wrap.appendChild(v);
   }
 
+  // Hero circuit cars (SMIL): keep their lap position continuous across re-renders, pause for reduced motion.
+  function syncCircuit() {
+    const svg = document.querySelector('.hero-circuit');
+    if (!svg?.setCurrentTime) return;
+    if (reduce()) { svg.pauseAnimations(); svg.setCurrentTime(1.5); return; }
+    svg.setCurrentTime((performance.now() / 1000) % 1000);
+  }
+
   function attach() {
+    syncCircuit();
     if (failed) return;
     const hero = document.querySelector('.race-hero');
     if (!hero) { wrap?.querySelector('video')?.pause(); return; }

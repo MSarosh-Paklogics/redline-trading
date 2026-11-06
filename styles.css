@@ -659,3 +659,15 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .cc-num-sm{font-size:12px!important}
 @media(max-width:1200px){.race-meter .race-dial.cc-dial{height:160px}.race-full-cluster .race-dial.cc-dial{height:210px}}
 @media(max-width:650px){.race-meter .race-dial.cc-dial{height:150px}.race-full-cluster .race-dial.cc-dial{height:160px}}
+/* ===== Hero circuit (corsa.js raceHero) ===== */
+.race-hero-visual svg.hero-circuit{overflow:visible}
+.hero-circuit .hc-label{fill:#ffffff8c;font:700 6.5px Consolas,monospace;letter-spacing:1.4px;text-anchor:middle}
+.hero-circuit .hc-racer{filter:drop-shadow(0 0 3px #000)}
+@media (prefers-reduced-motion: no-preference){body:not(.reduced) .hero-circuit .hc-line{animation:hcLineFlow 1.6s linear infinite}}
+@keyframes hcLineFlow{to{stroke-dashoffset:-40}}
+/* Powered by AI — minimal accent, no box */
+.race-hero>.hero-ai{top:24px;gap:12px;padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;animation:none!important;color:#ffffffc7;font:600 9.5px/1 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:4.5px}
+.race-hero>.hero-ai b{color:#fff200;font-weight:700}
+.race-hero>.hero-ai>i{display:block;width:44px;height:1px;background:linear-gradient(90deg,transparent,#ed1c24 60%,#fff200)}
+.race-hero>.hero-ai>i:last-child{background:linear-gradient(90deg,#fff200,#ed1c24 40%,transparent)}
+@media(max-width:700px){.race-hero>.hero-ai{letter-spacing:3px;font-size:8.5px}.race-hero>.hero-ai>i{width:24px}}
