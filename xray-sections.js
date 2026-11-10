@@ -210,3 +210,19 @@
     if (typeof render === 'function') render();
   });
 })();
+
+/* #/xray: the live Market X-Ray page (Engine 25 + Engine 29), replacing the old illustrative demo.
+   Same sections as the dashboard's Engine tabs, with the trade-permission strip on top. */
+(() => {
+  const page = () => {
+    const x = window.redlineXray?.model;
+    const top = head('MARKET X-RAY', 'See what is happening underneath the market: participation, pressure, stress and risk in one view. Engine 25 market evidence and Engine 29 market character, live.', btn('Open chart cockpit', 'workspace', true, 'chart'), 'REDLINE / ENGINE 25 · ENGINE 29');
+    if (!x) {
+      if (!window.redlineXray?.loading) window.redlineXray?.load?.();
+      return top + '<div class="ce-empty">Loading the live Engine 25 Market X-Ray… Nothing is shown rather than demo data.</div>';
+    }
+    const live = `<div class="sl-status"><span class="pill green">LIVE BACKEND</span><span>Data <b>${esc(x.dataStatus || '—')}</b></span><span>Engine 25 <b>${esc(String(x.headline?.label || '—').toUpperCase())}</b></span><span>Generated <b>${esc(x.generatedAt ? String(x.generatedAt).replace('T', ' ').slice(0, 16) + ' UTC' : '—')}</b></span></div>`;
+    return top + live + (typeof raceLiveOverview === 'function' ? raceLiveOverview(x) : '') + window.redlineXraySections(x);
+  };
+  window.fryePages = { ...(window.fryePages || {}), xray: page };
+})();

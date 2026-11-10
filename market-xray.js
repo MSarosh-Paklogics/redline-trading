@@ -138,7 +138,7 @@
         const [e25, meter, hourly, eod, e29, i10, m30, h4, eodLive] = rs.map(r => r.status === 'fulfilled' ? r.value.data : null);
         xray.model = e25 || meter || e29 ? buildModel(e25, meter, hourly, eod, e29, spyMeter(i10, m30, hourly, h4, eodLive)) : null;
         // Re-render the first page / meters so the existing UI picks up the new values.
-        if (typeof render === 'function' && /^#\/(overview|meters)?($|\?)/.test(location.hash || '#/')) render();
+        if (typeof render === 'function' && /^#\/(overview|meters|xray)?($|\?)/.test(location.hash || '#/')) render();
         return xray.model;
       })
       .finally(() => { xray.loading = null; });
