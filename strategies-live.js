@@ -63,7 +63,35 @@
     return verified ? { text: 'TOUCHED · VERIFIED', cls: 'verified' } : { text: 'REACHED · ES SNAPSHOT', cls: 'reached' };
   }
 
+  /* Engine 22 owner research counts (currentWavelength.degrees[deg].owner*Research, selectionStatus
+     RESEARCH_ONLY). Brian's Strategies page shows the newest of these per degree ahead of the
+     canonical working count; priority order MIRRORED from Frye Engine22MarketStructureCard.jsx.
+     Engine 27's canonical working count stays visible next to it. */
+  const RESEARCH = {
+    submicro: ['ownerSubmicroW3Nov9InternalResearch', 'ownerSubmicroW3Nov9Research', 'ownerSubmicroNov6AbcResearch'],
+    micro: ['ownerMicroW3Nov9ReclassifiedResearch', 'ownerMicroW2Nov6Research'],
+    subminute: ['ownerSubminuteW1FormingNov9Research', 'ownerSubminuteNov5AbcResearch'],
+    minute: ['ownerMinuteW1FormingNov9Research', 'ownerMinuteAbcResearch'],
+    minor: ['ownerMinorW3Nov9Research', 'ownerMinorW2Research']
+  };
+  function research(m, deg) {
+    const cw = m.ws.currentWavelength?.degrees?.[deg] || {};
+    for (const k of RESEARCH[deg] || []) { const o = cw[k]; if (o && typeof o === 'object' && o.selectionStatus === 'RESEARCH_ONLY') return { key: k, ...o }; }
+    return null;
+  }
+  const words = k => String(k).replace(/^w(\d)/, 'W$1 ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([0-9])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase()).replace(/\s+/g, ' ').trim();
+  function anchorRows(a) {
+    if (!a) return '';
+    return Object.entries(a).filter(([k, v]) => !/LocalTime$|AtUtc$|^provenance$|^priorAnchorRevision$|^ownerApprovalReference$/.test(k) && v != null && typeof v !== 'object').map(([k, v]) => {
+      const t = a[`${k}LocalTime`] || a[`${k.replace(/(Low|High|Reference)$/, '')}LocalTime`];
+      const val = typeof v === 'boolean' ? (v ? 'YES' : 'NO') : n(v) != null ? `${px(v)}${t ? ' · ' + t : ''}` : L(v);
+      return kv(words(k), val, typeof v === 'boolean' ? (v ? 'up' : 'yellow') : '');
+    }).join('');
+  }
+
   function levelsFor(m, deg) {
+    const rs = research(m, deg);
+    if (rs) return Array.isArray(rs.levels) ? rs.levels : [];
     const v2l = m.v2?.degrees?.[deg]?.potentialCompletion?.levels;
     const wl = m.work?.degrees?.[deg]?.potentialCompletion?.levels;
     // Same fallbacks as Frye: the Engine 22 wavelength levels (e.g. Minor W5), then the display levels.
@@ -86,10 +114,11 @@
   /* ---------- Engine 22: seven-degree ladder ---------- */
   function ladder(m) {
     return `<div class="sl-ladder" role="tablist" aria-label="Wave degrees">${ORDER.map(deg => {
-      const d = m.work?.degrees?.[deg] || {}, da = d.directionAssessment || {};
-      const wave = d.available === false ? 'UNAVAILABLE' : `${d.activeWave || '—'} ${d.waveDirection || ''}`.trim();
-      return `<button type="button" role="tab" data-sl-degree="${deg}" aria-selected="${deg === ui.degree}" class="sl-rung ${deg === ui.degree ? 'selected' : ''} ${tone(d.waveDirection)}">
-        <small>${esc(L(deg))}</small><strong>${esc(wave)}</strong><span>${esc(L(d.currentCondition))}</span>${da.status ? `<em class="${tone(da.status)}">${esc(da.status)}</em>` : ''}</button>`;
+      const d = m.work?.degrees?.[deg] || {}, da = d.directionAssessment || {}, rs = research(m, deg);
+      const canon = d.available === false ? 'UNAVAILABLE' : `${d.activeWave || '—'} ${d.waveDirection || ''}`.trim();
+      const wave = rs ? `${rs.activeWave || '—'} ${rs.direction || ''}`.trim() : canon;
+      return `<button type="button" role="tab" data-sl-degree="${deg}" aria-selected="${deg === ui.degree}" class="sl-rung ${deg === ui.degree ? 'selected' : ''} ${tone(rs ? rs.direction : d.waveDirection)}">
+        <small>${esc(L(deg))}${rs ? ' <i class="sl-research">RESEARCH</i>' : ''}</small><strong>${esc(wave)}</strong><span>${esc(rs ? L(rs.stage) : L(d.currentCondition))}</span>${rs ? `<span class="sl-canon">E27 count: ${esc(canon)}</span>` : ''}${da.status ? `<em class="${tone(da.status)}">${esc(da.status)}</em>` : ''}</button>`;
     }).join('')}</div>`;
   }
 
@@ -124,7 +153,21 @@
   function degreeDetail(m) {
     const deg = ui.degree, d = m.work?.degrees?.[deg] || {}, v = m.v2?.degrees?.[deg] || {}, da = d.directionAssessment || {}, pv = d.provenance || {};
     const tr = d.traderRead || v.traderRead || {};
-    const structure = card(`${L(deg)} · working structure`, `
+    const rs = research(m, deg);
+    const researchCard = rs ? card(`${L(deg)} · owner research count`, `
+      <div class="sl-head ${tone(rs.direction)}">${esc(`${L(deg)} ${rs.activeWave || ''} ${rs.direction || ''} — ${L(rs.stage)}`)}</div>
+      ${kv('Parent', `${L(rs.parentDegree)} ${L(rs.parentWave)}`, '')}
+      ${rs.completedWave ? kv('Completed wave', `${rs.completedWave} · ${L(rs.completedWaveStatus)}`, '') : ''}
+      ${rs.w2CompletionStatus ? kv('W2 completion', L(rs.w2CompletionStatus)) : ''}
+      ${rs.w3StartStatus ? kv('W3 start', L(rs.w3StartStatus)) : ''}
+      ${rs.nextWave ? kv('Next wave', `${rs.nextWave} · ${rs.nextWaveStarted ? 'STARTED' : 'NOT STARTED'}`, '') : ''}
+      <div class="sl-sub">Owner anchors</div>${anchorRows(rs.anchors)}
+      ${kv('Fibonacci method', L(rs.fibMethod), '')}
+      ${n(rs.reviewReference) != null ? kv('Review reference', px(rs.reviewReference), 'down') : ''}
+      ${rs.timestampConflictNote ? `<p class="sl-muted">Review: ${esc(L(rs.timestampConflictNote))}</p>` : ''}
+      <p class="sl-muted">Research only — Engine 22 owner working interpretation. The canonical count (Engine 27 source) is shown below and is unchanged. Not a trade or permission.</p>
+      ${kv('Model', rs.version || rs.key, '')}`, 'gold', chip('ENGINE 22 · RESEARCH', 'gold')) : '';
+    const structure = card(`${L(deg)} · ${rs ? 'canonical working count' : 'working structure'}`, `
       <div class="sl-head ${tone(d.waveDirection)}">${esc(tr.headline || `${L(deg)} structure not published.`)}</div>
       ${kv('Active wave', d.activeWave ? `${d.activeWave} · ${L(d.waveDirection)}` : '—')}
       ${kv('Condition', L(d.currentCondition))}
@@ -146,9 +189,11 @@
       ${kv('Closes', da.previousClose != null ? `${px(da.previousClose)} → ${px(da.latestClose)}` : '—', '')}
       ${kv('Review reference', da.reviewZone ? px(da.reviewZone.low) : '—', '')}
       <p class="sl-muted">${esc(da.note || 'Directional observation only.')}</p>`, '', chip('READ ONLY'));
-    const alts = altFibs(m, deg);
-    const levelCards = alts.length ? alts.map((a, i) => card(a.title, fibTable(m, deg, a.levels), i ? 'gold' : 'green', chip(i ? 'ALTERNATIVE' : 'LEVELS', i ? 'gold' : 'green'))).join('') : card(`${L(deg)} levels`, fibTable(m, deg), 'green', chip('LEVELS', 'green'));
-    return `<div class="sl-detail">${structure}<div class="sl-stack">${levelCards}</div><div class="sl-stack">${riskCard(m, deg)}${direction}</div></div>`;
+    const alts = rs ? [] : altFibs(m, deg);
+    const rsEmpty = rs && !(rs.levels || []).length ? `<p class="sl-muted">Fibonacci pending: ${esc(L(rs.fibMethod || 'W1 and W2 anchors not published'))}. No targets are invented.</p>` : '';
+    const levelCards = alts.length ? alts.map((a, i) => card(a.title, fibTable(m, deg, a.levels), i ? 'gold' : 'green', chip(i ? 'ALTERNATIVE' : 'LEVELS', i ? 'gold' : 'green'))).join('')
+      : card(`${L(deg)} ${rs ? 'research ' : ''}levels`, rsEmpty || fibTable(m, deg), 'green', chip(rs ? 'RESEARCH LEVELS' : 'LEVELS', 'green'));
+    return `<div class="sl-detail"><div class="sl-stack">${researchCard}${structure}</div><div class="sl-stack">${levelCards}</div><div class="sl-stack">${riskCard(m, deg)}${direction}</div></div>`;
   }
 
   /* ---------- Engine 27: trader intelligence ---------- */

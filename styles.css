@@ -716,3 +716,6 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .cc-gear-read small{display:block;margin-top:2px;font:600 7px Consolas,monospace;color:#ffffff70;letter-spacing:1px}
 @media (prefers-reduced-motion: no-preference){body.mp-entering:not(.reduced) .cc-knob{animation:ccShift 1.1s cubic-bezier(.3,1.2,.5,1) both}}
 @keyframes ccShift{0%{transform:translate(80px,74px)}45%{transform:translate(var(--kx),74px)}100%{transform:translate(var(--kx),var(--ky))}}
+/* Strategies: Engine 22 owner research counts */
+.sl-research{font-style:normal;margin-left:4px;padding:1px 4px;border:1px solid #5c5700;border-radius:2px;color:#fff200;font:700 6.5px Consolas,monospace;letter-spacing:.5px;vertical-align:middle}
+.sl-canon{font:600 7px Consolas,monospace!important;color:#8d8d92!important;letter-spacing:.3px}
