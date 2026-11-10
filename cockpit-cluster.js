@@ -136,6 +136,38 @@
     return `<div class="cc-lamps">${lamp(e6 && e6 !== 'ALLOW', 'red', 'E6', `Engine 6: ${e6 || 'UNAVAILABLE'}`)}${lamp(riskOff, 'red', 'RISK', 'Engine 25 risk-off')}${lamp(degraded, 'amber', 'DATA', 'Data degraded or not live')}${lamp(!!(x && cm), 'green', 'LIVE', 'Live backend')}</div>`;
   }
 
+
+  /* 6-speed gated shifter = risk-management level. The six gears are the six bands of the
+     MIRRORED 65/20/15 trade-permission read (market-xray.js permissionRead): 6 = long bias ...
+     1 = strong defensive. A risk level for sizing context, not a trade or a permission. */
+  const GEARS = [
+    { g: 1, min: -Infinity, tone: 'down', short: 'STRONG DEFENSIVE' },
+    { g: 2, min: 35, tone: 'down', short: 'DEFENSIVE' },
+    { g: 3, min: 45, tone: 'yellow', short: 'SHORT WATCH' },
+    { g: 4, min: 50, tone: 'yellow', short: 'NEUTRAL / WAIT' },
+    { g: 5, min: 55, tone: 'up', short: 'REDUCED SIZE' },
+    { g: 6, min: 65, tone: 'up', short: 'NORMAL LONG' }
+  ];
+  function gate(x) {
+    const p = x?.permission || {}, score = n(p.score);
+    const cur = score == null ? null : [...GEARS].reverse().find(r => score >= r.min);
+    // H-pattern: 1-3-5 on top, 2-4-6 below, one neutral rail across the middle.
+    const col = g => 34 + Math.floor((g - 1) / 2) * 46, row = g => (g % 2 ? 34 : 114);
+    const slots = [1, 3, 5].map(g => `<path d="M${col(g)} ${row(g)} V74" class="cc-slot"/>`).join('') + [2, 4, 6].map(g => `<path d="M${col(g)} 74 V${row(g)}" class="cc-slot"/>`).join('');
+    const nums = GEARS.map(r => `<text x="${col(r.g)}" y="${r.g % 2 ? 18 : 140}" class="cc-gnum ${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g}</text>`).join('');
+    const kx = cur ? col(cur.g) : 80, ky = cur ? row(cur.g) : 74;
+    return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Risk gear from the 65/20/15 permission score. Not a trade permission — Engine 6 decides.">
+      <svg viewBox="0 0 160 150" class="cc-gate-svg" role="img" aria-label="Risk gear ${cur ? cur.g : 'unavailable'} of 6">
+        <defs><linearGradient id="cc-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5c60"/><stop offset=".45" stop-color="#2a2b2e"/><stop offset="1" stop-color="#46484c"/></linearGradient>
+        <radialGradient id="cc-knob" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c9cbcf"/><stop offset="1" stop-color="#55575c"/></radialGradient></defs>
+        <rect x="6" y="24" width="148" height="102" rx="12" fill="url(#cc-metal)" class="cc-plate"/>
+        <rect x="6" y="24" width="148" height="102" rx="12" class="cc-plate-edge"/>
+        <path d="M34 74 H126" class="cc-slot"/>${slots}${nums}
+        <g class="cc-knob" style="--kx:${kx}px;--ky:${ky}px"><circle r="13" fill="#000" opacity=".45" cx="1.5" cy="2.5"/><circle r="12" fill="url(#cc-knob)" class="cc-knob-ball"/><circle r="5.2" class="cc-knob-top ${cur ? cur.tone : ''}"/></g>
+      </svg>
+      <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${cur ? `GEAR ${cur.g}` : 'GEAR —'}</b><span>${cur ? `${cur.short} · ${f(score, 0)}` : 'UNAVAILABLE'}</span><small>RISK LEVEL · 65/20/15</small></div>
+    </div>`;
+  }
   function cluster() {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
     if (!x && !cm) return '';
@@ -147,10 +179,10 @@
       <div class="cc-hood"></div>
       ${tft(x, cm)}
       <div class="cc-gauge cc-big">${tach}</div>
-      <div class="cc-center"><div class="cc-gear ${gear === 'L' ? 'up' : gear === 'S' ? 'down' : ''}"><b>${gear}</b><small>BIAS · E15</small></div>${lamps(x, cm)}<div class="cc-perm"><small>E6 PERMISSION</small><b>${U(cm?.e6?.permission).replace(/_/g, ' ') || '—'}</b></div></div>
+      <div class="cc-center">${gate(x)}</div>
       <div class="cc-gauge">${speedo}</div>
       ${nav(x, cm)}
-      <p class="cc-note">LIVE BACKEND · display only · ES Master and permission score are Engine 25 / market-meter readings; the gear is Engine 15 bias, not a trade. Engine 6 decides.</p>
+      <p class="cc-note">LIVE BACKEND · display only · ES Master and permission score are Engine 25 / market-meter readings; the 6-speed gear is the risk level from the 65/20/15 permission score, not a trade. Engine 6 decides.</p>
     </section>`;
   }
 
