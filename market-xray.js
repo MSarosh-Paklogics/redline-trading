@@ -21,14 +21,15 @@
   }
 
   // MIRRORED from Engine25MarketXrayPreview tradePermissionRead (65/20/15 thresholds).
+  // Label, sizing and description MIRRORED from Frye Engine25MarketXrayPreview tradePermissionRead.
   function permissionRead(x) {
-    if (x == null) return ['WAITING FOR EOD SHADOW', 'NO DECISION SCORE YET'];
-    if (x >= 65) return ['LONG BIAS', 'NORMAL LONG PERMISSION'];
-    if (x >= 55) return ['LONG ALLOWED — REDUCED SIZE', 'NO AGGRESSIVE SIZE-UP'];
-    if (x >= 50) return ['NEUTRAL / WAIT', 'DO NOT SIZE UP'];
-    if (x >= 45) return ['AVOID NEW LONGS / SHORT WATCH', 'NO SIZE-UP LONG'];
-    if (x >= 35) return ['BEARISH / SHORTS FAVORED', 'DEFENSIVE'];
-    return ['STRONG DEFENSIVE / BEARISH', 'NO NORMAL LONGS'];
+    if (x == null) return ['WAITING FOR EOD SHADOW', 'NO DECISION SCORE YET', 'Reconstructed EOD v1 still needs its backend feed before the permission score is activated.'];
+    if (x >= 65) return ['LONG BIAS', 'NORMAL LONG PERMISSION', 'Fast and structural evidence are aligned enough to favor longs when price confirms.'];
+    if (x >= 55) return ['LONG ALLOWED — REDUCED SIZE', 'NO AGGRESSIVE SIZE-UP', 'Longs are allowed, but confirmation is incomplete. Keep size controlled.'];
+    if (x >= 50) return ['NEUTRAL / WAIT', 'DO NOT SIZE UP', 'Evidence is mixed. Wait for faster confirmation before adding directional risk.'];
+    if (x >= 45) return ['AVOID NEW LONGS / SHORT WATCH', 'NO SIZE-UP LONG', 'Fast ES weakness is overpowering the slower backdrop. Watch for confirmed short setup.'];
+    if (x >= 35) return ['BEARISH / SHORTS FAVORED', 'DEFENSIVE', 'Tactical evidence is bearish. Avoid blind longs and require confirmation for any reversal.'];
+    return ['STRONG DEFENSIVE / BEARISH', 'NO NORMAL LONGS', 'Fast and intermediate evidence are strongly bearish. Long exposure requires exceptional confirmation.'];
   }
 
   // SPY market meter (MIRRORED from Frye RowMarketOverview): live 10m/30m/1H/4H/EOD scores,
@@ -74,7 +75,7 @@
     // 65/20/15 permission read (MIRRORED): ES master, 4H light, reconstructed EOD shadow.
     const master = n(meter?.master?.score), m4h = n(meter?.lights?.['4h']?.score), recon = n(eod?.score);
     const permScore = master != null && m4h != null && recon != null ? 0.65 * master + 0.20 * m4h + 0.15 * recon : null;
-    const [permLabel, permSizing] = permissionRead(permScore);
+    const [permLabel, permSizing, permText] = permissionRead(permScore);
 
     return {
       at: Date.now(),
@@ -91,7 +92,7 @@
       sectors, broader,
       meter: meter ? { master, masterState: meter.master?.state || null, lights: meter.lights || {}, updatedAt: meter.updated_at_utc || null } : null,
       eod: eod ? { score: recon, state: eod.state || null } : null,
-      permission: { score: permScore, label: permLabel, sizing: permSizing, master, m4h, recon },
+      permission: { score: permScore, label: permLabel, sizing: permSizing, text: permText, master, m4h, recon, masterState: meter?.master?.tone || meter?.master?.state || meter?.master?.label || null, m4hState: meter?.lights?.['4h']?.state || meter?.lights?.['4h']?.tone || null, reconState: eod?.state || null },
       e29: e29?.data ? { ...e29.data, servedAt: e29.servedAt, esResolvedSymbol: e29.data.esResolvedSymbol || e29.data.display?.oneWeek?.esPriceAction?.resolvedSymbol || e29.data.esPriceAction?.resolvedSymbol || null } : null,
       // Detail sections of the Frye X-Ray page (rendered by xray-sections.js).
       spy,

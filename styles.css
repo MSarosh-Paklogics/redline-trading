@@ -676,3 +676,27 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .race-hero>.hero-video:after{background:linear-gradient(90deg,#000000eb 0%,#000000b3 30%,#00000033 58%,#00000000 78%),linear-gradient(0deg,#00000099,transparent 40%)}
 .race-hero:has(.hero-video.ready) .hc-svg{opacity:.18}
 .race-hero:has(.hero-video.ready) .race-hero-word{opacity:.35}
+/* Paged NAV screen (cockpit-cluster.js) */
+.cc-nav{display:flex;flex-direction:column;min-height:248px}
+.cc-nav-head{align-items:center}
+.cc-nav-titles{flex:1;min-width:0;position:relative;height:30px}
+.cc-nav-title{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(4px);transition:opacity .35s,transform .35s;pointer-events:none}
+.cc-nav-title.on{opacity:1;transform:none}
+.cc-nav-title b{font:700 12px Consolas,monospace;color:#fff;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-nav-title i{font:normal 8px Consolas,monospace;color:#8aa0b4;letter-spacing:.6px}
+.cc-nav-btn{flex-shrink:0;width:22px;height:22px;border:1px solid #2b3a48;border-radius:3px;background:#0b141c;color:#fff200;font:700 14px/1 Consolas,monospace;cursor:pointer;padding:0}
+.cc-nav-btn:hover{border-color:#fff200}
+.cc-nav-page{display:none;flex:1;animation:ccPage .35s ease}
+.cc-nav-page.on{display:block}
+.cc-nav-tag{margin:-2px 0 6px}.cc-nav-tag em{font:normal 700 8px Consolas,monospace;padding:2px 6px;border:1px solid #2b2b2e;border-radius:2px;color:#8aa0b4}.cc-nav-tag em.on{color:#20c46e;border-color:#00592d}
+.cc-big-read{display:flex;align-items:baseline;gap:8px;margin:2px 0 6px;flex-wrap:wrap}
+.cc-big-read b{font:700 24px Bahnschrift,'Arial Narrow',sans-serif;color:#fff;line-height:1}
+.cc-big-read span{font:700 9px Consolas,monospace;letter-spacing:.5px}
+.cc-kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #121c24;font-size:9px}
+.cc-kv span{color:#8aa0b4;letter-spacing:.3px}.cc-kv b{color:#fff;font-weight:700;text-align:right}
+.cc-nav .up{color:#20c46e}.cc-nav .down{color:#ff3b3b}.cc-nav .yellow{color:#fff200}
+.cc-nav-dots{display:flex;justify-content:center;gap:5px;margin-top:8px}
+.cc-nav-dots button{width:6px;height:6px;padding:0;border:0;border-radius:50%;background:#2b3a48;cursor:pointer}
+.cc-nav-dots button.on{background:#fff200;box-shadow:0 0 6px #fff200}
+@keyframes ccPage{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.cc-nav-page{animation:none}}
