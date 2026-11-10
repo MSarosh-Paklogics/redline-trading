@@ -74,6 +74,7 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `live-stream.js` | Real-time candles: Backend 2 SSE bars merged into the live bar cache, chart SVG redrawn ≤1/s; requested same-origin `/stream/...` (proxied by `server.mjs` and the `vercel.json` rewrite, because Backend 2 only allows Frye's origins); 5 s Backend 1 polling fallback |
 | `chart-interact.js` | TradingView-style controls: drag pan (time + price), price-axis drag to scale, wheel zoom, Shift+wheel scroll, keys, double-click axis reset; `window.redlineChartView` feeds `chartGeometry()`; keeps panel scroll across re-renders |
 | `live-surfaces.js` | Live panels for strategies, chart and meters; re-attaches them after app.js re-renders |
+| `page-nav.js` | SaaS-style sticky "On this page" section navigator built after each render from visible `.race-section-label` / tab bars (or top-level panel titles), scroll-spy highlight, smooth jump, back-to-top button. Presentation only |
 | `motion-pro.js` | Presentation-only motion on top of `motion.js`: staggered reveal of each element type the first time it appears on a page visit (never on live refreshes), gauge needle sweep, yellow flash on values that change between renders. Off with prefers-reduced-motion / `state.settings.reduced` |
 | `navigation.js`, `chart-tools.js`, `terminal.js`, `corsa.js`, `motion.js`, `protection.js` | UI layers added on top of app.js |
 

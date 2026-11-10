@@ -719,3 +719,28 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 /* Strategies: Engine 22 owner research counts */
 .sl-research{font-style:normal;margin-left:4px;padding:1px 4px;border:1px solid #5c5700;border-radius:2px;color:#fff200;font:700 6.5px Consolas,monospace;letter-spacing:.5px;vertical-align:middle}
 .sl-canon{font:600 7px Consolas,monospace!important;color:#8d8d92!important;letter-spacing:.3px}
+/* ===== SaaS layout: sticky section navigator, back-to-top, spacing (page-nav.js) ===== */
+#main{scroll-margin-top:80px}
+.page-nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;margin:0 0 22px;padding:8px 10px;border:1px solid #242424;border-radius:10px;background:#0a0a0bd9;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 1px 0 #ffffff08 inset;transition:box-shadow .25s,border-color .25s,border-radius .25s}
+.page-nav.stuck{border-color:#2e2e2e;box-shadow:0 10px 30px #000a,0 1px 0 #ffffff0a inset;border-radius:0 0 10px 10px}
+.page-nav-label{flex-shrink:0;font:700 8px Consolas,monospace;letter-spacing:1.6px;color:#fff200b3;padding-left:4px}
+.page-nav-track{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0;scroll-behavior:smooth}
+.page-nav-track::-webkit-scrollbar{display:none}
+.page-nav-track button{flex-shrink:0;position:relative;padding:7px 12px;border:1px solid transparent;border-radius:6px;background:none;color:#a6a6ab;font:600 11px 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:.2px;white-space:nowrap;cursor:pointer;transition:color .2s,background .2s,border-color .2s}
+.page-nav-track button:hover{color:#fff;background:#161616}
+.page-nav-track button.on{color:#fff;background:linear-gradient(180deg,#2a0b0d,#160708);border-color:#ed1c2466}
+.page-nav-track button.on:after{content:'';position:absolute;left:12px;right:12px;bottom:3px;height:2px;border-radius:2px;background:linear-gradient(90deg,#ed1c24,#fff200)}
+.page-nav-track button:focus-visible{outline:2px solid #fff200;outline-offset:1px}
+.to-top{position:fixed;right:22px;bottom:22px;z-index:40;width:42px;height:42px;border:1px solid #ed1c2499;border-radius:50%;background:#0d0d0ee6;color:#fff200;font:700 18px/1 Bahnschrift,sans-serif;cursor:pointer;opacity:0;transform:translateY(12px);pointer-events:none;transition:opacity .25s,transform .25s,box-shadow .25s;box-shadow:0 8px 24px #000a}
+.to-top.show{opacity:1;transform:none;pointer-events:auto}
+.to-top:hover{box-shadow:0 8px 24px #000a,0 0 16px #ed1c2466}
+/* consistent rhythm and alignment */
+#main>.race-section-label{margin-top:30px}
+#main>.page-nav+.race-section-label{margin-top:0}
+.grid>.panel,.stats>.stat,.sl-planner>.sl-card{height:100%}
+.race-section-label{scroll-margin-top:72px}
+@media(min-width:1700px){#main{max-width:1640px;margin-inline:auto}}
+@media(max-width:700px){.page-nav{gap:8px;padding:6px;border-radius:8px}.page-nav-label{display:none}.page-nav-track button{padding:6px 10px;font-size:10.5px}.to-top{right:14px;bottom:14px;width:38px;height:38px}}
+@media(prefers-reduced-motion:reduce){.page-nav-track{scroll-behavior:auto}}
+/* Keep "no sideways scroll" without turning body/#app into scroll containers (that breaks position:sticky) */
+body,#app{overflow-x:clip;overflow-y:visible}
