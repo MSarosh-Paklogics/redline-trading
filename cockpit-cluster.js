@@ -230,7 +230,7 @@
       <div class="cs-bezel"><div class="cs-screen">
         <header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><span>ES <b>${r.price == null ? '—' : r.price.toFixed(2)}</b></span><span>DATA <b>${L(x?.dataStatus)}</b></span><span>ENGINE 25 <b class="${tTone(x?.headline?.label)}">${L(x?.headline?.label)}</b></span><em>REDLINE OS · NAV</em></header>
         <div class="cs-body">
-          <aside class="cs-left">${car}<div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
+          <aside class="cs-left"><div class="cs-car3d" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" loading="lazy" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div><div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
             <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}</aside>
           <div class="cs-map">${instr('up', r.above, r.above ? r.above.lo - r.price : 0)}${mapSvg(r)}<div class="cs-map-foot">${instr('down', r.below, r.below ? r.below.hi - r.price : 0)}<span class="cs-loc ${r.inside ? 'on' : ''}">${r.inside ? 'IN ' + r.inside.label : 'IN TRANSIT'}</span></div></div>
           <div class="cs-cards">${cards}</div>

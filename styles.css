@@ -848,3 +848,14 @@ body,#app{overflow-x:clip;overflow-y:visible}
 
 /* Readable numbers: tabular figures everywhere data is shown. */
 .kv strong,.sl-kv b,.cc-kv b,.stat-value,.number,td{font-variant-numeric:tabular-nums}
+/* Command screen: 3D car render (frame from the licensed F80 film) */
+.cs-car3d{position:relative;width:calc(100% + 20px);margin:-10px -10px 0;aspect-ratio:480/272;overflow:hidden;border-radius:12px 12px 0 0}
+.cs-car3d img{width:100%;height:100%;object-fit:cover;display:block;-webkit-mask-image:radial-gradient(ellipse 72% 78% at 52% 55%,#000 55%,transparent 100%);mask-image:radial-gradient(ellipse 72% 78% at 52% 55%,#000 55%,transparent 100%);filter:saturate(1.08) contrast(1.05)}
+.cs-car3d-floor{position:absolute;left:18%;right:14%;bottom:8%;height:18%;border-radius:50%;background:radial-gradient(ellipse at center,#ed1c2440,transparent 70%);filter:blur(6px);pointer-events:none}
+.cs-car3d-sheen{position:absolute;top:0;bottom:0;left:-40%;width:35%;background:linear-gradient(100deg,transparent,#ffffff1a,transparent);transform:skewX(-18deg);pointer-events:none}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduced) .cs-car3d img{animation:csFloat 6s ease-in-out infinite}
+  body:not(.reduced) .cs-car3d-sheen{animation:csSheen 7s ease-in-out 1s infinite}
+}
+@keyframes csFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.012)}}
+@keyframes csSheen{0%,75%{left:-40%}100%{left:120%}}
