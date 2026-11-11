@@ -74,6 +74,19 @@
     minute: ['ownerMinuteW1FormingNov9Research', 'ownerMinuteAbcResearch'],
     minor: ['ownerMinorW3Nov9Research', 'ownerMinorW2Research']
   };
+  /* Which published level set is CURRENT for a research card, and its title. MIRRORED from Frye
+     Engine22MarketStructureCard.jsx (Nov 10): the other arrays on the same object are history
+     (w4Retracement, cDownExtension, w1PriorCorrectionRetracement) or superseded (w1LegacyProxy)
+     and are never shown as current. Keys without an entry fall back to the generic levels. */
+  const CURRENT_FIBS = {
+    ownerMicroW3Nov9ReclassifiedResearch: { field: 'w5UpExtensionLevels', title: 'Micro W5 up — W4 low + W1 length extensions (watch)' },
+    ownerSubmicroW3Nov9InternalResearch: { field: 'w2DownRetracementLevels', title: 'Submicro W2 down — retracements of completed W1 (watch)' }
+  };
+  const researchLevels = rs => {
+    const c = rs && CURRENT_FIBS[rs.key];
+    const arr = c ? rs[c.field] : rs?.levels;
+    return Array.isArray(arr) ? arr : [];
+  };
   function research(m, deg) {
     const cw = m.ws.currentWavelength?.degrees?.[deg] || {};
     for (const k of RESEARCH[deg] || []) { const o = cw[k]; if (o && typeof o === 'object' && o.selectionStatus === 'RESEARCH_ONLY') return { key: k, ...o }; }
@@ -91,7 +104,7 @@
 
   function levelsFor(m, deg) {
     const rs = research(m, deg);
-    if (rs) return Array.isArray(rs.levels) ? rs.levels : [];
+    if (rs) return researchLevels(rs);
     const v2l = m.v2?.degrees?.[deg]?.potentialCompletion?.levels;
     const wl = m.work?.degrees?.[deg]?.potentialCompletion?.levels;
     // Same fallbacks as Frye: the Engine 22 wavelength levels (e.g. Minor W5), then the display levels.
@@ -190,9 +203,9 @@
       ${kv('Review reference', da.reviewZone ? px(da.reviewZone.low) : '—', '')}
       <p class="sl-muted">${esc(da.note || 'Directional observation only.')}</p>`, '', chip('READ ONLY'));
     const alts = rs ? [] : altFibs(m, deg);
-    const rsEmpty = rs && !(rs.levels || []).length ? `<p class="sl-muted">Fibonacci pending: ${esc(L(rs.fibMethod || 'W1 and W2 anchors not published'))}. No targets are invented.</p>` : '';
+    const rsEmpty = rs && !researchLevels(rs).length ? `<p class="sl-muted">Fibonacci pending: ${esc(L(rs.fibMethod || 'W1 and W2 anchors not published'))}. No targets are invented.</p>` : '';
     const levelCards = alts.length ? alts.map((a, i) => card(a.title, fibTable(m, deg, a.levels), i ? 'gold' : 'green', chip(i ? 'ALTERNATIVE' : 'LEVELS', i ? 'gold' : 'green'))).join('')
-      : card(`${L(deg)} ${rs ? 'research ' : ''}levels`, rsEmpty || fibTable(m, deg), 'green', chip(rs ? 'RESEARCH LEVELS' : 'LEVELS', 'green'));
+      : card(CURRENT_FIBS[rs?.key]?.title || `${L(deg)} ${rs ? 'research ' : ''}levels`, rsEmpty || fibTable(m, deg), 'green', chip(rs ? 'RESEARCH LEVELS' : 'LEVELS', 'green'));
     return `<div class="sl-detail"><div class="sl-stack">${researchCard}${structure}</div><div class="sl-stack">${levelCards}</div><div class="sl-stack">${riskCard(m, deg)}${direction}</div></div>`;
   }
 
