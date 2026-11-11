@@ -466,7 +466,7 @@
     const bias = U(Object.fromEntries(cm?.pills || []).BIAS), gear = bias === 'LONG' ? 'L' : bias === 'SHORT' ? 'S' : cm ? 'N' : '—';
     const master = n(x?.meter?.master), perm = n(x?.permission?.score);
     const tach = dial({ id: 'cc-tach', value: master, face: 'red', step: 10, minor: 5, labels: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => [i * 10, String(i)]), zones: [[0, 50, 'bear'], [50, 65, 'mid'], [65, 100, 'bull']], unit: 'ES MASTER ×10', title: 'ES MASTER METER', readout: f(master) });
-    const speedo = dial({ id: 'cc-speed', value: perm, face: 'dark', step: 10, minor: 5, labels: [0, 20, 40, 60, 80, 100].map(v => [v, String(v)]), zones: [[0, 35, 'bear'], [35, 55, 'mid'], [65, 100, 'bull']], unit: '65/20/15 SCORE', title: 'TRADE PERMISSION', readout: f(perm) });
+    const speedo = dial({ id: 'cc-speed', value: perm, face: 'dark', step: 10, minor: 5, labels: [0, 20, 40, 60, 80, 100].map(v => [v, String(v)]), zones: [[0, 35, 'bear'], [35, 55, 'mid'], [65, 100, 'bull']], unit: 'MPH', title: 'PERMISSION · 65/20/15', readout: f(perm, 0) });
     return `<section class="cc-dash" aria-label="Cockpit instrument cluster">
       <div class="cc-hood"></div>
       ${tft(x, cm)}

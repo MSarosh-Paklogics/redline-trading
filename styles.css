@@ -1105,3 +1105,5 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .cc-dpair .cc-dnum em{font-size:9px;letter-spacing:.5px}
 .cc-dsplit .cc-dnum.s-up b,.cc-dsplit.d-down .cc-dnum.s-down b{font-size:28px}
 .cc-dsplit .cc-dnum.s-down b,.cc-dsplit.d-down .cc-dnum.s-up b{font-size:20px}
+/* Speedometer reads the permission score in MPH (1 point = 1 mph) */
+.cc-dial.dark .cc-unit{font:700 11px Consolas,monospace;letter-spacing:2px;fill:#fff200}
