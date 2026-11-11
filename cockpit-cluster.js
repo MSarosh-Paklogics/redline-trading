@@ -443,15 +443,21 @@
     // [label, big digits, unit, tone, sub line, level 0-100 for the segment bar]
     const cells = [
       ['MARKET HEALTH', f(h.score, 0), '/100', sTone(h.score) || 'na', L(h.label), n(h.score)],
-      ['BREADTH', buyB == null ? '—' : String(Math.round(buyB)), '%', buyB == null ? 'na' : buyB >= 55 ? 'up' : buyB <= 45 ? 'down' : 'yellow', buyB == null ? '1H breadth unavailable' : `ADVANCING · ${Math.round(sellB)}% DECLINING`, buyB],
-      ['STOCK VOLUME', buyV == null ? '—' : String(Math.round(buyV)), '%', buyV == null ? 'na' : buyV >= 55 ? 'up' : buyV <= 45 ? 'down' : 'yellow', buyV == null ? '1H volume unavailable' : `BUYING · ${Math.round(sellV)}% SELLING`, buyV],
+      ['BREADTH', buyB, sellB, 'ADV', 'DEC', '1H stocks advancing vs declining'],
+      ['STOCK VOLUME', buyV, sellV, 'BUY', 'SELL', '1H directional volume'],
       ['DISTRIBUTION', dRaw == null ? '—' : String(Math.round(dRaw)), '%', dRaw == null ? 'na' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', `4H STRUCTURAL · ${L(d.label)}`, dRaw],
       ['SECTORS', sec.weak == null ? '—' : String(sec.weak), 'WEAK', 'yellow', sec.strong == null ? 'sector participation unavailable' : `${sec.strong} STRONG · ${sec.neutral} MIXED`, sec.strong == null ? null : sec.strong / 11 * 100],
       ['DATA', L(x.dataStatus), '', tTone(x.dataStatus) || 'na', cov == null ? 'coverage unavailable' : `${cov.toFixed(1)}% VOLUME COVERAGE`, cov]
     ];
     const SEG = 20;
     const bar = v => v == null ? '' : `<span class="cc-dseg">${Array.from({ length: SEG }, (_, i) => `<i class="${i < Math.round(Math.max(0, Math.min(100, v)) / 100 * SEG) ? 'on' : ''}"></i>`).join('')}</span>`;
-    return `<div class="cc-digital">${cells.map(([k, v, unit, t, note, level]) => `<div class="cc-dig d-${lvl(level, t)}"><small>${k}</small><div class="cc-dnum"><b data-ghost="${/^\d+$/.test(v) ? '8'.repeat(v.length) : ''}">${esc(v)}</b>${unit ? `<em>${esc(unit)}</em>` : ''}</div>${bar(level)}<span class="cc-dsub">${esc(note)}</span></div>`).join('')}</div>`;
+    // Two-sided cells (breadth, volume): both sides as digits, and one bar split green | red.
+    const split = ([k, a, b, la, lb, note]) => {
+      if (a == null || b == null) return `<div class="cc-dig d-na"><small>${k}</small><div class="cc-dnum"><b>—</b></div><span class="cc-dsub">${esc(note)} unavailable</span></div>`;
+      const ga = Math.round(a / 100 * SEG), lead = a > b ? 'up' : a < b ? 'down' : 'yellow';
+      return `<div class="cc-dig cc-dsplit d-${lead}"><small>${k}</small><div class="cc-dpair"><div class="cc-dnum s-up"><b data-ghost="88">${Math.round(a)}</b><em>% ${la}</em></div><div class="cc-dnum s-down"><b data-ghost="88">${Math.round(b)}</b><em>% ${lb}</em></div></div><span class="cc-dseg">${Array.from({ length: SEG }, (_, i) => `<i class="${i < ga ? 'on s-up' : 'on s-down'}"></i>`).join('')}</span><span class="cc-dsub">${esc(note)}</span></div>`;
+    };
+    return `<div class="cc-digital">${cells.map(c => c.length === 6 && typeof c[3] === 'string' && (c[3] === 'ADV' || c[3] === 'BUY') ? split(c) : c).map(c => typeof c === 'string' ? c : (([k, v, unit, t, note, level]) => `<div class="cc-dig d-${lvl(level, t)}"><small>${k}</small><div class="cc-dnum"><b data-ghost="${/^\d+$/.test(v) ? '8'.repeat(v.length) : ''}">${esc(v)}</b>${unit ? `<em>${esc(unit)}</em>` : ''}</div>${bar(level)}<span class="cc-dsub">${esc(note)}</span></div>`)(c)).join('')}</div>`;
   }
 
   function cluster() {

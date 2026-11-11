@@ -1092,3 +1092,16 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .cc-dsub{font:600 9px Consolas,monospace;letter-spacing:.6px;color:#9fb0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cc-dig b.d-up,.cc-dig b.d-down,.cc-dig b.d-yellow,.cc-dig b.d-white,.cc-dig b.d-na{color:var(--c)}
 @media(max-width:700px){.cc-dnum b{font-size:28px}}
+/* Two-sided digital cells: advancing | declining, buying | selling */
+.cc-dpair{display:flex;justify-content:space-between;align-items:baseline;gap:8px;min-width:0}
+.cc-dnum.s-up{--c:#20e07a}.cc-dnum.s-down{--c:#ff3b3b}
+.cc-dnum.s-down b{font-size:26px}
+.cc-dsplit .cc-dnum.s-up b{font-size:34px}
+.cc-dseg i.s-up{background:#20e07a;box-shadow:0 0 5px #20e07a}
+.cc-dseg i.s-down{background:#ff3b3b;box-shadow:0 0 5px #ff3b3b;opacity:.85}
+.cc-dsplit.d-down .cc-dnum.s-down b{font-size:34px}.cc-dsplit.d-down .cc-dnum.s-up b{font-size:26px}
+.cc-dpair .cc-dnum{flex-shrink:0;gap:3px}
+.cc-dpair .cc-dnum b{overflow:visible;text-overflow:clip;letter-spacing:1px}
+.cc-dpair .cc-dnum em{font-size:9px;letter-spacing:.5px}
+.cc-dsplit .cc-dnum.s-up b,.cc-dsplit.d-down .cc-dnum.s-down b{font-size:28px}
+.cc-dsplit .cc-dnum.s-down b,.cc-dsplit.d-down .cc-dnum.s-up b{font-size:20px}
