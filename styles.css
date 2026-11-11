@@ -917,21 +917,16 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .cs-model.ready:after{display:none}
 .cs-model-credit{position:absolute;left:6px;right:6px;bottom:-2px;font:600 6.5px Consolas,monospace;color:#5d7184;text-align:center;line-height:1.3;pointer-events:none}
 
-/* ===== Redline OS: Android-style car screen ===== */
-.cs-screen{min-height:600px}
+/* ===== Redline OS: simple car screen (Enzo home + info apps) ===== */
+.cs-screen{min-height:560px}
 .cs-status .os-sig{display:flex;align-items:flex-end;gap:2px;height:11px;margin-left:6px}
 .cs-status .os-sig i{width:3px;background:#20c46e;border-radius:1px}
 .cs-status .os-sig i:nth-child(1){height:4px}.cs-status .os-sig i:nth-child(2){height:6px}.cs-status .os-sig i:nth-child(3){height:8px}.cs-status .os-sig i:nth-child(4){height:11px}
 .os-view{flex:1;animation:osOpen .32s cubic-bezier(.2,.8,.2,1)}
-@keyframes osOpen{from{opacity:0;transform:scale(.975)}to{opacity:1;transform:none}}
-/* App icons */
-.os-app{display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px;border:0;background:none;color:#e8eef5;text-decoration:none;cursor:pointer;border-radius:14px;transition:transform .18s,background .2s}
-.os-app:hover{background:#ffffff08;transform:translateY(-2px)}
-.os-app:active{transform:scale(.95)}
-.os-app b{font:600 11px "Segoe UI",Arial,sans-serif;color:#dfe7ef;text-align:center;line-height:1.2}
+@keyframes osOpen{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:none}}
+/* Icons */
 .os-ic{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:18px;color:#fff;box-shadow:0 8px 18px #0009,inset 0 1px 0 #ffffff33}
 .os-ic svg{width:28px;height:28px}
-.os-ic em{position:absolute;right:-8px;top:-7px;min-width:20px;padding:2px 5px;border-radius:999px;background:#0d151d;border:1px solid #ffffff26;font:700 9px Consolas,monospace;font-style:normal;color:#fff200;box-shadow:0 4px 10px #000a}
 .os-ic.t-red{background:linear-gradient(145deg,#ff4a50,#b3121a)}
 .os-ic.t-yellow{background:linear-gradient(145deg,#fff36a,#d9c700);color:#111}
 .os-ic.t-green{background:linear-gradient(145deg,#2ee08a,#00804a)}
@@ -939,51 +934,52 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-ic.t-purple{background:linear-gradient(145deg,#a58cff,#5b3fd6)}
 .os-ic.t-graphite{background:linear-gradient(145deg,#4a4f57,#1c1f24);border:1px solid #ffffff14}
 .os-ic.sm{width:30px;height:30px;border-radius:10px}.os-ic.sm svg{width:16px;height:16px}
-.os-app.sm{padding:3px;flex-direction:row}
-.os-app.on .os-ic{outline:2px solid #fff200;outline-offset:2px}
-/* App drawer */
-.os-drawer{padding:16px 18px;background:radial-gradient(ellipse at 50% 0%,#132030,transparent 70%)}
-.os-drawer-head{display:flex;align-items:baseline;gap:10px;margin:0 4px 14px}
-.os-drawer-head b{font:700 18px Bahnschrift,"Segoe UI",sans-serif;color:#fff}.os-drawer-head small{font:600 10px Consolas,monospace;color:#8aa0b4}
-.os-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:18px 10px}
-.os-drawer .os-app{animation:osPop .35s cubic-bezier(.2,.8,.2,1) both}
-.os-drawer .os-app:nth-child(n+5){animation-delay:.04s}.os-drawer .os-app:nth-child(n+9){animation-delay:.08s}.os-drawer .os-app:nth-child(n+13){animation-delay:.12s}
-@keyframes osPop{from{opacity:0;transform:translateY(12px) scale(.9)}to{opacity:1;transform:none}}
+/* Home: the Enzo centre stage, info apps beside it */
+.os-home{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:16px;padding:14px}
+.os-hero{position:relative;display:flex;flex-direction:column;border-radius:16px;background:radial-gradient(ellipse at 50% 62%,#2a0a0c,#07090c 72%);border:1px solid #ffffff0d;overflow:hidden}
+.os-hero-car.cs-car3d{flex:1;width:100%;margin:0;min-height:320px;aspect-ratio:auto;border-radius:0}
+.os-hero-info{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.os-hero-price small,.os-hero-gear small{display:block;font:700 9px Consolas,monospace;letter-spacing:1.2px;color:#8aa0b4}
+.os-hero-price b{font:700 34px/1.1 Bahnschrift,"Segoe UI",sans-serif;color:#fff;letter-spacing:.5px}
+.os-hero-gear{text-align:right}
+.os-hero-gear b{display:block;font:800 40px/1 Bahnschrift,"Segoe UI",sans-serif;color:#fff}
+.os-hero-gear span{font:700 9px Consolas,monospace;letter-spacing:.8px;color:#c8d3dd}
+.os-hero-gear.g-up b{color:#20c46e}.os-hero-gear.g-yellow b{color:#fff200}.os-hero-gear.g-down b{color:#ff3b3b}
+.os-hero-chain{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #ffffff0d;background:#05070acc}
+.os-hero-chain span{flex:1;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;min-width:0}
+.os-hero-chain i{grid-row:span 2;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid #ffffff2a;font:700 9px Consolas,monospace;font-style:normal;color:#c8d3dd}
+.os-hero-chain small{font:700 8px Consolas,monospace;letter-spacing:1px;color:#8aa0b4}
+.os-hero-chain b{font:700 12px Bahnschrift,sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.os-hero-chain em{font-style:normal;color:#5d7184}
+.os-hero-chain .g-up b{color:#20c46e}.os-hero-chain .g-yellow b{color:#fff200}.os-hero-chain .g-down b{color:#ff3b3b}
+.os-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.os-tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic name" "val val" "sub sub";column-gap:10px;row-gap:6px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid #ffffff10;background:linear-gradient(160deg,#111a23,#0a0f14);color:#e8eef5;text-align:left;cursor:pointer;transition:transform .18s,border-color .2s}
+.os-tile:hover{transform:translateY(-2px);border-color:#fff20055}
+.os-tile:active{transform:scale(.98)}
+.os-tile .os-ic{grid-area:ic}
+.os-tile small{grid-area:name;font:700 10px "Segoe UI",Arial,sans-serif;color:#c8d3dd}
+.os-tile b{grid-area:val;font:700 22px/1.1 Bahnschrift,"Segoe UI",sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.os-tile span:last-child{grid-area:sub;font:600 9px Consolas,monospace;color:#9fb0c0;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.os-tile b.g-up{color:#20c46e}.os-tile b.g-yellow{color:#fff200}.os-tile b.g-down{color:#ff3b3b}
 /* Full-screen apps */
 .os-app-view{display:flex;flex-direction:column;padding:12px;gap:10px}
 .os-appbar{display:flex;align-items:center;gap:10px}
 .os-appbar b{font:700 16px Bahnschrift,"Segoe UI",sans-serif;color:#fff}.os-appbar small{font:600 10px Consolas,monospace;color:#8aa0b4;letter-spacing:.4px}
 .os-back{width:32px;height:32px;border-radius:10px;border:1px solid #ffffff1a;background:#0d151d;color:#fff;font:700 16px/1 sans-serif;cursor:pointer}
 .os-back:hover{border-color:#fff200;color:#fff200}
-.os-full-map{flex:1;min-height:500px}
-.os-car{flex:1;display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,.8fr);gap:14px;align-items:center}
-.os-car3d.cs-car3d{width:100%;margin:0;aspect-ratio:16/9;border-radius:14px;background:radial-gradient(ellipse at 50% 70%,#2a0a0c,#05070a 70%)}
-.os-car3d.cs-car3d.has-model{height:auto;aspect-ratio:16/9}
-.os-car-side{display:flex;flex-direction:column;gap:10px;align-items:stretch}
-.os-car-side .cs-price{text-align:left}.os-car-side .cs-price b{font-size:34px}
+.os-full-map{flex:1;min-height:460px}
 .os-detail{flex:1;padding:16px 18px;border-radius:14px;background:#ffffff06;border:1px solid #ffffff0d;column-count:2;column-gap:28px}
 .os-detail .cc-big-read{break-inside:avoid;margin-bottom:10px}.os-detail .cc-big-read b{font-size:40px}.os-detail .cc-big-read span{font-size:12px}
 .os-detail .cc-kv{break-inside:avoid;font-size:12px;padding:6px 0;border-bottom-color:#ffffff0d}
 .os-detail .cc-na{font-size:11px;line-height:1.5;break-inside:avoid}
 .os-detail .up{color:#20c46e}.os-detail .down{color:#ff3b3b}.os-detail .yellow{color:#fff200}
-/* System bar */
+/* System bar: back + home only */
 .os-sysbar{position:relative;display:flex;align-items:center;gap:10px;padding:8px 14px;border-top:1px solid #ffffff0d;background:linear-gradient(180deg,#0b1016,#06080b)}
-.os-pinned{display:flex;gap:4px}
 .os-navkeys{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:26px}
 .os-navkeys button{width:38px;height:30px;border:0;border-radius:10px;background:none;color:#c8d3dd;font:600 17px/1 "Segoe UI Symbol",Arial,sans-serif;cursor:pointer;transition:background .2s,color .2s}
 .os-navkeys button:hover{background:#ffffff0d;color:#fff}
 .os-navkeys button.on{color:#fff200}
 .os-sysbar .cs-dock-note{margin-left:auto}
-@media(max-width:1350px){.os-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
-@media(max-width:900px){.os-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.os-car{grid-template-columns:1fr}.os-detail{column-count:1}.os-pinned{display:none}.os-navkeys{position:static;transform:none;margin:0 auto}}
-@media(prefers-reduced-motion:reduce){.os-view,.os-drawer .os-app{animation:none}}
-
-/* OS widgets under the app grid */
-.os-widgets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
-.os-widget{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px 16px;border-radius:18px;border:1px solid #ffffff12;background:linear-gradient(160deg,#121b25,#0a0f15);color:#e8eef5;text-align:left;cursor:pointer;transition:transform .2s,border-color .2s;animation:osPop .4s .15s cubic-bezier(.2,.8,.2,1) both}
-.os-widget:hover{transform:translateY(-2px);border-color:#fff20055}
-.os-widget small{font:700 8px Consolas,monospace;letter-spacing:1px;color:#8aa0b4}
-.os-widget b{font:700 18px Bahnschrift,sans-serif;color:#fff}.os-widget b.big{font-size:26px}
-.os-widget span{font:600 9px Consolas,monospace;color:#9fb0c0}
-.os-widget.w-down b{color:#ff3b3b}.os-widget.w-up b{color:#20c46e}.os-widget.w-yellow b{color:#fff200}
-@media(max-width:900px){.os-widgets{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.os-home{grid-template-columns:1fr}.os-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.os-tiles{grid-template-columns:1fr 1fr}.os-detail{column-count:1}.os-navkeys{position:static;transform:none;margin:0 auto}.os-sysbar .cs-dock-note{display:none}}
+@media(prefers-reduced-motion:reduce){.os-view{animation:none}}
