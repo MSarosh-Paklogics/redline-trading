@@ -1035,3 +1035,15 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-tbar>i{display:block;height:100%;border-radius:3px;background:#8aa0b4;transition:width .6s ease}
 .os-tbar.g-up>i{background:#20c46e}.os-tbar.g-yellow>i{background:#fff200}.os-tbar.g-down>i{background:#ff3b3b}
 .os-tile b{font-size:21px}
+/* Home: tiles across the whole screen (5 above, 5 below), car turning behind, price/gear band in the middle */
+.os-home{grid-template-columns:1fr;grid-template-rows:auto minmax(170px,1fr) auto auto;gap:12px}
+.os-tiles-top,.os-tiles-bottom{grid-template-columns:repeat(5,minmax(0,1fr));grid-auto-rows:auto}
+.os-band{display:flex;justify-content:space-between;align-items:center;padding:0 10px;pointer-events:none;text-shadow:0 2px 14px #000}
+.os-band .os-hero-price small,.os-band .os-hero-gear small{display:block;font:700 9px Consolas,monospace;letter-spacing:1.2px;color:#c8d3dd}
+.os-band .os-hero-price b{font:700 38px/1.1 Bahnschrift,"Segoe UI",sans-serif;color:#fff}
+.os-tdl{grid-column:1/-1;margin:2px 0 0;display:grid;gap:3px}
+.os-tdl div{display:flex;justify-content:space-between;gap:8px;font:600 9.5px Consolas,monospace}
+.os-tdl dt{color:#8aa0b4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.os-tdl dd{margin:0;color:#e8eef5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;text-align:right}
+.os-tile{grid-template-areas:"ic name" "val val" "sub sub" "bar bar" "dl dl"}.os-tdl{grid-area:dl}
+@media(max-width:1250px){.os-tiles-top,.os-tiles-bottom{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.os-tiles-top,.os-tiles-bottom{grid-template-columns:1fr 1fr}.os-band .os-hero-price b{font-size:28px}}
