@@ -1047,3 +1047,20 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-tile{grid-template-areas:"ic name" "val val" "sub sub" "bar bar" "dl dl"}.os-tdl{grid-area:dl}
 @media(max-width:1250px){.os-tiles-top,.os-tiles-bottom{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.os-tiles-top,.os-tiles-bottom{grid-template-columns:1fr 1fr}.os-band .os-hero-price b{font-size:28px}}
+/* Prominent tab bars (client request 2026-11-12): bigger, clearly separated, strong active state */
+.page-nav{padding:10px 12px;gap:14px;border-color:#2f2f2f;background:#0b0b0cf2}
+.page-nav-label{font-size:10px;letter-spacing:1.8px;color:#fff200}
+.page-nav-track{gap:8px}
+.page-nav-track button{padding:10px 18px;border:1px solid #2c2c2e;border-radius:999px;background:#151517;color:#d6d6da;font:700 13px 'Segoe UI',Bahnschrift,Arial,sans-serif;letter-spacing:.2px}
+.page-nav-track button:hover{color:#fff;background:#232326;border-color:#fff20066;transform:translateY(-1px)}
+.page-nav-track button.on{color:#fff;background:linear-gradient(180deg,#ed1c24,#a5121a);border-color:#ff5a60;box-shadow:0 6px 18px #ed1c2459,inset 0 1px 0 #ffffff40}
+.page-nav-track button.on:after{left:18px;right:18px;bottom:4px;background:#fff200}
+#main > .page-nav ~ .db-tabs:not(.jl-modes):not(.sf-views){top:72px}
+.db-tabs{gap:8px;padding:8px;border-color:#3a2c2c;border-radius:12px}
+.db-tabs button{padding:12px 18px;border:1px solid #2c2c2e;border-radius:10px;background:#151517;color:#e2e2e6;font-size:15px;font-weight:700}
+.db-tabs button small{font-size:10px;letter-spacing:.8px}
+.db-tabs button:hover{background:#222225;border-color:#fff20066;color:#fff}
+.db-tabs button.selected,.race-dashboard .db-tabs button.selected{color:#fff;border-color:#ff5a60;background:linear-gradient(135deg,#ed1c24,#8f0f15);box-shadow:0 8px 22px #ed1c244d,inset 0 1px 0 #ffffff33}
+.race-dashboard .db-tabs button.selected small,.db-tabs button.selected small{color:#fff200}
+.db-tabs button:after{left:18px;right:18px;height:3px;background:#fff200}
+@media(max-width:700px){.page-nav-track button{padding:8px 13px;font-size:12px}.db-tabs button{padding:10px 12px;font-size:13px}}
