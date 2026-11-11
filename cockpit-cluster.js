@@ -352,12 +352,12 @@
       <div class="os-hero">
         <div class="cs-car3d os-hero-car" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div>
         <div class="os-hero-info">
-          <div class="os-hero-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')} · LIVE</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
+          <div class="os-hero-price"><small>ES</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
           <div class="os-hero-gear ${cur ? 'g-' + cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>
         </div>
         <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}</div>
       </div>
-      <div class="os-tiles">${list.map(a => `<button type="button" class="os-tile" data-os-open="${a.id}"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><small>${a.name}</small><b class="g-${a.tone || 'na'}">${esc(a.value)}</b><span>${esc(a.sub)}</span></button>`).join('')}</div>
+      <div class="os-tiles">${list.map(a => `<button type="button" class="os-tile" data-os-open="${a.id}" title="${esc(a.sub)}"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><small>${a.name}</small><b class="g-${a.tone || 'na'}">${esc(a.value)}</b></button>`).join('')}</div>
     </div>`;
   }
 
@@ -379,7 +379,7 @@
     const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false });
     const title = csOS.app === 'home' ? 'HOME' : (list.find(q => q.id === csOS.app)?.name || '').toUpperCase();
     const view = csOS.app === 'home' ? homeView(x, cm, r, cur) : appView(x, cm, r, cur, list);
-    return `<header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><span>ES <b>${r.price == null ? '—' : r.price.toFixed(2)}</b></span><span>ENGINE 25 <b class="${tTone(x?.headline?.label)}">${L(x?.headline?.label)}</b></span><em>REDLINE OS · ${title}</em><span class="os-sig" aria-hidden="true"><i></i><i></i><i></i><i></i></span></header>
+    return `<header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><em>REDLINE OS · ${title}</em><span class="os-sig" aria-hidden="true"><i></i><i></i><i></i><i></i></span></header>
       ${view}
       <footer class="os-sysbar">
         <div class="os-navkeys"><button type="button" data-os-back aria-label="Back">◁</button><button type="button" data-os-home aria-label="Home" class="${csOS.app === 'home' ? 'on' : ''}">○</button></div>
