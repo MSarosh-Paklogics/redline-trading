@@ -1077,3 +1077,18 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .xr-gearbox{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:center;padding:16px;border-radius:14px;border:1px solid #232325;background:radial-gradient(ellipse at 15% 50%,#1a0a0c,#0a0a0b 60%)}
 .xr-gearbox .cc-digital{grid-column:auto;margin:0;padding:0;border:0;grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:800px){.xr-gearbox{grid-template-columns:1fr}.xr-gearbox .cc-digital{grid-template-columns:1fr 1fr}}
+/* Digital car-meter readouts: LCD glass, glowing segment digits with ghost 8s, segment level bar */
+.cc-dig{--c:#8aa0b4;position:relative;gap:6px;padding:12px 14px 11px;border-radius:12px;border:1px solid #ffffff12;background:radial-gradient(ellipse at 50% 0%,#ffffff0a,transparent 60%),linear-gradient(180deg,#0a1016,#040608);box-shadow:inset 0 0 0 1px #000,inset 0 10px 24px #000c,0 6px 18px #0008;overflow:hidden}
+.cc-dig:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 3px);mix-blend-mode:screen}
+.cc-dig.d-up{--c:#20e07a}.cc-dig.d-down{--c:#ff3b3b}.cc-dig.d-yellow{--c:#fff200}.cc-dig.d-na{--c:#6d7e8e}
+.cc-dig small{font:700 9px Consolas,monospace;letter-spacing:1.6px;color:#7f93a6}
+.cc-dnum{display:flex;align-items:baseline;gap:6px;min-width:0}
+.cc-dnum b{position:relative;font:italic 700 34px/1 Consolas,"Lucida Console",monospace;letter-spacing:2px;color:var(--c);text-shadow:0 0 6px var(--c),0 0 18px color-mix(in srgb,var(--c) 55%,transparent);transform:skewX(-6deg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-dnum b:before{content:attr(data-ghost);position:absolute;left:0;top:0;color:color-mix(in srgb,var(--c) 10%,transparent);text-shadow:none;z-index:-1}
+.cc-dnum em{font:700 11px Consolas,monospace;font-style:normal;letter-spacing:1px;color:color-mix(in srgb,var(--c) 70%,#fff)}
+.cc-dseg{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;height:7px}
+.cc-dseg i{border-radius:1px;background:#ffffff0f}
+.cc-dseg i.on{background:var(--c);box-shadow:0 0 5px var(--c)}
+.cc-dsub{font:600 9px Consolas,monospace;letter-spacing:.6px;color:#9fb0c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-dig b.d-up,.cc-dig b.d-down,.cc-dig b.d-yellow,.cc-dig b.d-white,.cc-dig b.d-na{color:var(--c)}
+@media(max-width:700px){.cc-dnum b{font-size:28px}}

@@ -438,16 +438,20 @@
     const buyB = bd ? up / bd * 100 : null, sellB = bd ? down / bd * 100 : null;
     const av = n(hb.advVol), dv = n(hb.decVol), vd = av != null && dv != null ? av + dv : null;
     const buyV = vd ? av / vd * 100 : null, sellV = vd ? dv / vd * 100 : null;
-    const p0 = v => `${Math.round(v)}%`, dRaw = n(d.raw);
+    const dRaw = n(d.raw), cov = n(hb.coverage);
+    const lvl = (v, t) => t === 'na' ? 'na' : t;
+    // [label, big digits, unit, tone, sub line, level 0-100 for the segment bar]
     const cells = [
-      ['MARKET HEALTH', f(h.score, 0), sTone(h.score), L(h.label)],
-      ['BREADTH', buyB == null ? '—' : `${p0(buyB)} ADVANCING / ${p0(sellB)} DECLINING`, buyB == null ? '' : buyB >= 55 ? 'up' : buyB <= 45 ? 'down' : 'yellow', '1H stocks advancing vs declining'],
-      ['STOCK VOLUME', buyV == null ? '—' : `${p0(buyV)} BUYING / ${p0(sellV)} SELLING`, buyV == null ? '' : 'white', '1H directional volume'],
-      ['DISTRIBUTION', dRaw == null ? '—' : p0(dRaw), dRaw == null ? '' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', `4H structural · ${L(d.label)}`],
-      ['SECTORS', sec.weak == null ? '—' : `${sec.weak} WEAK`, 'yellow', sec.strong == null ? 'sector participation unavailable' : `${sec.strong} strong · ${sec.neutral} mixed`],
-      ['DATA', L(x.dataStatus), tTone(x.dataStatus), hb.coverage == null ? 'coverage unavailable' : `${n(hb.coverage).toFixed(1)}% volume coverage`]
+      ['MARKET HEALTH', f(h.score, 0), '/100', sTone(h.score) || 'na', L(h.label), n(h.score)],
+      ['BREADTH', buyB == null ? '—' : String(Math.round(buyB)), '%', buyB == null ? 'na' : buyB >= 55 ? 'up' : buyB <= 45 ? 'down' : 'yellow', buyB == null ? '1H breadth unavailable' : `ADVANCING · ${Math.round(sellB)}% DECLINING`, buyB],
+      ['STOCK VOLUME', buyV == null ? '—' : String(Math.round(buyV)), '%', buyV == null ? 'na' : buyV >= 55 ? 'up' : buyV <= 45 ? 'down' : 'yellow', buyV == null ? '1H volume unavailable' : `BUYING · ${Math.round(sellV)}% SELLING`, buyV],
+      ['DISTRIBUTION', dRaw == null ? '—' : String(Math.round(dRaw)), '%', dRaw == null ? 'na' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', `4H STRUCTURAL · ${L(d.label)}`, dRaw],
+      ['SECTORS', sec.weak == null ? '—' : String(sec.weak), 'WEAK', 'yellow', sec.strong == null ? 'sector participation unavailable' : `${sec.strong} STRONG · ${sec.neutral} MIXED`, sec.strong == null ? null : sec.strong / 11 * 100],
+      ['DATA', L(x.dataStatus), '', tTone(x.dataStatus) || 'na', cov == null ? 'coverage unavailable' : `${cov.toFixed(1)}% VOLUME COVERAGE`, cov]
     ];
-    return `<div class="cc-digital">${cells.map(([k, v, t, note]) => `<div class="cc-dig"><small>${k}</small><b class="d-${t || 'na'}">${esc(v)}</b><span>${esc(note)}</span></div>`).join('')}</div>`;
+    const SEG = 20;
+    const bar = v => v == null ? '' : `<span class="cc-dseg">${Array.from({ length: SEG }, (_, i) => `<i class="${i < Math.round(Math.max(0, Math.min(100, v)) / 100 * SEG) ? 'on' : ''}"></i>`).join('')}</span>`;
+    return `<div class="cc-digital">${cells.map(([k, v, unit, t, note, level]) => `<div class="cc-dig d-${lvl(level, t)}"><small>${k}</small><div class="cc-dnum"><b data-ghost="${/^\d+$/.test(v) ? '8'.repeat(v.length) : ''}">${esc(v)}</b>${unit ? `<em>${esc(unit)}</em>` : ''}</div>${bar(level)}<span class="cc-dsub">${esc(note)}</span></div>`).join('')}</div>`;
   }
 
   function cluster() {
