@@ -58,10 +58,10 @@
     const attrs = {
       src: url, alt: '3D Ferrari Enzo',
       'interaction-prompt': 'none', 'shadow-intensity': '1.1', 'shadow-softness': '0.9', exposure: '1.05',
-      'environment-image': 'neutral', 'camera-orbit': '32deg 66deg 78%', 'field-of-view': '28deg',
+      'environment-image': 'neutral', 'camera-orbit': '32deg 68deg 120%', 'field-of-view': '28deg',
       'min-camera-orbit': 'auto 20deg auto', 'max-camera-orbit': 'auto 88deg auto', loading: 'eager', reveal: 'auto'
     };
-    if (!reduce) { attrs['auto-rotate'] = ''; attrs['rotation-per-second'] = '14deg'; attrs['auto-rotate-delay'] = '1500'; }
+    if (!reduce) { attrs['auto-rotate'] = ''; attrs['rotation-per-second'] = '20deg'; attrs['auto-rotate-delay'] = '0'; }
     Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
     // 'load' can be missed while the screen re-renders, so also watch the viewer's loaded flag.
     const done = () => { if (ready) return; ready = true; wrap.classList.add('ready'); wrap.parentNode?.classList.add('model-ready'); };

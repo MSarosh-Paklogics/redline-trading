@@ -32,6 +32,9 @@
     return null;
   }
 
+  // Shared with market-pulse.js: one live quote { last, change } or null (never demo values).
+  window.redlineQuoteRead = read;
+
   async function refresh() {
     if (busy || !window.redlineApi || typeof symbols === 'undefined') return;
     busy = true;
