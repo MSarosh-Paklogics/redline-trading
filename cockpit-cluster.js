@@ -349,8 +349,8 @@
     const pills = Object.fromEntries(cm?.pills || []), d22 = cm?.display?.degrees?.minute || {}, e6 = cm?.e6 || {}, e27 = cm?.e27 || {};
     const steps = [['WAVE', d22.badge || d22.direction || e27.decisionState], ['READY', pills.READINESS], ['PERMITTED', e6.permission]];
     return `<div class="os-home os-view">
+      <div class="cs-car3d os-bg-car" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div>
       <div class="os-hero">
-        <div class="cs-car3d os-hero-car" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div>
         <div class="os-hero-info">
           <div class="os-hero-price"><small>ES</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
           <div class="os-hero-gear ${cur ? 'g-' + cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>

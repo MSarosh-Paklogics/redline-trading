@@ -934,17 +934,22 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-ic.t-graphite{background:linear-gradient(145deg,#4a4f57,#1c1f24);border:1px solid #ffffff14}
 .os-ic.sm{width:30px;height:30px;border-radius:10px}.os-ic.sm svg{width:16px;height:16px}
 /* Home: the Enzo centre stage, info apps beside it */
-.os-home{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:16px;padding:14px}
-.os-hero{position:relative;display:flex;flex-direction:column;border-radius:16px;background:radial-gradient(ellipse at 50% 62%,#2a0a0c,#07090c 72%);border:1px solid #ffffff0d;overflow:hidden}
-.os-hero-car.cs-car3d{flex:1;width:100%;margin:0;min-height:320px;aspect-ratio:auto;border-radius:0}
-.os-hero-info{position:absolute;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.os-home{position:relative;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);gap:16px;padding:14px;min-height:500px;isolation:isolate}
+/* The Enzo fills the whole home screen behind everything */
+.os-bg-car.cs-car3d,.os-bg-car.cs-car3d.has-model{position:absolute;inset:0;z-index:-1;width:auto;height:auto;margin:0;aspect-ratio:auto;border-radius:0;overflow:hidden;background:radial-gradient(ellipse at 38% 60%,#3a0c10,#07090c 70%)}
+.os-bg-car>img{position:absolute;inset:0 30% 0 0;width:70%;height:100%;object-fit:cover}
+.os-bg-car .cs-model{right:30%}
+.os-bg-car:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 45%,#05070acc 78%),linear-gradient(180deg,#05070a99,transparent 22%,transparent 78%,#05070acc)}
+.os-bg-car .cs-model-credit{left:14px;right:auto;bottom:62px;text-align:left}
+.os-hero{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:460px;pointer-events:none}
+.os-hero-info{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 6px;text-shadow:0 2px 12px #000}
 .os-hero-price small,.os-hero-gear small{display:block;font:700 9px Consolas,monospace;letter-spacing:1.2px;color:#8aa0b4}
 .os-hero-price b{font:700 34px/1.1 Bahnschrift,"Segoe UI",sans-serif;color:#fff;letter-spacing:.5px}
 .os-hero-gear{text-align:right}
 .os-hero-gear b{display:block;font:800 40px/1 Bahnschrift,"Segoe UI",sans-serif;color:#fff}
 .os-hero-gear span{font:700 9px Consolas,monospace;letter-spacing:.8px;color:#c8d3dd}
 .os-hero-gear.g-up b{color:#20c46e}.os-hero-gear.g-yellow b{color:#fff200}.os-hero-gear.g-down b{color:#ff3b3b}
-.os-hero-chain{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #ffffff0d;background:#05070acc}
+.os-hero-chain{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;border:1px solid #ffffff14;background:#05070a8c;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .os-hero-chain span{flex:1;display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center;min-width:0}
 .os-hero-chain i{grid-row:span 2;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid #ffffff2a;font:700 9px Consolas,monospace;font-style:normal;color:#c8d3dd}
 .os-hero-chain small{font:700 8px Consolas,monospace;letter-spacing:1px;color:#8aa0b4}
@@ -952,7 +957,7 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-hero-chain em{font-style:normal;color:#5d7184}
 .os-hero-chain .g-up b{color:#20c46e}.os-hero-chain .g-yellow b{color:#fff200}.os-hero-chain .g-down b{color:#ff3b3b}
 .os-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
-.os-tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic name" "val val";column-gap:10px;row-gap:6px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid #ffffff10;background:linear-gradient(160deg,#111a23,#0a0f14);color:#e8eef5;text-align:left;cursor:pointer;transition:transform .18s,border-color .2s}
+.os-tile{display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic name" "val val";column-gap:10px;row-gap:6px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid #ffffff1a;background:#0b1118a6;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#e8eef5;text-align:left;cursor:pointer;transition:transform .18s,border-color .2s}
 .os-tile:hover{transform:translateY(-2px);border-color:#fff20055}
 .os-tile:active{transform:scale(.98)}
 .os-tile .os-ic{grid-area:ic}
@@ -979,6 +984,6 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-navkeys button:hover{background:#ffffff0d;color:#fff}
 .os-navkeys button.on{color:#fff200}
 .os-sysbar .cs-dock-note{margin-left:auto}
-@media(max-width:1100px){.os-home{grid-template-columns:1fr}.os-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1100px){.os-home{grid-template-columns:1fr}.os-bg-car>img{inset:0;width:100%}.os-bg-car .cs-model{right:0}.os-hero{min-height:340px}.os-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.os-tiles{grid-template-columns:1fr 1fr}.os-detail{column-count:1}.os-navkeys{position:static;transform:none;margin:0 auto}.os-sysbar .cs-dock-note{display:none}}
 @media(prefers-reduced-motion:reduce){.os-view{animation:none}}
