@@ -346,15 +346,15 @@
     const signedN = v => v == null ? '—' : `${v > 0 ? '+' : ''}${f(v, 0)}`;
     const paras = list => list.length ? list.map(t => `<p class="cc-na os-para">${esc(t)}</p>`).join('') : '<p class="cc-na">Brief unavailable.</p>';
     return [
-      { id: 'permit', name: 'Trade Permission', tile: 't-yellow', value: f(score, 0), sub: L(p.label), tone: sTone(score), page: pg['TRADE PERMISSION'] },
-      { id: 'health', name: 'Market Health', tile: 't-green', value: f(h.score, 0), sub: L(h.label), tone: sTone(h.score), page: pg['MARKET HEALTH'] },
+      { id: 'permit', bar: score, name: 'Trade Permission', tile: 't-yellow', value: f(score, 0), sub: L(p.label), tone: sTone(score), page: pg['TRADE PERMISSION'] },
+      { id: 'health', bar: n(h.score), name: 'Market Health', tile: 't-green', value: f(h.score, 0), sub: L(h.label), tone: sTone(h.score), page: pg['MARKET HEALTH'] },
       { id: 'partic', name: 'Participation', tile: 't-purple', value: L(b.state), sub: `Surviving ${pct(n(b.usableEffectiveWeight) == null ? null : n(b.usableEffectiveWeight) * 100, 0)}`, tone: tTone(b.state), page: pg['PARTICIPATION'] },
-      { id: 'evidence', name: '1H Market Evidence', tile: 't-cyan', value: hb.buyBreadth == null ? '—' : pct(hb.buyBreadth, 0), sub: 'Advancing share of stocks · 1H', tone: sTone(hb.buyBreadth), page: pg['1H MARKET EVIDENCE'] },
-      { id: 'dist', name: 'Distribution', tile: 't-red', value: dRaw == null ? '—' : f(dRaw, 0), sub: L(x?.distribution?.label), tone: dRaw == null ? '' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', page: pg['DISTRIBUTION'] },
+      { id: 'evidence', bar: n(hb.buyBreadth), name: '1H Market Evidence', tile: 't-cyan', value: hb.buyBreadth == null ? '—' : pct(hb.buyBreadth, 0), sub: 'Advancing share of stocks · 1H', tone: sTone(hb.buyBreadth), page: pg['1H MARKET EVIDENCE'] },
+      { id: 'dist', bar: dRaw, name: 'Distribution', tile: 't-red', value: dRaw == null ? '—' : f(dRaw, 0), sub: L(x?.distribution?.label), tone: dRaw == null ? '' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', page: pg['DISTRIBUTION'] },
       { id: 'index', name: 'Index vs Market', tile: 't-graphite', value: diff == null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}`, sub: diff == null ? 'Unavailable' : diff > 0 ? 'ES holding up better' : 'Broader market stronger', tone: diff == null ? '' : diff > 0 ? 'yellow' : 'down', page: pg['INDEX VS BROADER MARKET'] },
-      { id: 'stress', name: 'Financial Stress', tile: 't-red', value: f(cr.creditFragility, 0), sub: L(x?.credit?.label), tone: stressTone(cr.creditFragility),
+      { id: 'stress', bar: n(cr.creditFragility), name: 'Financial Stress', tile: 't-red', value: f(cr.creditFragility, 0), sub: L(x?.credit?.label), tone: stressTone(cr.creditFragility),
         page: { head: 'CREDIT · BANKS · BONDS · LIQUIDITY', body: big(f(cr.creditFragility, 0), L(x?.credit?.label), stressTone(cr.creditFragility)) + kv('CREDIT FRAGILITY', f(cr.creditFragility), stressTone(cr.creditFragility)) + kv('MACRO CREDIT', f(cr.creditStress), stressTone(cr.creditStress)) + kv('BOND MARKET', f(cr.bondMarket), stressTone(cr.bondMarket)) + kv('LIQUIDITY', f(cr.liquidity), stressTone(cr.liquidity)) + '<p class="cc-na">Engine 25 credit stress detail. Higher = more stress on equities.</p>' } },
-      { id: 'macro', name: 'Macro Pressure', tile: 't-yellow', value: f(mac.score, 0), sub: L(mac.label), tone: stressTone(mac.score),
+      { id: 'macro', bar: n(mac.score), name: 'Macro Pressure', tile: 't-yellow', value: f(mac.score, 0), sub: L(mac.label), tone: stressTone(mac.score),
         page: { head: 'RATES · DOLLAR · OIL', body: big(f(mac.score, 0), L(mac.label), stressTone(mac.score)) + Object.entries(x?.macroTrends || {}).slice(0, 8).map(([k, t]) => kv(L(k), n(t?.current) == null ? '—' : f(t.current, 2))).join('') + `<p class="cc-na">Engine 25 macro pressure${x?.macroFresh ? '' : ' · intraday macro feed not fresh'}.</p>` } },
       { id: 'leaders', name: 'Market Leadership', tile: 't-green', value: signedN(net), sub: nh == null ? 'New highs vs new lows' : `${f(nh, 0)} highs · ${f(nl, 0)} lows`, tone: net == null ? '' : net > 0 ? 'up' : net < 0 ? 'down' : 'yellow',
         page: { head: 'NEW HIGHS VS NEW LOWS', body: big(signedN(net), net == null ? 'UNAVAILABLE' : net > 0 ? 'MORE NEW HIGHS' : net < 0 ? 'MORE NEW LOWS' : 'BALANCED', net == null ? '' : net > 0 ? 'up' : 'down') + kv('NEW HIGHS · 1H', f(nh, 0), 'up') + kv('NEW LOWS · 1H', f(nl, 0), 'down') + kv('NET · INTRADAY', signedN(n(x?.nhnl?.intradayNetHighsLows))) + kv('NET · EOD', signedN(n(x?.nhnl?.eodNetHighsLows))) } },
@@ -377,7 +377,7 @@
         </div>
         <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}</div>
       </div>
-      <div class="os-tiles">${list.map(a => `<button type="button" class="os-tile" data-os-open="${a.id}" title="${esc(a.sub)}"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><small>${a.name}</small><b class="g-${a.tone || 'na'}">${esc(a.value)}</b></button>`).join('')}</div>
+      <div class="os-tiles">${list.map(a => `<button type="button" class="os-tile" data-os-open="${a.id}" title="${esc(a.sub)}"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><small>${a.name}</small><b class="g-${a.tone || 'na'}">${esc(a.value)}</b><span class="os-tsub">${esc(a.sub)}</span>${a.bar == null ? '' : `<i class="os-tbar g-${a.tone || 'na'}"><i style="width:${Math.max(2, Math.min(100, a.bar))}%"></i></i>`}</button>`).join('')}</div>
     </div>`;
   }
 
