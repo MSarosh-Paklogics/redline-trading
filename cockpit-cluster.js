@@ -304,7 +304,7 @@
 
   /* ---------- Redline OS: simple car screen ----------
      Home = the car (Enzo 3D model in local demo, F80 photo otherwise) with ES price, risk gear and the
-     three-step decision chain, plus six info apps that show their reading on the tile. Tapping a tile
+     three-step decision chain, plus ten info apps (named after Brian's X-Ray cards) that show their reading on the tile. Tapping a tile
      opens it full screen; the system bar has back and home only. Only the screen re-renders. Display only. */
   const csOS = { app: 'home', prev: [] };
   const IC = {
@@ -323,26 +323,44 @@
     journal: '<path d="M5 3 H17 C18.5 3 19 4 19 5 V21 H7 C5.9 21 5 20.1 5 19 Z M8 7 H16 M8 11 H16 M8 15 H13" fill="none" stroke="currentColor" stroke-width="1.9"/>',
     meters: '<path d="M3 15 A9 9 0 0 1 21 15" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 15 L16.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="2"/>',
     engines: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2 V6 M15 2 V6 M9 18 V22 M15 18 V22 M2 9 H6 M2 15 H6 M18 9 H22 M18 15 H22" stroke="currentColor" stroke-width="1.8"/>',
+    stress: '<path d="M12 2 L22 20 H2 Z M12 9 V14 M12 16.5 V17" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/>',
+    macro: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12 H21 M12 3 C15 6 15 18 12 21 C9 18 9 6 12 3" fill="none" stroke="currentColor" stroke-width="1.8"/>',
+    leaders: '<path d="M7 20 V11 M12 20 V5 M17 20 V14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M9 6 L12 3 L15 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+    intraday: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7 V12 L15.5 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
     settings: '<path d="M12 8.5 A3.5 3.5 0 1 0 12.01 8.5 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M4.9 4.9 L7 7 M17 17 L19.1 19.1 M4.9 19.1 L7 17 M17 7 L19.1 4.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
   };
   const svgIcon = k => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">${IC[k] || ''}</svg>`;
 
+  /* Screen apps, named after Brian's Engine 25 X-Ray cards. Each tile shows its live reading; the
+     full-screen app shows the card detail. Display only, backend values only. */
   function apps(x, cm, r) {
-    const p = x?.permission || {}, h = x?.headline || {}, b = x?.blended || {}, score = n(p.score);
+    const p = x?.permission || {}, h = x?.headline || {}, b = x?.blended || {}, hb = x?.hourly || {}, score = n(p.score);
     const master = n(x?.meter?.master), broader = n(x?.broader), diff = master == null || broader == null ? null : master - broader;
-    const dRaw = n(x?.distribution?.raw);
+    const dRaw = n(x?.distribution?.raw), cr = x?.credit?.scores || {}, mac = x?.macro || {};
+    const nh = n(x?.hourlyNhNl?.nh), nl = n(x?.hourlyNhNl?.nl), net = nh == null || nl == null ? n(x?.nhnl?.intradayNetHighsLows) : nh - nl;
+    const e29 = x?.e29 || {}, brief = x?.briefs?.intraday || [];
     const pg = Object.fromEntries(xrayPages(x).map(q => [q.title, q]));
-    const navVal = r.price == null ? '—' : r.inside ? `IN ${r.inside.label}` : r.above ? `+${(r.above.lo - r.price).toFixed(2)}` : '—';
-    const navSub = r.above && r.price != null ? `Next above · ${r.above.label} ${r.above.lo.toFixed(0)}–${r.above.hi.toFixed(0)}` : r.below && r.price != null ? `Next below · ${r.below.label} ${r.below.hi.toFixed(0)} (${(r.below.hi - r.price).toFixed(2)})` : 'No zone on active layers';
+    const stressTone = v => n(v) == null ? '' : n(v) >= 65 ? 'down' : n(v) >= 50 ? 'yellow' : 'up';
+    const signedN = v => v == null ? '—' : `${v > 0 ? '+' : ''}${f(v, 0)}`;
+    const paras = list => list.length ? list.map(t => `<p class="cc-na os-para">${esc(t)}</p>`).join('') : '<p class="cc-na">Brief unavailable.</p>';
     return [
-      { id: 'nav', name: 'Navigation', tile: 't-cyan', value: navVal, sub: navSub, tone: r.inside ? 'yellow' : '' },
-      { id: 'permit', name: 'Permission', tile: 't-yellow', value: f(score, 0), sub: L(p.label), tone: sTone(score), page: pg['TRADE PERMISSION'] },
-      { id: 'health', name: 'Health', tile: 't-green', value: f(h.score, 0), sub: L(h.label), tone: sTone(h.score), page: pg['MARKET HEALTH'] },
+      { id: 'permit', name: 'Trade Permission', tile: 't-yellow', value: f(score, 0), sub: L(p.label), tone: sTone(score), page: pg['TRADE PERMISSION'] },
+      { id: 'health', name: 'Market Health', tile: 't-green', value: f(h.score, 0), sub: L(h.label), tone: sTone(h.score), page: pg['MARKET HEALTH'] },
       { id: 'partic', name: 'Participation', tile: 't-purple', value: L(b.state), sub: `Surviving ${pct(n(b.usableEffectiveWeight) == null ? null : n(b.usableEffectiveWeight) * 100, 0)}`, tone: tTone(b.state), page: pg['PARTICIPATION'] },
+      { id: 'evidence', name: '1H Market Evidence', tile: 't-cyan', value: hb.buyBreadth == null ? '—' : pct(hb.buyBreadth, 0), sub: 'Advancing share of stocks · 1H', tone: sTone(hb.buyBreadth), page: pg['1H MARKET EVIDENCE'] },
       { id: 'dist', name: 'Distribution', tile: 't-red', value: dRaw == null ? '—' : f(dRaw, 0), sub: L(x?.distribution?.label), tone: dRaw == null ? '' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', page: pg['DISTRIBUTION'] },
-      { id: 'index', name: 'Index vs Market', tile: 't-graphite', value: diff == null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}`, sub: diff == null ? 'Unavailable' : diff > 0 ? 'ES holding up better' : 'Broader market stronger', tone: diff == null ? '' : diff > 0 ? 'yellow' : 'down', page: pg['INDEX VS BROADER MARKET'] }
+      { id: 'index', name: 'Index vs Market', tile: 't-graphite', value: diff == null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(1)}`, sub: diff == null ? 'Unavailable' : diff > 0 ? 'ES holding up better' : 'Broader market stronger', tone: diff == null ? '' : diff > 0 ? 'yellow' : 'down', page: pg['INDEX VS BROADER MARKET'] },
+      { id: 'stress', name: 'Financial Stress', tile: 't-red', value: f(cr.creditFragility, 0), sub: L(x?.credit?.label), tone: stressTone(cr.creditFragility),
+        page: { head: 'CREDIT · BANKS · BONDS · LIQUIDITY', body: big(f(cr.creditFragility, 0), L(x?.credit?.label), stressTone(cr.creditFragility)) + kv('CREDIT FRAGILITY', f(cr.creditFragility), stressTone(cr.creditFragility)) + kv('MACRO CREDIT', f(cr.creditStress), stressTone(cr.creditStress)) + kv('BOND MARKET', f(cr.bondMarket), stressTone(cr.bondMarket)) + kv('LIQUIDITY', f(cr.liquidity), stressTone(cr.liquidity)) + '<p class="cc-na">Engine 25 credit stress detail. Higher = more stress on equities.</p>' } },
+      { id: 'macro', name: 'Macro Pressure', tile: 't-yellow', value: f(mac.score, 0), sub: L(mac.label), tone: stressTone(mac.score),
+        page: { head: 'RATES · DOLLAR · OIL', body: big(f(mac.score, 0), L(mac.label), stressTone(mac.score)) + Object.entries(x?.macroTrends || {}).slice(0, 8).map(([k, t]) => kv(L(k), n(t?.current) == null ? '—' : f(t.current, 2))).join('') + `<p class="cc-na">Engine 25 macro pressure${x?.macroFresh ? '' : ' · intraday macro feed not fresh'}.</p>` } },
+      { id: 'leaders', name: 'Market Leadership', tile: 't-green', value: signedN(net), sub: nh == null ? 'New highs vs new lows' : `${f(nh, 0)} highs · ${f(nl, 0)} lows`, tone: net == null ? '' : net > 0 ? 'up' : net < 0 ? 'down' : 'yellow',
+        page: { head: 'NEW HIGHS VS NEW LOWS', body: big(signedN(net), net == null ? 'UNAVAILABLE' : net > 0 ? 'MORE NEW HIGHS' : net < 0 ? 'MORE NEW LOWS' : 'BALANCED', net == null ? '' : net > 0 ? 'up' : 'down') + kv('NEW HIGHS · 1H', f(nh, 0), 'up') + kv('NEW LOWS · 1H', f(nl, 0), 'down') + kv('NET · INTRADAY', signedN(n(x?.nhnl?.intradayNetHighsLows))) + kv('NET · EOD', signedN(n(x?.nhnl?.eodNetHighsLows))) } },
+      { id: 'intraday', name: 'Intraday', tile: 't-purple', value: L(e29.overallState), sub: 'Engine 29 live market character', tone: tTone(e29.overallState),
+        page: { head: 'ENGINE 29 · INTRADAY BRIEF', body: big(L(e29.overallState), `TACTICAL ${L(e29.tacticalState)}`, tTone(e29.overallState)) + kv('STRUCTURAL', L(e29.structuralState), tTone(e29.structuralState)) + kv('TACTICAL', L(e29.tacticalState), tTone(e29.tacticalState)) + kv('FAST TACTICAL', L(e29.fastTacticalState), tTone(e29.fastTacticalState)) + '<p class="cc-kv"><span>INTRADAY BRIEF</span></p>' + paras(brief) } }
     ];
   }
+
 
   function homeView(x, cm, r, cur) {
     const list = apps(x, cm, r);

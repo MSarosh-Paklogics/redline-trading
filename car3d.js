@@ -1,5 +1,6 @@
 'use strict';
-/* Optional interactive 3D car in the command screen (presentation only).
+/* Optional 3D car in the command screen (presentation only). It turns on its own and is not
+   touchable: no camera controls, so taps and drags go to the screen, not the car.
    If assets/local/enzo.glb exists (or window.REDLINE_CAR_MODEL points at a model), the car photo
    in the command screen is replaced by a rotatable 3D model rendered with Google's <model-viewer>
    web component, loaded from a CDN only in that case. The model is committed and deployed (the owner
@@ -55,7 +56,7 @@
     el = document.createElement('model-viewer');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const attrs = {
-      src: url, alt: '3D Ferrari Enzo', 'camera-controls': '', 'touch-action': 'pan-y',
+      src: url, alt: '3D Ferrari Enzo',
       'interaction-prompt': 'none', 'shadow-intensity': '1.1', 'shadow-softness': '0.9', exposure: '1.05',
       'environment-image': 'neutral', 'camera-orbit': '32deg 66deg 78%', 'field-of-view': '28deg',
       'min-camera-orbit': 'auto 20deg auto', 'max-camera-orbit': 'auto 88deg auto', loading: 'eager', reveal: 'auto'

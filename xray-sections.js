@@ -51,7 +51,9 @@
     return `<svg class="xr-trend" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Engine 25 composite score, last ${rows.length} sessions">${[40, 55, 75].map(guide).join('')}<polyline points="${line}" class="xr-trend-line"/></svg><div class="xr-trend-axis"><span>${esc(rows[0].date)}</span><span>Latest ${f(rows.at(-1).score)} · ${esc(rows.at(-1).date)}</span></div>`;
   }
 
-  function engine25(x) {
+  // opt.skip: panel keys left out (the dashboard drops the ones the command screen already shows).
+  function engine25(x, opt = {}) {
+    const skip = new Set(opt.skip || []);
     const h = x.headline || {}, hb = x.hourly || {}, sec = x.sectors || {}, dd = x.distributionDetail || {}, comp = dd.components || {}, sd = x.sourceDiagnostics || {}, blend = x.blended || {};
     const master = x.meter?.master, broader = x.broader, diff = master == null || broader == null ? null : master - broader;
     const prior = key => { const rows = (dd.history?.[{ structural4h: '4h', tactical1h: '1h', confirmation30m: '30m', acceleration10m: '10m' }[key]] || []).filter(r => n(r?.pressure) != null); return rows.length >= 2 ? n(rows.at(-2).pressure) : null; };
@@ -108,17 +110,17 @@
       `), btn('Open market meter', 'meters', false, 'arrow'))}
     </div>
 
-    ${panel('Redline market briefing', body(`${tabs('brief', ui.brief, [['current', 'Current market'], ['intraday', 'Intraday']])}${briefParas.length ? briefParas.map(p => `<p class="xr-para">${esc(p)}</p>`).join('') : '<p class="xr-muted">Briefing unavailable.</p>'}`), '', 'Full plain-English read of current market conditions from canonical Redline evidence')}
+    ${skip.has('brief') ? '' : panel('Redline market briefing', body(`${tabs('brief', ui.brief, [['current', 'Current market'], ['intraday', 'Intraday']])}${briefParas.length ? briefParas.map(p => `<p class="xr-para">${esc(p)}</p>`).join('') : '<p class="xr-muted">Briefing unavailable.</p>'}`), '', 'Full plain-English read of current market conditions from canonical Redline evidence')}
 
     <div class="grid cols-2">
       ${panel('11-sector participation', body(`${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
-      ${panel('Financial stress', body(`${note('Credit, banks, bonds and liquidity')}${kv('Credit fragility', f(x.credit?.scores?.creditFragility))}${kv('Macro credit', f(x.credit?.scores?.creditStress))}${kv('Bond market', f(x.credit?.scores?.bondMarket))}${kv('Liquidity', f(x.credit?.scores?.liquidity))}<div class="notice">${esc(L(x.credit?.label))}</div>`))}
+      ${skip.has('stress') ? '' : panel('Financial stress', body(`${note('Credit, banks, bonds and liquidity')}${kv('Credit fragility', f(x.credit?.scores?.creditFragility))}${kv('Macro credit', f(x.credit?.scores?.creditStress))}${kv('Bond market', f(x.credit?.scores?.bondMarket))}${kv('Liquidity', f(x.credit?.scores?.liquidity))}<div class="notice">${esc(L(x.credit?.label))}</div>`))}
     </div>
 
-    ${panel('Macro pressure — rates, dollar, oil', body(`${note('Red = increasing pressure on equities. Green = easing pressure.')}<div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Current</th><th>2H</th><th>Session</th><th>1D</th><th>2D</th><th>5D</th></tr></thead><tbody>${macroRow('U.S. 10Y yield', mt.tenYearYield, 'bp')}${macroRow('U.S. 30Y yield', mt.thirtyYearYield, 'bp')}${macroRow('U.S. Dollar (UUP)', mt.dollarUup, 'pct')}${macroRow('WTI oil', mt.wti, 'pct')}${macroRow('Brent oil', mt.brent, 'pct')}</tbody></table></div>${kv('Macro pressure', `${f(x.macro?.score)} · ${L(x.macro?.label)}`, tone(x.macro?.label))}${x.macroFresh ? '' : '<div class="notice">Intraday macro data is not fresh.</div>'}`))}
+    ${skip.has('macro') ? '' : panel('Macro pressure — rates, dollar, oil', body(`${note('Red = increasing pressure on equities. Green = easing pressure.')}<div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Current</th><th>2H</th><th>Session</th><th>1D</th><th>2D</th><th>5D</th></tr></thead><tbody>${macroRow('U.S. 10Y yield', mt.tenYearYield, 'bp')}${macroRow('U.S. 30Y yield', mt.thirtyYearYield, 'bp')}${macroRow('U.S. Dollar (UUP)', mt.dollarUup, 'pct')}${macroRow('WTI oil', mt.wti, 'pct')}${macroRow('Brent oil', mt.brent, 'pct')}</tbody></table></div>${kv('Macro pressure', `${f(x.macro?.score)} · ${L(x.macro?.label)}`, tone(x.macro?.label))}${x.macroFresh ? '' : '<div class="notice">Intraday macro data is not fresh.</div>'}`))}
 
     <div class="grid cols-3">
-      ${panel('Market leadership — new highs vs new lows', body(`${kv('New highs', f(x.hourlyNhNl?.nh), 'up')}${kv('New lows', f(x.hourlyNhNl?.nl), 'down')}${kv('Net new highs / lows', signed(x.nhnl?.intradayNetHighsLows, 0), n(x.nhnl?.intradayNetHighsLows) < 0 ? 'down' : 'up')}`))}
+      ${skip.has('leaders') ? '' : panel('Market leadership — new highs vs new lows', body(`${kv('New highs', f(x.hourlyNhNl?.nh), 'up')}${kv('New lows', f(x.hourlyNhNl?.nl), 'down')}${kv('Net new highs / lows', signed(x.nhnl?.intradayNetHighsLows, 0), n(x.nhnl?.intradayNetHighsLows) < 0 ? 'down' : 'up')}`))}
       ${panel('Active event risk', body(`${note('Only material events that can meaningfully affect market risk belong here.')}${(() => {
         // Same as Frye: the first active material Engine 25 event.
         const ev = x.newsEvents[0];
