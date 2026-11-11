@@ -468,6 +468,9 @@
     </section>`;
   }
 
+  // Shared with the Market X-Ray page: ES Master gearbox and digital readouts.
+  window.redlineCockpit = { gate, digitalStrip };
+
   const base = overview;
   overview = function () {
     const html = base.apply(this, arguments);

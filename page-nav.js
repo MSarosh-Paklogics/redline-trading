@@ -33,10 +33,30 @@
     const bar = document.createElement('nav');
     bar.className = 'page-nav';
     bar.setAttribute('aria-label', 'Sections on this page');
-    bar.innerHTML = `<span class="page-nav-label">ON THIS PAGE</span><div class="page-nav-track">${items.map((it, i) => `<button type="button" data-nav-to="${it.id}" class="${i ? '' : 'on'}">${it.text}</button>`).join('')}</div>`;
+    bar.innerHTML = `<span class="page-nav-label">ON THIS PAGE</span><div class="page-nav-track">${items.map((it, i) => `<button type="button" data-nav-to="${it.id}" class="${i ? '' : 'on'}">${it.text}</button>`).join('')}</div>` + signalBadge();
     const first = main.querySelector('.page-head') || main.querySelector('.race-hero');
     (first ? first.nextSibling ? main.insertBefore(bar, first.nextSibling) : main.appendChild(bar) : main.prepend(bar));
     spy();
+  }
+
+  /* Live trade signal at the right end of the bar (client request 2026-11-12). Mirrors the backend
+     only: Engine 6 is the final permission (ALLOW / REDUCE / STAND_DOWN) and the direction is the
+     Engine 17 bias. BUY / SELL shows only when Engine 6 allows the trade; otherwise NO TRADE.
+     A signal, never an order (Redline places no trades). */
+  function signalBadge() {
+    const cm = window.redlineChart?.model;
+    if (!cm) return '';
+    const e6 = cm.e6 || {}, perm = String(e6.permission || '').toUpperCase();
+    const bias = String(Object.fromEntries(cm.pills || []).BIAS || '').toUpperCase();
+    const dir = /LONG/.test(bias) ? 'LONG' : /SHORT/.test(bias) ? 'SHORT' : null;
+    const allowed = perm === 'ALLOW' || perm === 'REDUCE';
+    const sym = String(e6.symbol || cm.symbol || 'ES').toUpperCase(), tf = e6.tf || cm.tf || '';
+    let text, tone, sub;
+    if (!perm) { text = 'SIGNAL UNAVAILABLE'; tone = 'na'; sub = 'Engine 6 not published'; }
+    else if (allowed && dir) { text = dir === 'LONG' ? 'BUY SIGNAL' : 'SELL SIGNAL'; tone = dir === 'LONG' ? 'buy' : 'sell'; sub = `E6 ${perm}${perm === 'REDUCE' ? ' size' : ''} ×${e6.sizeMultiplier ?? '—'} · E17 ${dir}`; }
+    else if (allowed) { text = 'NO DIRECTION'; tone = 'wait'; sub = `E6 ${perm} · E17 bias ${bias || 'unavailable'}`; }
+    else { text = 'NO TRADE'; tone = 'wait'; sub = `E6 ${perm.replace(/_/g, ' ')} · E17 ${bias || '—'}`; }
+    return `<div class="pn-signal pn-${tone}" title="Engine 6 final permission + Engine 17 bias for ${sym}. A signal only — Redline places no orders."><span class="pn-sym">${sym}${tf ? ' · ' + tf : ''}</span><b>${text}</b><small>${sub}</small></div>`;
   }
 
   function offset() { return (document.querySelector('.page-nav')?.offsetHeight || 0) + BAR_GAP + 8; }

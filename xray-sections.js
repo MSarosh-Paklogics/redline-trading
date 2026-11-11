@@ -232,7 +232,10 @@
       return top + '<div class="ce-empty">Loading the live Engine 25 Market X-Ray… Nothing is shown rather than demo data.</div>';
     }
     const live = `<div class="sl-status"><span class="pill green">LIVE BACKEND</span><span>Data <b>${esc(x.dataStatus || '—')}</b></span><span>Engine 25 <b>${esc(String(x.headline?.label || '—').toUpperCase())}</b></span><span>Generated <b>${esc(x.generatedAt ? String(x.generatedAt).replace('T', ' ').slice(0, 16) + ' UTC' : '—')}</b></span></div>`;
-    return top + live + (typeof raceLiveOverview === 'function' ? raceLiveOverview(x) : '') + window.redlineXraySections(x);
+    // ES Master as a gear (R / N / 1-4 / TURBO) plus digital readouts, instead of analog meters.
+    const ck = window.redlineCockpit;
+    const gear = ck ? `<div class="race-section-label"><span>ES MASTER · GEAR & DIGITAL READOUTS</span><small>R &lt;50 · N 50–62 · 1–4 · TURBO 90+ · LIVE BACKEND</small></div><div class="xr-gearbox">${ck.gate(x)}${ck.digitalStrip(x)}</div>` : '';
+    return top + live + gear + (typeof raceLiveOverview === 'function' ? raceLiveOverview(x, { meters: !ck }) : '') + window.redlineXraySections(x);
   };
   window.fryePages = { ...(window.fryePages || {}), xray: page };
 })();

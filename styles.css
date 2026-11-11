@@ -1064,3 +1064,16 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .race-dashboard .db-tabs button.selected small,.db-tabs button.selected small{color:#fff200}
 .db-tabs button:after{left:18px;right:18px;height:3px;background:#fff200}
 @media(max-width:700px){.page-nav-track button{padding:8px 13px;font-size:12px}.db-tabs button{padding:10px 12px;font-size:13px}}
+/* Live trade signal at the right of the page bar: Engine 6 permission + Engine 17 bias */
+.pn-signal{flex-shrink:0;margin-left:auto;display:grid;grid-template-columns:auto auto;grid-template-areas:"sym txt" "sub sub";align-items:center;column-gap:10px;row-gap:2px;padding:6px 14px;border-radius:10px;border:1px solid #2c2c2e;background:#151517}
+.pn-signal .pn-sym{grid-area:sym;font:700 10px Consolas,monospace;letter-spacing:1px;color:#c8d3dd}
+.pn-signal b{grid-area:txt;font:800 15px Bahnschrift,"Segoe UI",sans-serif;letter-spacing:.8px;text-align:right}
+.pn-signal small{grid-area:sub;font:600 9px Consolas,monospace;color:#9fb0c0;white-space:nowrap}
+.pn-buy{border-color:#20c46e;background:linear-gradient(135deg,#0d3b24,#08160f);box-shadow:0 0 18px #20c46e40}.pn-buy b{color:#20c46e}
+.pn-sell{border-color:#ff3b3b;background:linear-gradient(135deg,#4a0d10,#170708);box-shadow:0 0 18px #ff3b3b40}.pn-sell b{color:#ff3b3b}
+.pn-wait{border-color:#fff20066}.pn-wait b{color:#fff200}.pn-na b{color:#8aa0b4}
+@media(max-width:900px){.pn-signal small{display:none}}
+/* Market X-Ray: ES Master gearbox + digital readouts */
+.xr-gearbox{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;align-items:center;padding:16px;border-radius:14px;border:1px solid #232325;background:radial-gradient(ellipse at 15% 50%,#1a0a0c,#0a0a0b 60%)}
+.xr-gearbox .cc-digital{grid-column:auto;margin:0;padding:0;border:0;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:800px){.xr-gearbox{grid-template-columns:1fr}.xr-gearbox .cc-digital{grid-template-columns:1fr 1fr}}
