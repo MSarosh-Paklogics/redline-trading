@@ -52,5 +52,7 @@
 
   const base = bindPage;
   bindPage = function () { base.apply(this, arguments); attach(); };
+  // Switching apps inside the command screen re-renders only the screen.
+  window.addEventListener('redline:screen', attach);
   probe();
 })();

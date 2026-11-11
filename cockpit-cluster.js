@@ -302,27 +302,135 @@
     return `<div class="cs-chain">${steps.map(([t, o, v], i) => `<div class="cs-step ${tTone(v)}"><i>${i + 1}</i><div><small>${t} · ${o}</small><b>${L(v)}</b></div></div>`).join('')}</div>${conflict ? `<p class="cs-conflict">${conflict}</p>` : ''}`;
   }
 
-  function commandScreen(x, cm) {
-    if (!x && !cm) return '';
+  /* ---------- Redline OS: Android-style car screen (home, app drawer, full-screen apps) ----------
+     Home = car status + map + all readouts. The app drawer lists every app with a live badge; in-screen
+     apps open full screen inside the device, page apps open the full Redline page. System bar: back,
+     home, apps, plus pinned favourites. Only the screen re-renders on app switches. Display only. */
+  const csOS = { app: 'home', prev: [] };
+  const IC = {
+    nav: '<path d="M12 2 L20 21 L12 17 L4 21 Z"/>',
+    car: '<path d="M5 15 L6.5 9.5 C7 8 8 7 9.5 7 H14.5 C16 7 17 8 17.5 9.5 L19 15 V19 H17 V17.5 H7 V19 H5 Z M7.5 14.5 a1.4 1.4 0 1 0 0.01 0 M16.5 14.5 a1.4 1.4 0 1 0 0.01 0 M8.2 11 H15.8 L15 8.8 H9 Z"/>',
+    permit: '<path d="M12 2 L20 5 V11 C20 16 16.5 20 12 22 C7.5 20 4 16 4 11 V5 Z M8.5 12 L11 14.5 L15.8 9.5" fill="none" stroke="currentColor" stroke-width="2"/>',
+    health: '<path d="M2 12 H7 L9 6 L13 18 L15.5 10 L17 12 H22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>',
+    partic: '<path d="M4 20 V12 M9 20 V6 M14 20 V10 M19 20 V4" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>',
+    evidence: '<path d="M3 20 H21 M6 16 L10 11 L13 14 L19 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="19" cy="6" r="2"/>',
+    dist: '<path d="M7 4 V16 M3.5 12.5 L7 16 L10.5 12.5 M17 4 V20 M13.5 16.5 L17 20 L20.5 16.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+    index: '<path d="M12 3 V21 M5 21 H19 M4 8 H20 M4 8 L1.5 14 H6.5 Z M20 8 L17.5 14 H22.5 Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>',
+    chart: '<path d="M6 3 V21 M12 6 V18 M18 4 V20" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="7" width="4" height="8" rx="1"/><rect x="10" y="9" width="4" height="5" rx="1"/><rect x="16" y="6" width="4" height="9" rx="1"/>',
+    xray: '<path d="M4 8 V4 H8 M16 4 H20 V8 M20 16 V20 H16 M8 20 H4 V16 M7 12 H17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+    strategies: '<path d="M2 16 L6 8 L10 14 L14 5 L18 12 L22 9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>',
+    sectors: '<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>',
+    journal: '<path d="M5 3 H17 C18.5 3 19 4 19 5 V21 H7 C5.9 21 5 20.1 5 19 Z M8 7 H16 M8 11 H16 M8 15 H13" fill="none" stroke="currentColor" stroke-width="1.9"/>',
+    meters: '<path d="M3 15 A9 9 0 0 1 21 15" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 15 L16.5 8.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="2"/>',
+    engines: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2 V6 M15 2 V6 M9 18 V22 M15 18 V22 M2 9 H6 M2 15 H6 M18 9 H22 M18 15 H22" stroke="currentColor" stroke-width="1.8"/>',
+    settings: '<path d="M12 8.5 A3.5 3.5 0 1 0 12.01 8.5 Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2 V5 M12 19 V22 M2 12 H5 M19 12 H22 M4.9 4.9 L7 7 M17 17 L19.1 19.1 M4.9 19.1 L7 17 M17 7 L19.1 4.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+  };
+  const svgIcon = k => `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">${IC[k] || ''}</svg>`;
+
+  function apps(x, cm, r) {
+    const p = x?.permission || {}, h = x?.headline || {}, hb = x?.hourly || {}, score = n(p.score);
+    const cur = score == null ? null : [...GEARS].reverse().find(g => score >= g.min);
+    const master = n(x?.meter?.master), broader = n(x?.broader), diff = master == null || broader == null ? null : master - broader;
+    const pg = Object.fromEntries(xrayPages(x).map(q => [q.title, q]));
+    return [
+      { id: 'nav', name: 'Navigation', tile: 't-cyan', badge: r.above && r.price != null ? `+${(r.above.lo - r.price).toFixed(0)}` : r.inside ? 'IN' : '—' },
+      { id: 'car', name: 'Car', tile: 't-red', badge: cur ? `G${cur.g}` : '—' },
+      { id: 'permit', name: 'Permission', tile: 't-yellow', badge: f(score, 0), page: pg['TRADE PERMISSION'] },
+      { id: 'health', name: 'Health', tile: 't-green', badge: f(h.score, 0), page: pg['MARKET HEALTH'] },
+      { id: 'partic', name: 'Participation', tile: 't-purple', badge: String(x?.blended?.state || '—').slice(0, 5), page: pg['PARTICIPATION'] },
+      { id: 'evidence', name: '1H Evidence', tile: 't-graphite', badge: hb.buyBreadth == null ? '—' : `${Math.round(hb.buyBreadth)}%`, page: pg['1H MARKET EVIDENCE'] },
+      { id: 'dist', name: 'Distribution', tile: 't-red', badge: f(x?.distribution?.raw, 0), page: pg['DISTRIBUTION'] },
+      { id: 'index', name: 'Index vs Mkt', tile: 't-graphite', badge: diff == null ? '—' : `${diff > 0 ? '+' : ''}${diff.toFixed(0)}`, page: pg['INDEX VS BROADER MARKET'] },
+      { id: 'chart', name: 'Chart', tile: 't-graphite', href: '#/workspace' },
+      { id: 'strategies', name: 'Strategies', tile: 't-yellow', href: '#/strategies' },
+      { id: 'xray', name: 'Market X-Ray', tile: 't-cyan', href: '#/xray' },
+      { id: 'sectors', name: 'Sectors', tile: 't-green', href: '#/sectors' },
+      { id: 'meters', name: 'Meters', tile: 't-red', href: '#/meters' },
+      { id: 'journal', name: 'Journal', tile: 't-purple', href: '#/journal' },
+      { id: 'engines', name: 'Engine Room', tile: 't-graphite', href: '#/engines' },
+      { id: 'settings', name: 'Settings', tile: 't-graphite', href: '#/settings' }
+    ];
+  }
+  const tile = (a, small) => a.href
+    ? `<a class="os-app${small ? ' sm' : ''}" href="${a.href}" title="${a.name}"><span class="os-ic ${a.tile}">${svgIcon(a.id)}</span>${small ? '' : `<b>${a.name}</b>`}</a>`
+    : `<button type="button" class="os-app${small ? ' sm' : ''}${csOS.app === a.id ? ' on' : ''}" data-os-open="${a.id}" title="${a.name}"><span class="os-ic ${a.tile}">${svgIcon(a.id)}${a.badge && !small ? `<em>${esc(a.badge)}</em>` : ''}</span>${small ? '' : `<b>${a.name}</b>`}</button>`;
+
+  function homeView(x, cm, r, cur) {
+    const cards = xrayPages(x).map(pg => `<div class="cs-card"><header><b>${pg.title}</b><i>${pg.head}</i></header>${pg.body}</div>`).join('') || '<p class="cc-na">X-Ray loading…</p>';
+    return `<div class="cs-body os-view">
+      <aside class="cs-left"><div class="cs-car3d" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" loading="lazy" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div><div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
+        <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}</aside>
+      <div class="cs-map" data-cs-map>${mapInner(x, cm)}</div>
+      <div class="cs-cards">${cards}</div>
+    </div>`;
+  }
+
+  function appView(x, cm, r, cur, list) {
+    const a = list.find(q => q.id === csOS.app);
+    if (!a) return homeView(x, cm, r, cur);
+    const bar = (sub) => `<div class="os-appbar"><button type="button" class="os-back" data-os-back aria-label="Back">←</button><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><b>${a.name}</b><small>${sub}</small></div>`;
+    if (a.id === 'nav') return `<div class="os-view os-app-view">${bar('ES route · zones · live')}<div class="cs-map os-full-map" data-cs-map>${mapInner(x, cm)}</div></div>`;
+    if (a.id === 'car') return `<div class="os-view os-app-view">${bar('Status · risk gear · decision chain')}<div class="os-car">
+        <div class="cs-car3d os-car3d" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div>
+        <div class="os-car-side"><div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
+        <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}
+        <p class="cc-na">Risk gear = 65/20/15 permission band. Engine 6 alone permits a trade.</p></div></div></div>`;
+    if (a.page) return `<div class="os-view os-app-view">${bar(a.page.head)}<div class="os-detail">${a.page.body}</div></div>`;
+    return homeView(x, cm, r, cur);
+  }
+
+
+  // Android-style live widgets under the app grid.
+  function widgets() {
+    const x = window.redlineXray?.model, cm = window.redlineChart?.model, r = routeData(x, cm), score = n(x?.permission?.score);
+    const cur = score == null ? null : [...GEARS].reverse().find(g => score >= g.min);
+    const zone = (dir, z) => z && r.price != null ? `<b>${dir === 'up' ? '+' : ''}${((dir === 'up' ? z.lo : z.hi) - r.price).toFixed(2)}</b><span>${z.label} ${z.lo.toFixed(0)}–${z.hi.toFixed(0)}</span>` : '<b>—</b><span>No zone on active layers</span>';
+    return `<div class="os-widgets">
+      <button type="button" class="os-widget" data-os-open="nav"><small>ES · LIVE</small><b class="big">${r.price == null ? '—' : r.price.toFixed(2)}</b><span>${r.inside ? 'IN ' + r.inside.label : 'IN TRANSIT'}</span></button>
+      <button type="button" class="os-widget w-${cur ? cur.tone : 'na'}" data-os-open="car"><small>RISK GEAR</small><b class="big">${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'} · ${f(score, 0)}</span></button>
+      <button type="button" class="os-widget" data-os-open="nav"><small>NEXT ABOVE</small>${zone('up', r.above)}</button>
+      <button type="button" class="os-widget" data-os-open="nav"><small>NEXT BELOW</small>${zone('down', r.below)}</button>
+    </div>`;
+  }
+
+  function drawerView(list) {
+    return `<div class="os-view os-drawer"><div class="os-drawer-head"><b>All apps</b><small>${list.length} apps · tap to open</small></div><div class="os-grid">${list.map(a => tile(a)).join('')}</div>${widgets()}</div>`;
+  }
+
+  function screenInner(x, cm) {
     const r = routeData(x, cm), p = x?.permission || {}, score = n(p.score);
     const cur = score == null ? null : [...GEARS].reverse().find(g => score >= g.min);
+    const list = apps(x, cm, r);
     const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false });
-    const instr = (dir, z, d) => z ? `<div class="cs-instr ${dir}"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>${d > 0 ? '+' : ''}${d.toFixed(2)} pts</b><small>NEXT ${dir === 'up' ? 'ABOVE' : 'BELOW'} · ${z.label} ${z.lo.toFixed(2)}–${z.hi.toFixed(2)}</small></div></div>` : `<div class="cs-instr ${dir} none"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>—</b><small>NO ZONE ${dir === 'up' ? 'ABOVE' : 'BELOW'} IN VIEW</small></div></div>`;
-    const cards = xrayPages(x).map(pg => `<div class="cs-card"><header><b>${pg.title}</b><i>${pg.head}</i></header>${pg.body}</div>`).join('') || '<p class="cc-na">X-Ray loading…</p>';
-    const car = '<svg viewBox="0 0 80 150" class="cs-car-svg" aria-hidden="true"><defs><linearGradient id="cs-paint" x1="0" x2="1"><stop offset="0" stop-color="#8f0d12"/><stop offset=".5" stop-color="#ed1c24"/><stop offset="1" stop-color="#8f0d12"/></linearGradient></defs><ellipse cx="40" cy="78" rx="34" ry="70" fill="#000" opacity=".5"/><path d="M40 6 C58 6 66 22 67 42 L69 112 C69 132 58 144 40 144 C22 144 11 132 11 112 L13 42 C14 22 22 6 40 6 Z" fill="url(#cs-paint)"/><path d="M22 52 C30 44 50 44 58 52 L56 74 C48 70 32 70 24 74 Z" fill="#0d0d0f"/><path d="M24 98 C32 104 48 104 56 98 L57 116 C48 120 32 120 23 116 Z" fill="#0d0d0f"/><rect x="5" y="30" width="7" height="20" rx="3" fill="#111"/><rect x="68" y="30" width="7" height="20" rx="3" fill="#111"/><rect x="5" y="104" width="7" height="22" rx="3" fill="#111"/><rect x="68" y="104" width="7" height="22" rx="3" fill="#111"/><circle cx="28" cy="10" r="2.4" fill="#fffbe0"/><circle cx="52" cy="10" r="2.4" fill="#fffbe0"/><rect x="24" y="140" width="32" height="3" rx="1.5" fill="#fff200"/></svg>';
-    return `<section class="cs-device" aria-label="Command screen">
-      <div class="cs-bezel"><div class="cs-screen">
-        <header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><span>ES <b>${r.price == null ? '—' : r.price.toFixed(2)}</b></span><span>DATA <b>${L(x?.dataStatus)}</b></span><span>ENGINE 25 <b class="${tTone(x?.headline?.label)}">${L(x?.headline?.label)}</b></span><em>REDLINE OS · NAV</em></header>
-        <div class="cs-body">
-          <aside class="cs-left"><div class="cs-car3d" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" loading="lazy" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div><div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
-            <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}</aside>
-          <div class="cs-map" data-cs-map>${mapInner(x, cm)}</div>
-          <div class="cs-cards">${cards}</div>
-        </div>
-        <footer class="cs-dock">${[['chart', 'workspace', 'Chart'], ['scan', 'xray', 'X-Ray'], ['wave', 'strategies', 'Strategies'], ['sectors', 'sectors', 'Sectors'], ['book', 'journal', 'Journal']].map(([ic, to, t]) => `<a href="#/${to}" class="cs-dock-btn">${typeof icon === 'function' ? icon(ic, 14) : ''}<span>${t}</span></a>`).join('')}<span class="cs-dock-note">Location and readings only — not a trade. Engine 6 decides.</span></footer>
-      </div><div class="cs-glare"></div></div>
-    </section>`;
+    const title = csOS.app === 'home' ? 'HOME' : csOS.app === 'drawer' ? 'APPS' : (list.find(q => q.id === csOS.app)?.name || '').toUpperCase();
+    const view = csOS.app === 'home' ? homeView(x, cm, r, cur) : csOS.app === 'drawer' ? drawerView(list) : appView(x, cm, r, cur, list);
+    const pinned = ['nav', 'car', 'permit', 'health', 'chart', 'strategies'].map(id => list.find(q => q.id === id)).filter(Boolean);
+    return `<header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><span>ES <b>${r.price == null ? '—' : r.price.toFixed(2)}</b></span><span>ENGINE 25 <b class="${tTone(x?.headline?.label)}">${L(x?.headline?.label)}</b></span><em>REDLINE OS · ${title}</em><span class="os-sig" aria-hidden="true"><i></i><i></i><i></i><i></i></span></header>
+      ${view}
+      <footer class="os-sysbar"><div class="os-pinned">${pinned.map(a => tile(a, true)).join('')}</div>
+        <div class="os-navkeys"><button type="button" data-os-back aria-label="Back">◁</button><button type="button" data-os-home aria-label="Home" class="${csOS.app === 'home' ? 'on' : ''}">○</button><button type="button" data-os-apps aria-label="All apps" class="${csOS.app === 'drawer' ? 'on' : ''}">▦</button></div>
+        <span class="cs-dock-note">Readings only — not a trade. Engine 6 decides.</span></footer>`;
   }
+
+  function commandScreen(x, cm) {
+    if (!x && !cm) return '';
+    return `<section class="cs-device" aria-label="Command screen"><div class="cs-bezel"><div class="cs-screen" data-os-screen>${screenInner(x, cm)}</div><div class="cs-glare"></div></div></section>`;
+  }
+
+  function redrawScreen() {
+    const s = document.querySelector('[data-os-screen]'); if (!s) return;
+    s.innerHTML = screenInner(window.redlineXray?.model, window.redlineChart?.model);
+    lastMarkPrice = null; moveMarker();
+    window.dispatchEvent(new Event('redline:screen'));
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target, open = t.closest?.('[data-os-open]');
+    if (open) { if (csOS.app !== open.dataset.osOpen) { csOS.prev.push(csOS.app); csOS.app = open.dataset.osOpen; } return redrawScreen(); }
+    if (t.closest?.('[data-os-back]')) { csOS.app = csOS.prev.pop() || 'home'; return redrawScreen(); }
+    if (t.closest?.('[data-os-home]')) { csOS.app = 'home'; csOS.prev = []; return redrawScreen(); }
+    if (t.closest?.('[data-os-apps]')) { if (csOS.app !== 'drawer') csOS.prev.push(csOS.app); csOS.app = 'drawer'; return redrawScreen(); }
+  });
+
 
   function cluster() {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
