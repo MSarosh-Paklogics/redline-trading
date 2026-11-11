@@ -173,41 +173,125 @@
      Left: car status (ES price, risk gear, decision chain incl. Engine 6). Centre: NAV route as a
      sat-nav map (ES against the Engine 26 zone and acc/dist shelves). Right: the six X-Ray readouts.
      Street pattern on the map is decoration; every number is live backend data. Display only. */
+  /* ---------- Command-screen sat-nav map (interactive, live) ----------
+     Layers: Engine 26 zone, institutional smart-money zones (ES SMZ), accumulation / distribution
+     shelves. Controls: layer toggles, zoom (fit / near / close), 2D-3D tilt, recentre, tap a zone for
+     its details. The ES marker follows live ticks from the hero-candles stream and leaves a short
+     breadcrumb trail of recent 10m closes. Street pattern is decoration; zones and prices are live. */
+  const csMap = { zoom: 'near', tilt: true, sel: null, layers: { e26: true, smz: true, acc: true, dist: true } };
+  const ZOOM = { fit: null, near: 60, close: 25 };
+  const LAYER_LABEL = { e26: 'E26 ZONE', smz: 'INSTITUTIONAL', acc: 'ACCUMULATION', dist: 'DISTRIBUTION' };
+
+  function livePrice(cm, x) {
+    const hb = window.redlineHeroCandles?.bars;
+    return n(hb?.at?.(-1)?.c) ?? n(cm?.currentPrice) ?? n(x?.headline?.esClose);
+  }
+
   function routeData(x, cm) {
-    const price = n(cm?.currentPrice) ?? n(x?.headline?.esClose);
-    const zones = [];
-    const ez = cm?.e26?.entryZone; if (n(ez?.low) != null && n(ez?.high) != null) zones.push({ lo: n(ez.low), hi: n(ez.high), kind: 'e26', label: 'E26 ZONE' });
-    (cm?.shelves || []).forEach(s => { const lo = n(s.lo), hi = n(s.hi); if (lo != null && hi != null) zones.push({ lo, hi, kind: /dist/i.test(s.type) ? 'dist' : 'acc', label: /dist/i.test(s.type) ? 'DIST' : 'ACC' }); });
+    const price = livePrice(cm, x);
+    const all = [];
+    const ez = cm?.e26?.entryZone; if (n(ez?.low) != null && n(ez?.high) != null) all.push({ lo: n(ez.low), hi: n(ez.high), kind: 'e26', label: 'E26 ZONE', meta: `${L(cm?.e26?.status)} · ${L(cm?.e26?.setupClass || ez.type)}` });
+    (cm?.shelves || []).forEach(s => { const lo = n(s.lo), hi = n(s.hi); if (lo != null && hi != null) { const k = /dist/i.test(s.type) ? 'dist' : 'acc'; all.push({ lo, hi, kind: k, label: k === 'dist' ? 'DIST' : 'ACC', meta: `STRENGTH ${s.strength ?? '—'} · ${String(s.timeframe || '').toUpperCase()}` }); } });
+    (cm?.smz || []).forEach(z => { const r = z.displayPriceRange || z.priceRange; const a = n(r?.[0]), b = n(r?.[1]); if (a != null && b != null) all.push({ lo: Math.min(a, b), hi: Math.max(a, b), kind: 'smz', label: 'INST', meta: `${L(z.type)} · STRENGTH ${z.strength ?? '—'}` }); });
+    all.forEach((z, i) => { z.id = `z${i}`; });
+    const zones = all.filter(z => csMap.layers[z.kind]);
     const above = price == null ? null : zones.filter(z => z.lo > price).sort((a, b) => a.lo - b.lo)[0] || null;
     const below = price == null ? null : zones.filter(z => z.hi < price).sort((a, b) => b.hi - a.hi)[0] || null;
     const inside = price == null ? null : zones.find(z => price >= z.lo && price <= z.hi) || null;
-    return { price, zones, above, below, inside };
+    return { price, zones, all, above, below, inside };
+  }
+
+  const MAP_W = 420, MAP_H = 360, rx = yy => 210 + 46 * Math.sin(yy / 52);
+  function mapWindow(r) {
+    const span = ZOOM[csMap.zoom];
+    if (span && r.price != null) return { lo: r.price - span, hi: r.price + span };
+    const near = r.zones.filter(z => r.price == null || Math.abs((z.lo + z.hi) / 2 - r.price) < 400);
+    const vals = [r.price, ...near.flatMap(z => [z.lo, z.hi])].filter(v => v != null);
+    return { lo: Math.min(...vals) - 8, hi: Math.max(...vals) + 8 };
   }
 
   function mapSvg(r) {
-    const W = 420, H = 360;
     const streets = [
       'M-10 40 L430 70', 'M-10 120 L430 105', 'M-10 210 L430 230', 'M-10 300 L430 285', 'M-10 350 L430 340',
       'M40 -10 L70 370', 'M120 -10 L100 370', 'M300 -10 L330 370', 'M380 -10 L360 370', 'M-10 170 L180 -10', 'M240 370 L430 160'
     ].map((d, i) => `<path d="${d}" class="cs-street ${i % 3 ? '' : 'major'}"/>`).join('');
     const blocks = [[55, 75, 40, 30], [130, 125, 50, 60], [250, 90, 36, 50], [320, 240, 50, 30], [60, 230, 44, 50], [150, 300, 60, 32], [270, 300, 40, 28]].map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="cs-block"/>`).join('');
     const water = '<path d="M-10 255 C 80 240, 140 270, 210 262 S 340 250, 430 268 L430 290 C 340 272, 260 290, 210 284 S 80 262, -10 278 Z" class="cs-water"/>';
-    if (r.price == null || !r.zones.length) return `<svg viewBox="0 0 ${W} ${H}" class="cs-map-svg" aria-hidden="true">${water}${streets}${blocks}</svg>`;
-    const lo = Math.min(r.price, ...r.zones.map(z => z.lo)) - 8, hi = Math.max(r.price, ...r.zones.map(z => z.hi)) + 8;
-    const y = v => 28 + (hi - v) / (hi - lo) * (H - 56);
-    const rx = yy => 210 + 46 * Math.sin(yy / 52);
-    const pts = []; for (let yy = H + 10; yy >= -10; yy -= 6) pts.push(`${rx(yy).toFixed(1)},${yy}`);
+    if (r.price == null) return `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" class="cs-map-svg" aria-hidden="true">${water}${streets}${blocks}</svg>`;
+    const win = mapWindow(r), y = v => 28 + (win.hi - v) / (win.hi - win.lo) * (MAP_H - 56);
+    const pts = []; for (let yy = MAP_H + 10; yy >= -10; yy -= 6) pts.push(`${rx(yy).toFixed(1)},${yy}`);
     const cy = y(r.price), cx = rx(cy);
     const ahead = pts.filter(p => Number(p.split(',')[1]) <= cy).join(' '), behind = pts.filter(p => Number(p.split(',')[1]) >= cy).join(' ');
-    const zoneEls = r.zones.map(z => { const y1 = y(z.hi), y2 = y(z.lo), mid = (y1 + y2) / 2, zx = rx(mid); return `<g class="cs-zone ${z.kind}"><rect x="${zx - 54}" y="${y1}" width="108" height="${Math.max(6, y2 - y1)}" rx="8"/><text x="${zx + 62}" y="${mid + 3}">${z.label} ${z.lo.toFixed(0)}–${z.hi.toFixed(0)}</text></g>`; }).join('');
-    const ticks = [hi - 8, (hi + lo) / 2, lo + 8].map(v => `<text x="8" y="${y(v) + 3}" class="cs-tick">${v.toFixed(0)}</text>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" class="cs-map-svg" role="img" aria-label="ES ${r.price.toFixed(2)} relative to zones">
+    const visible = r.zones.filter(z => z.hi >= win.lo && z.lo <= win.hi);
+    const zoneEls = visible.map(z => {
+      const y1 = Math.max(4, y(Math.min(z.hi, win.hi))), y2 = Math.min(MAP_H - 4, y(Math.max(z.lo, win.lo))), mid = (y1 + y2) / 2, zx = rx(mid), w = z.kind === 'smz' ? 132 : 108;
+      const on = r.inside && r.inside.id === z.id, sel = csMap.sel === z.id;
+      return `<g class="cs-zone ${z.kind}${on ? ' inside' : ''}${sel ? ' sel' : ''}" data-cs-zone="${z.id}" tabindex="0" role="button" aria-label="${z.label} ${z.lo.toFixed(2)} to ${z.hi.toFixed(2)}"><rect x="${zx - w / 2}" y="${y1}" width="${w}" height="${Math.max(6, y2 - y1)}" rx="8"/><text x="${zx + w / 2 + 8}" y="${mid + 3}">${z.label} ${z.lo.toFixed(0)}–${z.hi.toFixed(0)}</text></g>`;
+    }).join('');
+    const ticks = [0.12, 0.5, 0.88].map(f => { const v = win.hi - f * (win.hi - win.lo); return `<text x="8" y="${y(v) + 3}" class="cs-tick">${v.toFixed(0)}</text>`; }).join('');
+    const trail = (window.redlineHeroCandles?.bars || []).slice(-24, -1).map((b, i, a) => { const v = n(b.c); if (v == null || v < win.lo || v > win.hi) return ''; const yy = y(v); return `<circle cx="${rx(yy).toFixed(1)}" cy="${yy.toFixed(1)}" r="${1.4 + i / a.length * 2.2}" class="cs-trail" style="opacity:${(0.12 + i / a.length * 0.6).toFixed(2)}"/>`; }).join('');
+    return `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" class="cs-map-svg" role="img" aria-label="ES ${r.price.toFixed(2)} relative to zones" data-lo="${win.lo}" data-hi="${win.hi}">
       ${water}${streets}${blocks}${zoneEls}
-      <polyline points="${behind}" class="cs-route-done"/><polyline points="${ahead}" class="cs-route-glow"/><polyline points="${ahead}" class="cs-route"/>
-      ${ticks}
-      <g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})" class="cs-me"><circle r="18" class="cs-me-halo"/><circle r="11" class="cs-me-ring"/><path d="M0 -8 L6 6 L0 3 L-6 6 Z" class="cs-me-arrow"/></g>
+      <polyline points="${behind}" class="cs-route-done"/><polyline points="${ahead}" class="cs-route-glow"/><polyline points="${ahead}" class="cs-route"/><polyline points="${ahead}" class="cs-route-flow"/>
+      ${trail}${ticks}
+      <g class="cs-me" style="transform:translate(${cx.toFixed(1)}px,${cy.toFixed(1)}px)"><circle r="20" class="cs-me-halo"/><circle r="12" class="cs-me-ring"/><path d="M0 -8 L6 6 L0 3 L-6 6 Z" class="cs-me-arrow"/><text y="-18" class="cs-me-price">${r.price.toFixed(2)}</text></g>
     </svg>`;
   }
+
+  function navInstr(dir, z, price) {
+    if (!z || price == null) return `<div class="cs-instr ${dir} none"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>—</b><small>NO ZONE ${dir === 'up' ? 'ABOVE' : 'BELOW'} ON ACTIVE LAYERS</small></div></div>`;
+    const d = dir === 'up' ? z.lo - price : z.hi - price;
+    return `<div class="cs-instr ${dir}" data-cs-zone="${z.id}" role="button" tabindex="0"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>${d > 0 ? '+' : ''}${d.toFixed(2)} pts</b><small>NEXT ${dir === 'up' ? 'ABOVE' : 'BELOW'} · ${z.label} ${z.lo.toFixed(2)}–${z.hi.toFixed(2)}</small></div></div>`;
+  }
+
+  function zoneCard(r) {
+    const z = r.all.find(q => q.id === csMap.sel); if (!z) return '';
+    const d = r.price == null ? null : r.price > z.hi ? z.hi - r.price : r.price < z.lo ? z.lo - r.price : 0;
+    return `<div class="cs-zone-card ${z.kind}"><button type="button" class="cs-x" data-cs-close aria-label="Close">×</button><small>${LAYER_LABEL[z.kind]}</small><b>${z.lo.toFixed(2)} – ${z.hi.toFixed(2)}</b><span>${z.meta || ''}</span><span>Width ${(z.hi - z.lo).toFixed(2)} pts · ${d == null ? '—' : d === 0 ? 'ES IS INSIDE' : `${d > 0 ? '+' : ''}${d.toFixed(2)} pts from ES`}</span><em>Location only — not a trade.</em></div>`;
+  }
+
+  function mapInner(x, cm) {
+    const r = routeData(x, cm);
+    const layers = Object.keys(LAYER_LABEL).map(k => `<button type="button" class="cs-layer ${k}${csMap.layers[k] ? ' on' : ''}" data-cs-layer="${k}" aria-pressed="${csMap.layers[k]}"><i></i>${LAYER_LABEL[k]}<em>${r.all.filter(z => z.kind === k).length}</em></button>`).join('');
+    return `<div class="cs-map-stage ${csMap.tilt ? 'tilt' : ''}">${mapSvg(r)}</div>
+      ${navInstr('up', r.above, r.price)}
+      <div class="cs-map-tools"><button type="button" data-cs-zoom="in" aria-label="Zoom in">+</button><button type="button" data-cs-zoom="out" aria-label="Zoom out">−</button><button type="button" data-cs-zoom="fit" class="${csMap.zoom === 'fit' ? 'on' : ''}">FIT</button><button type="button" data-cs-tilt class="${csMap.tilt ? 'on' : ''}">${csMap.tilt ? '3D' : '2D'}</button><button type="button" data-cs-recenter aria-label="Recentre on ES">◎</button></div>
+      <div class="cs-layers">${layers}</div>
+      ${zoneCard(r)}
+      <div class="cs-map-foot">${navInstr('down', r.below, r.price)}<span class="cs-loc ${r.inside ? 'on' : ''}">${r.inside ? 'IN ' + r.inside.label : 'IN TRANSIT'} · ${csMap.zoom.toUpperCase()}</span></div>`;
+  }
+
+  function redrawMap() {
+    const el = document.querySelector('[data-cs-map]'); if (!el) return;
+    el.innerHTML = mapInner(window.redlineXray?.model, window.redlineChart?.model);
+    lastMarkPrice = null; moveMarker();
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target;
+    const z = t.closest?.('[data-cs-zoom]'), l = t.closest?.('[data-cs-layer]'), zone = t.closest?.('[data-cs-zone]');
+    if (z) { const order = ['fit', 'near', 'close'], i = order.indexOf(csMap.zoom); csMap.zoom = z.dataset.csZoom === 'fit' ? 'fit' : order[Math.max(0, Math.min(2, i + (z.dataset.csZoom === 'in' ? 1 : -1)))]; return redrawMap(); }
+    if (l) { const k = l.dataset.csLayer; csMap.layers[k] = !csMap.layers[k]; return redrawMap(); }
+    if (t.closest?.('[data-cs-tilt]')) { csMap.tilt = !csMap.tilt; return redrawMap(); }
+    if (t.closest?.('[data-cs-recenter]')) { csMap.zoom = 'near'; csMap.sel = null; return redrawMap(); }
+    if (t.closest?.('[data-cs-close]')) { csMap.sel = null; return redrawMap(); }
+    if (zone) { csMap.sel = csMap.sel === zone.dataset.csZone ? null : zone.dataset.csZone; return redrawMap(); }
+  });
+  document.addEventListener('keydown', ev => { if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.closest?.('[data-cs-zone]')) { ev.preventDefault(); ev.target.click(); } });
+
+  // Live marker: glide the ES marker with every tick; arrow points the way price last moved.
+  let lastMarkPrice = null;
+  function moveMarker() {
+    const svg = document.querySelector('.cs-map-svg[data-lo]'), me = svg?.querySelector('.cs-me'); if (!me) return;
+    const p = livePrice(window.redlineChart?.model, window.redlineXray?.model); if (p == null) return;
+    const lo = Number(svg.dataset.lo), hi = Number(svg.dataset.hi);
+    if (p < lo || p > hi) { if (lastMarkPrice !== null) redrawMap(); return; }
+    const yy = 28 + (hi - p) / (hi - lo) * (MAP_H - 56);
+    me.style.transform = `translate(${rx(yy).toFixed(1)}px,${yy.toFixed(1)}px)`;
+    if (lastMarkPrice != null && p !== lastMarkPrice) me.classList.toggle('down', p < lastMarkPrice);
+    const label = me.querySelector('.cs-me-price'); if (label) label.textContent = p.toFixed(2);
+    lastMarkPrice = p;
+  }
+  setInterval(() => { if (!document.hidden) moveMarker(); }, 1000);
 
   function chain(cm) {
     if (!cm) return '<p class="cc-na">Decision chain loading…</p>';
@@ -232,7 +316,7 @@
         <div class="cs-body">
           <aside class="cs-left"><div class="cs-car3d" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" loading="lazy" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div><div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
             <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}</aside>
-          <div class="cs-map">${instr('up', r.above, r.above ? r.above.lo - r.price : 0)}${mapSvg(r)}<div class="cs-map-foot">${instr('down', r.below, r.below ? r.below.hi - r.price : 0)}<span class="cs-loc ${r.inside ? 'on' : ''}">${r.inside ? 'IN ' + r.inside.label : 'IN TRANSIT'}</span></div></div>
+          <div class="cs-map" data-cs-map>${mapInner(x, cm)}</div>
           <div class="cs-cards">${cards}</div>
         </div>
         <footer class="cs-dock">${[['chart', 'workspace', 'Chart'], ['scan', 'xray', 'X-Ray'], ['wave', 'strategies', 'Strategies'], ['sectors', 'sectors', 'Sectors'], ['book', 'journal', 'Journal']].map(([ic, to, t]) => `<a href="#/${to}" class="cs-dock-btn">${typeof icon === 'function' ? icon(ic, 14) : ''}<span>${t}</span></a>`).join('')}<span class="cs-dock-note">Location and readings only — not a trade. Engine 6 decides.</span></footer>

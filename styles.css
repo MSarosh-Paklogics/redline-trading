@@ -859,3 +859,50 @@ body,#app{overflow-x:clip;overflow-y:visible}
 }
 @keyframes csFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.012)}}
 @keyframes csSheen{0%,75%{left:-40%}100%{left:120%}}
+
+/* ===== Command-screen map: interactive + animated ===== */
+.cs-map{min-height:470px}
+.cs-map-stage{position:absolute;inset:0;perspective:900px;overflow:hidden}
+.cs-map-stage .cs-map-svg{position:absolute;inset:0;width:100%;height:100%;min-height:0;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.cs-map-stage.tilt .cs-map-svg{transform:rotateX(32deg) scale(1.22) translateY(-3%);transform-origin:50% 62%}
+.cs-map-stage:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,#0a1016 0%,#0a101600 22%,#0a101600 80%,#0a1016cc 100%)}
+.cs-zone{cursor:pointer;transition:opacity .2s}
+.cs-zone rect{transition:fill .25s,stroke-width .25s}
+.cs-zone:hover rect,.cs-zone.sel rect{stroke-width:3}
+.cs-zone.smz rect{fill:#7c5cff26;stroke:#9d86ff}
+.cs-zone.inside rect{stroke-width:3}
+.cs-zone:focus-visible{outline:none}.cs-zone:focus-visible rect{stroke:#fff;stroke-width:3}
+.cs-route-flow{fill:none;stroke:#fff;stroke-width:2;stroke-dasharray:2 16;stroke-linecap:round;opacity:.85}
+.cs-trail{fill:#00d0ff}
+.cs-me{transition:transform .9s cubic-bezier(.3,.8,.3,1)}
+.cs-me-arrow{transition:transform .4s}
+.cs-me.down .cs-me-arrow{transform:rotate(180deg)}
+.cs-me-price{font:700 10px Consolas,monospace;fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#0a1016;stroke-width:3px}
+.cs-map-tools{position:absolute;right:10px;top:76px;z-index:3;display:flex;flex-direction:column;gap:5px}
+.cs-map-tools button{width:34px;height:30px;border-radius:8px;border:1px solid #ffffff1c;background:#0d151dee;color:#e8eef5;font:700 13px/1 Consolas,monospace;cursor:pointer;backdrop-filter:blur(6px);transition:border-color .2s,color .2s,background .2s}
+.cs-map-tools button:hover{border-color:#fff200;color:#fff200}
+.cs-map-tools button.on{color:#fff200;border-color:#fff20066}
+.cs-map-tools button[data-cs-zoom="fit"],.cs-map-tools button[data-cs-tilt]{font-size:9px;letter-spacing:.5px}
+.cs-layers{position:absolute;left:10px;top:76px;z-index:3;display:flex;flex-direction:column;gap:5px}
+.cs-layer{display:flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid #ffffff14;background:#0d151dcc;color:#7d8b98;font:700 8px Consolas,monospace;letter-spacing:.5px;cursor:pointer;backdrop-filter:blur(6px);text-align:left}
+.cs-layer i{width:9px;height:9px;border-radius:3px;background:#2a3540}
+.cs-layer em{font-style:normal;margin-left:2px;color:#5d7184}
+.cs-layer.on{color:#e8eef5;border-color:#ffffff26}
+.cs-layer.on.e26 i{background:#fff200}.cs-layer.on.smz i{background:#9d86ff}.cs-layer.on.acc i{background:#20c46e}.cs-layer.on.dist i{background:#ff3b3b}
+.cs-instr[data-cs-zone]{cursor:pointer}
+.cs-zone-card{position:absolute;right:54px;top:76px;z-index:4;width:210px;padding:10px 12px;border-radius:12px;background:#0d151df2;border:1px solid #ffffff1c;box-shadow:0 14px 30px #000c;backdrop-filter:blur(8px);animation:csCard .3s cubic-bezier(.2,.8,.2,1)}
+.cs-zone-card small{display:block;font:700 8px Consolas,monospace;letter-spacing:1px;color:#8aa0b4}
+.cs-zone-card b{display:block;margin:3px 0 4px;font:700 16px Bahnschrift,sans-serif;color:#fff}
+.cs-zone-card span{display:block;font:600 9px Consolas,monospace;color:#c8d3dd;line-height:1.5}
+.cs-zone-card em{display:block;margin-top:5px;font:normal 8px Consolas,monospace;color:#5d7184}
+.cs-zone-card.e26{border-color:#fff20066}.cs-zone-card.smz{border-color:#9d86ff66}.cs-zone-card.acc{border-color:#20c46e66}.cs-zone-card.dist{border-color:#ff3b3b66}
+.cs-x{position:absolute;right:8px;top:6px;border:0;background:none;color:#8aa0b4;font:700 16px/1 sans-serif;cursor:pointer}
+@keyframes csCard{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: no-preference){
+  body:not(.reduced) .cs-route-flow{animation:csFlow 1.4s linear infinite}
+  body:not(.reduced) .cs-zone.inside rect{animation:csInside 2s ease-in-out infinite}
+}
+@keyframes csFlow{to{stroke-dashoffset:-36}}
+@keyframes csInside{50%{fill-opacity:.55;stroke-width:4}}
+@media(prefers-reduced-motion:reduce){.cs-map-stage .cs-map-svg,.cs-me{transition:none}}
+@media(max-width:800px){.cs-layers{top:auto;bottom:62px;flex-direction:row;flex-wrap:wrap;right:10px}.cs-zone-card{right:10px;left:10px;width:auto}}
