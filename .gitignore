@@ -1,3 +1,6 @@
 
 # Client Frye repos (cloned for reference, pulled daily; never commit into Redline)
 /frye/
+
+# Local-only demo assets (not licensed for the public site) — never commit or deploy
+/assets/local/
