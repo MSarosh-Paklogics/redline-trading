@@ -8,6 +8,6 @@ console.log('Built self-contained static demo in dist/. No dependencies or netwo
 
 await cp(path.join(root,'references'),path.join(root,'dist','references'),{recursive:true});
 
-await cp(path.join(root,'assets'),path.join(root,'dist','assets'),{recursive:true,filter:src=>!src.split(path.sep).join('/').includes('/assets/local')});
+await cp(path.join(root,'assets'),path.join(root,'dist','assets'),{recursive:true,filter:src=>!src.endsWith('.orig.glb')});
 
 

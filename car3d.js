@@ -1,10 +1,9 @@
 'use strict';
-/* Optional interactive 3D car in the command screen (presentation only, LOCAL DEMO).
+/* Optional interactive 3D car in the command screen (presentation only).
    If assets/local/enzo.glb exists (or window.REDLINE_CAR_MODEL points at a model), the car photo
    in the command screen is replaced by a rotatable 3D model rendered with Google's <model-viewer>
-   web component, loaded from a CDN only in that case. The model is committed (the owner confirmed
-   the licence on 2026-11-11) but build.mjs still leaves assets/local out of dist/ until it is cleared
-   for the public site. Without the file, nothing changes and the F80 photo stays.
+   web component, loaded from a CDN only in that case. The model is committed and deployed (the owner
+   confirmed the licence on 2026-11-11). Without the file, nothing changes and the F80 photo stays.
    Speed: the model download starts as soon as this script runs (not when the screen renders), is
    kept in the browser's Cache Storage so later visits load it instantly, and the car photo stays
    on screen until the 3D model is ready, then cross-fades. One viewer element is created once and
@@ -13,7 +12,7 @@
   if (typeof bindPage !== 'function') return;
   const SRC = window.REDLINE_CAR_MODEL || 'assets/local/enzo.glb';
   const VIEWER = 'https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js';
-  const CREDIT = '“2002 Ferrari Enzo” by Ddiaz Design (Sketchfab) · CC BY-NC-SA 4.0 · local demo only';
+  const CREDIT = '3D model: “2002 Ferrari Enzo” by Ddiaz Design';
   const CACHE = 'redline-car-v1';
   let state = 'unknown', el = null, wrap = null, url = null, ready = false;
 
@@ -56,7 +55,7 @@
     el = document.createElement('model-viewer');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const attrs = {
-      src: url, alt: '3D Ferrari Enzo (local demo model)', 'camera-controls': '', 'touch-action': 'pan-y',
+      src: url, alt: '3D Ferrari Enzo', 'camera-controls': '', 'touch-action': 'pan-y',
       'interaction-prompt': 'none', 'shadow-intensity': '1.1', 'shadow-softness': '0.9', exposure: '1.05',
       'environment-image': 'neutral', 'camera-orbit': '32deg 66deg 78%', 'field-of-view': '28deg',
       'min-camera-orbit': 'auto 20deg auto', 'max-camera-orbit': 'auto 88deg auto', loading: 'eager', reveal: 'auto'
