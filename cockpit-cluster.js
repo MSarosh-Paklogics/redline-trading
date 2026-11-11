@@ -168,6 +168,78 @@
       <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${cur ? `GEAR ${cur.g}` : 'GEAR —'}</b><span>${cur ? `${cur.short} · ${f(score, 0)}` : 'UNAVAILABLE'}</span><small>RISK LEVEL · 65/20/15</small></div>
     </div>`;
   }
+
+  /* ---------- Command screen: an in-car centre display showing everything at once ----------
+     Left: car status (ES price, risk gear, decision chain incl. Engine 6). Centre: NAV route as a
+     sat-nav map (ES against the Engine 26 zone and acc/dist shelves). Right: the six X-Ray readouts.
+     Street pattern on the map is decoration; every number is live backend data. Display only. */
+  function routeData(x, cm) {
+    const price = n(cm?.currentPrice) ?? n(x?.headline?.esClose);
+    const zones = [];
+    const ez = cm?.e26?.entryZone; if (n(ez?.low) != null && n(ez?.high) != null) zones.push({ lo: n(ez.low), hi: n(ez.high), kind: 'e26', label: 'E26 ZONE' });
+    (cm?.shelves || []).forEach(s => { const lo = n(s.lo), hi = n(s.hi); if (lo != null && hi != null) zones.push({ lo, hi, kind: /dist/i.test(s.type) ? 'dist' : 'acc', label: /dist/i.test(s.type) ? 'DIST' : 'ACC' }); });
+    const above = price == null ? null : zones.filter(z => z.lo > price).sort((a, b) => a.lo - b.lo)[0] || null;
+    const below = price == null ? null : zones.filter(z => z.hi < price).sort((a, b) => b.hi - a.hi)[0] || null;
+    const inside = price == null ? null : zones.find(z => price >= z.lo && price <= z.hi) || null;
+    return { price, zones, above, below, inside };
+  }
+
+  function mapSvg(r) {
+    const W = 420, H = 360;
+    const streets = [
+      'M-10 40 L430 70', 'M-10 120 L430 105', 'M-10 210 L430 230', 'M-10 300 L430 285', 'M-10 350 L430 340',
+      'M40 -10 L70 370', 'M120 -10 L100 370', 'M300 -10 L330 370', 'M380 -10 L360 370', 'M-10 170 L180 -10', 'M240 370 L430 160'
+    ].map((d, i) => `<path d="${d}" class="cs-street ${i % 3 ? '' : 'major'}"/>`).join('');
+    const blocks = [[55, 75, 40, 30], [130, 125, 50, 60], [250, 90, 36, 50], [320, 240, 50, 30], [60, 230, 44, 50], [150, 300, 60, 32], [270, 300, 40, 28]].map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="cs-block"/>`).join('');
+    const water = '<path d="M-10 255 C 80 240, 140 270, 210 262 S 340 250, 430 268 L430 290 C 340 272, 260 290, 210 284 S 80 262, -10 278 Z" class="cs-water"/>';
+    if (r.price == null || !r.zones.length) return `<svg viewBox="0 0 ${W} ${H}" class="cs-map-svg" aria-hidden="true">${water}${streets}${blocks}</svg>`;
+    const lo = Math.min(r.price, ...r.zones.map(z => z.lo)) - 8, hi = Math.max(r.price, ...r.zones.map(z => z.hi)) + 8;
+    const y = v => 28 + (hi - v) / (hi - lo) * (H - 56);
+    const rx = yy => 210 + 46 * Math.sin(yy / 52);
+    const pts = []; for (let yy = H + 10; yy >= -10; yy -= 6) pts.push(`${rx(yy).toFixed(1)},${yy}`);
+    const cy = y(r.price), cx = rx(cy);
+    const ahead = pts.filter(p => Number(p.split(',')[1]) <= cy).join(' '), behind = pts.filter(p => Number(p.split(',')[1]) >= cy).join(' ');
+    const zoneEls = r.zones.map(z => { const y1 = y(z.hi), y2 = y(z.lo), mid = (y1 + y2) / 2, zx = rx(mid); return `<g class="cs-zone ${z.kind}"><rect x="${zx - 54}" y="${y1}" width="108" height="${Math.max(6, y2 - y1)}" rx="8"/><text x="${zx + 62}" y="${mid + 3}">${z.label} ${z.lo.toFixed(0)}–${z.hi.toFixed(0)}</text></g>`; }).join('');
+    const ticks = [hi - 8, (hi + lo) / 2, lo + 8].map(v => `<text x="8" y="${y(v) + 3}" class="cs-tick">${v.toFixed(0)}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" class="cs-map-svg" role="img" aria-label="ES ${r.price.toFixed(2)} relative to zones">
+      ${water}${streets}${blocks}${zoneEls}
+      <polyline points="${behind}" class="cs-route-done"/><polyline points="${ahead}" class="cs-route-glow"/><polyline points="${ahead}" class="cs-route"/>
+      ${ticks}
+      <g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)})" class="cs-me"><circle r="18" class="cs-me-halo"/><circle r="11" class="cs-me-ring"/><path d="M0 -8 L6 6 L0 3 L-6 6 Z" class="cs-me-arrow"/></g>
+    </svg>`;
+  }
+
+  function chain(cm) {
+    if (!cm) return '<p class="cc-na">Decision chain loading…</p>';
+    const pills = Object.fromEntries(cm.pills || []), d22 = cm.display?.degrees?.minute || {}, e27 = cm.e27 || {}, e6 = cm.e6 || {};
+    const steps = [['WAVE DEVELOPING', 'E22 / E27', d22.badge || d22.direction || e27.decisionState], ['STRATEGY READY', 'E15', pills.READINESS], ['TRADE PERMITTED', 'E6 FINAL', e6.permission]];
+    const dirs = [['E15', pills.BIAS], ['E22', d22.direction], ['E27', e27.direction]].map(([k, v]) => [k, /LONG|BULL|UP/i.test(v || '') ? 'LONG' : /SHORT|BEAR|DOWN/i.test(v || '') ? 'SHORT' : null]).filter(([, v]) => v);
+    const conflict = new Set(dirs.map(d => d[1])).size > 1 ? `Direction differs: ${dirs.map(([k, v]) => `${k} ${v}`).join(' · ')}` : '';
+    return `<div class="cs-chain">${steps.map(([t, o, v], i) => `<div class="cs-step ${tTone(v)}"><i>${i + 1}</i><div><small>${t} · ${o}</small><b>${L(v)}</b></div></div>`).join('')}</div>${conflict ? `<p class="cs-conflict">${conflict}</p>` : ''}`;
+  }
+
+  function commandScreen(x, cm) {
+    if (!x && !cm) return '';
+    const r = routeData(x, cm), p = x?.permission || {}, score = n(p.score);
+    const cur = score == null ? null : [...GEARS].reverse().find(g => score >= g.min);
+    const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false });
+    const instr = (dir, z, d) => z ? `<div class="cs-instr ${dir}"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>${d > 0 ? '+' : ''}${d.toFixed(2)} pts</b><small>NEXT ${dir === 'up' ? 'ABOVE' : 'BELOW'} · ${z.label} ${z.lo.toFixed(2)}–${z.hi.toFixed(2)}</small></div></div>` : `<div class="cs-instr ${dir} none"><span class="cs-arrow">${dir === 'up' ? '↑' : '↓'}</span><div><b>—</b><small>NO ZONE ${dir === 'up' ? 'ABOVE' : 'BELOW'} IN VIEW</small></div></div>`;
+    const cards = xrayPages(x).map(pg => `<div class="cs-card"><header><b>${pg.title}</b><i>${pg.head}</i></header>${pg.body}</div>`).join('') || '<p class="cc-na">X-Ray loading…</p>';
+    const car = '<svg viewBox="0 0 80 150" class="cs-car-svg" aria-hidden="true"><defs><linearGradient id="cs-paint" x1="0" x2="1"><stop offset="0" stop-color="#8f0d12"/><stop offset=".5" stop-color="#ed1c24"/><stop offset="1" stop-color="#8f0d12"/></linearGradient></defs><ellipse cx="40" cy="78" rx="34" ry="70" fill="#000" opacity=".5"/><path d="M40 6 C58 6 66 22 67 42 L69 112 C69 132 58 144 40 144 C22 144 11 132 11 112 L13 42 C14 22 22 6 40 6 Z" fill="url(#cs-paint)"/><path d="M22 52 C30 44 50 44 58 52 L56 74 C48 70 32 70 24 74 Z" fill="#0d0d0f"/><path d="M24 98 C32 104 48 104 56 98 L57 116 C48 120 32 120 23 116 Z" fill="#0d0d0f"/><rect x="5" y="30" width="7" height="20" rx="3" fill="#111"/><rect x="68" y="30" width="7" height="20" rx="3" fill="#111"/><rect x="5" y="104" width="7" height="22" rx="3" fill="#111"/><rect x="68" y="104" width="7" height="22" rx="3" fill="#111"/><circle cx="28" cy="10" r="2.4" fill="#fffbe0"/><circle cx="52" cy="10" r="2.4" fill="#fffbe0"/><rect x="24" y="140" width="32" height="3" rx="1.5" fill="#fff200"/></svg>';
+    return `<section class="cs-device" aria-label="Command screen">
+      <div class="cs-bezel"><div class="cs-screen">
+        <header class="cs-status"><b>${time}</b><span>AZ</span><span class="cs-live ${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</span><span>ES <b>${r.price == null ? '—' : r.price.toFixed(2)}</b></span><span>DATA <b>${L(x?.dataStatus)}</b></span><span>ENGINE 25 <b class="${tTone(x?.headline?.label)}">${L(x?.headline?.label)}</b></span><em>REDLINE OS · NAV</em></header>
+        <div class="cs-body">
+          <aside class="cs-left">${car}<div class="cs-price"><small>ES ${esc(x?.e29?.esResolvedSymbol || '')}</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
+            <div class="cs-gear ${cur ? cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>${chain(cm)}</aside>
+          <div class="cs-map">${instr('up', r.above, r.above ? r.above.lo - r.price : 0)}${mapSvg(r)}<div class="cs-map-foot">${instr('down', r.below, r.below ? r.below.hi - r.price : 0)}<span class="cs-loc ${r.inside ? 'on' : ''}">${r.inside ? 'IN ' + r.inside.label : 'IN TRANSIT'}</span></div></div>
+          <div class="cs-cards">${cards}</div>
+        </div>
+        <footer class="cs-dock">${[['chart', 'workspace', 'Chart'], ['scan', 'xray', 'X-Ray'], ['wave', 'strategies', 'Strategies'], ['sectors', 'sectors', 'Sectors'], ['book', 'journal', 'Journal']].map(([ic, to, t]) => `<a href="#/${to}" class="cs-dock-btn">${typeof icon === 'function' ? icon(ic, 14) : ''}<span>${t}</span></a>`).join('')}<span class="cs-dock-note">Location and readings only — not a trade. Engine 6 decides.</span></footer>
+      </div><div class="cs-glare"></div></div>
+    </section>`;
+  }
+
   function cluster() {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
     if (!x && !cm) return '';
@@ -181,7 +253,7 @@
       <div class="cc-gauge cc-big">${tach}</div>
       <div class="cc-center">${gate(x)}</div>
       <div class="cc-gauge">${speedo}</div>
-      ${nav(x, cm)}
+      <div class="cc-meters">${typeof raceMetrics === 'function' && typeof raceMeter === 'function' && x ? raceMetrics().slice(0, 4).map((m, i) => raceMeter(m, i)).join('') : ''}</div>
       <p class="cc-note">LIVE BACKEND · display only · ES Master and permission score are Engine 25 / market-meter readings; the 6-speed gear is the risk level from the 65/20/15 permission score, not a trade. Engine 6 decides.</p>
     </section>`;
   }
@@ -189,9 +261,14 @@
   const base = overview;
   overview = function () {
     const html = base.apply(this, arguments);
-    const at = html.indexOf('<div class="race-section-label"><span>LIVE SIGNAL BOARD');
+    const at = html.indexOf('<nav class="db-tabs"');
     const c = cluster();
-    return at < 0 || !c ? html : html.slice(0, at) + `<div class="race-section-label"><span>COCKPIT CLUSTER · ES</span><small>LIVE INSTRUMENTS · SIGNALS ONLY</small></div>` + c + html.slice(at);
+    if (at < 0 || !c) return html;
+    const x = window.redlineXray?.model, cm = window.redlineChart?.model;
+    return html.slice(0, at)
+      + `<div class="race-section-label"><span>COCKPIT CLUSTER · ES</span><small>LIVE INSTRUMENTS · SIGNALS ONLY</small></div>` + c
+      + `<div class="race-section-label"><span>COMMAND SCREEN · NAV</span><small>ROUTE · PERMISSION · HEALTH · PARTICIPATION · EVIDENCE · DISTRIBUTION · INDEX</small></div>` + commandScreen(x, cm)
+      + html.slice(at);
   };
   if (typeof page !== 'undefined' && page === 'overview' && typeof render === 'function') render();
 })();

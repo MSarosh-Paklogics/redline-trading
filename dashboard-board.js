@@ -77,7 +77,7 @@
     const loading = '<div class="ce-empty">Loading the live ES engine read…</div>';
     const xs = window.redlineXraySections || {};
     const body = {
-      e25: x ? raceLiveOverview(x) + (xs.e25 ? xs.e25(x) : '') : '<div class="ce-empty">Engine 25 unavailable.</div>',
+      e25: x ? raceLiveOverview(x, { meters: false }) + (xs.e25 ? xs.e25(x) : '') : '<div class="ce-empty">Engine 25 unavailable.</div>',
       e29: x && xs.e29 ? xs.e29(x) || '<div class="ce-empty">Engine 29 unavailable.</div>' : '<div class="ce-empty">Engine 29 unavailable.</div>',
       strategy: parts ? `<div class="db-grid">${parts.strategy}<div class="ce-section">MARKET CONTEXT · ENGINE 22 TIMELINE READ</div>${parts.context}${parts.side}</div>` : loading,
       evidence: parts ? `<div class="db-grid">${parts.evidence}${parts.zones}</div>` : loading
@@ -89,7 +89,7 @@
   overview = function () {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
     if (!x && !cm) return baseOverview.apply(this, arguments);
-    return raceHero() + signalBoard(x, cm) + decisionChain(cm) + tabBar() + panes(x);
+    return raceHero() + tabBar() + panes(x);
   };
 
   // Switching tabs only toggles the panes, so the page doesn't rebuild or jump.

@@ -744,3 +744,71 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 @media(prefers-reduced-motion:reduce){.page-nav-track{scroll-behavior:auto}}
 /* Keep "no sideways scroll" without turning body/#app into scroll containers (that breaks position:sticky) */
 body,#app{overflow-x:clip;overflow-y:visible}
+
+/* ===== Cockpit: 4 dials across + 4 telemetry gauges underneath ===== */
+.cc-dash{grid-template-columns:minmax(200px,1fr) minmax(230px,1.3fr) minmax(150px,.7fr) minmax(210px,1.15fr)}
+.cc-meters{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:4px;padding-top:14px;border-top:1px solid #1d1d1f}
+.cc-meters .race-meter{background:radial-gradient(ellipse at 50% 30%,#18181a,#0a0a0b 70%);border-color:#232325}
+.cc-meters .race-meter .race-dial.cc-dial{height:150px}
+@media(max-width:1250px){.cc-dash{grid-template-columns:1fr 1fr}.cc-tft{grid-column:1/-1;order:0}.cc-meters{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.cc-dash{grid-template-columns:1fr}.cc-meters{grid-template-columns:1fr 1fr}}
+
+/* ===== Command screen (in-car centre display) ===== */
+.cs-device{margin:0 0 30px;perspective:1600px}
+.cs-bezel{position:relative;padding:14px;border-radius:26px;background:linear-gradient(160deg,#2b2b2e,#0c0c0d 40%,#1a1a1c);box-shadow:0 40px 80px #000d,0 0 0 1px #3a3a3d,inset 0 1px 0 #ffffff1f,inset 0 -2px 0 #000;transform:rotateX(2.2deg);transform-origin:50% 100%}
+.cs-bezel:before{content:"";position:absolute;left:50%;bottom:-24px;width:120px;height:24px;transform:translateX(-50%);background:linear-gradient(#1a1a1c,#0a0a0b);border-radius:0 0 12px 12px;box-shadow:0 10px 20px #000a;z-index:-1}
+.cs-screen{position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse at 40% 0%,#10161c 0%,#070a0d 60%,#050607 100%);box-shadow:inset 0 0 0 1px #000,inset 0 0 40px #000c;color:#e8eef5;font-family:"Segoe UI",Bahnschrift,Arial,sans-serif}
+.cs-glare{position:absolute;inset:14px;border-radius:14px;pointer-events:none;background:linear-gradient(118deg,#ffffff14 0%,#ffffff06 22%,transparent 38%,transparent 70%,#ffffff05 85%,transparent 100%)}
+.cs-status{display:flex;align-items:center;gap:14px;padding:9px 16px;border-bottom:1px solid #ffffff0d;font-size:11px;color:#9fb0c0}
+.cs-status>b{font-size:14px;color:#fff;letter-spacing:.5px}.cs-status b{color:#fff}
+.cs-status b.down{color:#ff3b3b}.cs-status b.up{color:#20c46e}.cs-status b.yellow{color:#fff200}
+.cs-status em{margin-left:auto;font-style:normal;font:700 9px Consolas,monospace;letter-spacing:1.5px;color:#fff20099}
+.cs-live{padding:2px 7px;border-radius:999px;border:1px solid #2a3540;font:700 9px Consolas,monospace;color:#7d8b98}.cs-live.on{color:#20c46e;border-color:#00592d;background:#00210f}
+.cs-body{display:grid;grid-template-columns:minmax(190px,.62fr) minmax(320px,1.35fr) minmax(380px,1.6fr);gap:12px;padding:12px;align-items:stretch}
+.cs-left{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px;border-radius:12px;background:#ffffff05;border:1px solid #ffffff0a}
+.cs-car-svg{width:60px;height:auto;filter:drop-shadow(0 10px 14px #000)}
+.cs-price{text-align:center}.cs-price small{display:block;font:600 8px Consolas,monospace;color:#8aa0b4;letter-spacing:1px}.cs-price b{font:700 26px Bahnschrift,"Arial Narrow",sans-serif;color:#fff;letter-spacing:.5px}
+.cs-gear{display:flex;align-items:baseline;gap:8px;padding:6px 12px;border-radius:10px;background:#0b0f13;border:1px solid #1f2a35}
+.cs-gear small{font:600 7px Consolas,monospace;color:#8aa0b4;letter-spacing:1px}.cs-gear b{font:800 24px Bahnschrift,sans-serif;color:#fff}.cs-gear span{font:700 9px Consolas,monospace;color:#d8d8d8}
+.cs-gear.down b{color:#ff3b3b}.cs-gear.yellow b{color:#fff200}.cs-gear.up b{color:#20c46e}
+.cs-chain{display:grid;gap:6px;width:100%}
+.cs-step{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#0b0f13;border:1px solid #1a242e}
+.cs-step i{flex-shrink:0;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid #fff20088;color:#fff200;font:700 9px Consolas,monospace;font-style:normal}
+.cs-step small{display:block;font:600 7px Consolas,monospace;color:#8aa0b4;letter-spacing:.5px}.cs-step b{font:700 12px Bahnschrift,sans-serif;color:#fff}
+.cs-step.up b{color:#20c46e}.cs-step.down b{color:#ff3b3b}.cs-step.yellow b{color:#fff200}
+.cs-conflict{margin:0;font:600 9px Consolas,monospace;color:#ffb36b;text-align:center}
+.cs-map{position:relative;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;background:#0a1016;border:1px solid #ffffff0d;min-height:440px}
+.cs-map-svg{flex:1;width:100%;height:100%;min-height:440px;display:block}
+.cs-street{fill:none;stroke:#18222c;stroke-width:5;stroke-linecap:round}.cs-street.major{stroke:#1f2c38;stroke-width:9}
+.cs-block{fill:#0f171f;stroke:#16212b}
+.cs-water{fill:#0b1a26}
+.cs-route-done{fill:none;stroke:#3a4652;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.cs-route-glow{fill:none;stroke:#fff200;stroke-width:12;opacity:.18;stroke-linecap:round;stroke-linejoin:round;filter:blur(3px)}
+.cs-route{fill:none;stroke:#fff200;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+.cs-zone rect{stroke-width:1.5}.cs-zone.e26 rect{fill:#fff2002e;stroke:#fff200}.cs-zone.acc rect{fill:#009a4e33;stroke:#20c46e}.cs-zone.dist rect{fill:#ed1c2433;stroke:#ff3b3b}
+.cs-zone text{font:700 9px Consolas,monospace;fill:#e8eef5;paint-order:stroke;stroke:#070a0d;stroke-width:3px}
+.cs-tick{font:600 9px Consolas,monospace;fill:#5d7184}
+.cs-me-halo{fill:#00d0ff26}.cs-me-ring{fill:#0a1016;stroke:#00d0ff;stroke-width:2}.cs-me-arrow{fill:#00d0ff}
+.cs-instr{position:absolute;left:10px;right:10px;top:10px;z-index:2;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:#0d151dee;border:1px solid #ffffff14;box-shadow:0 8px 20px #000a;backdrop-filter:blur(6px)}
+.cs-instr .cs-arrow{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#fff200;color:#111;font:800 18px/1 Bahnschrift,sans-serif}
+.cs-instr.down .cs-arrow{background:#20c46e}.cs-instr.none .cs-arrow{background:#2a3540;color:#8aa0b4}
+.cs-instr b{display:block;font:700 15px Bahnschrift,sans-serif;color:#fff}.cs-instr small{font:600 9px Consolas,monospace;color:#9fb0c0;letter-spacing:.3px}
+.cs-map-foot{position:absolute;left:10px;right:10px;bottom:10px;display:flex;align-items:center;gap:8px;z-index:2}
+.cs-map-foot .cs-instr{position:static;flex:1}
+.cs-loc{flex-shrink:0;padding:6px 10px;border-radius:999px;background:#0d151dee;border:1px solid #ffffff14;font:700 9px Consolas,monospace;color:#9fb0c0}.cs-loc.on{color:#20c46e;border-color:#00592d}
+.cs-cards{display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:min-content;gap:8px;align-content:start}
+.cs-card{padding:8px 10px;border-radius:10px;background:#ffffff06;border:1px solid #ffffff0d}
+.cs-card header{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-bottom:4px}
+.cs-card header b{font:700 9px Consolas,monospace;letter-spacing:.8px;color:#fff}.cs-card header i{font:normal 7.5px Consolas,monospace;color:#8aa0b4}
+.cs-card .cc-big-read{margin:0 0 3px}.cs-card .cc-big-read b{font-size:18px}.cs-card .cc-big-read span{font-size:8px}
+.cs-card .cc-kv{padding:2px 0;font-size:8.5px;border-bottom-color:#ffffff08}
+.cs-card .cc-na{margin:2px 0 3px;font-size:8px;line-height:1.35}
+.cs-card .up{color:#20c46e}.cs-card .down{color:#ff3b3b}.cs-card .yellow{color:#fff200}
+.cs-dock{display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid #ffffff0d;background:#ffffff04}
+.cs-dock-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;color:#c8d3dd;font-size:11px;text-decoration:none;border:1px solid transparent;transition:background .2s,border-color .2s,color .2s}
+.cs-dock-btn:hover{background:#ffffff0d;border-color:#ffffff14;color:#fff}.cs-dock-btn svg{color:#fff200}
+.cs-dock-note{margin-left:auto;font:600 8px Consolas,monospace;color:#5d7184;letter-spacing:.3px}
+@media (prefers-reduced-motion: no-preference){body:not(.reduced) .cs-me-halo{animation:csPulse 1.8s ease-out infinite}}
+@keyframes csPulse{0%{r:11;opacity:.9}100%{r:26;opacity:0}}
+@media(max-width:1350px){.cs-body{grid-template-columns:minmax(180px,.6fr) minmax(300px,1.3fr)}.cs-cards{grid-column:1/-1;grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.cs-bezel{transform:none;padding:8px;border-radius:16px}.cs-body{grid-template-columns:1fr}.cs-cards{grid-template-columns:1fr 1fr}.cs-status em,.cs-dock-note{display:none}.cs-dock{overflow-x:auto}.cs-map,.cs-map-svg{min-height:320px}}
