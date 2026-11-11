@@ -715,7 +715,7 @@ aside .side-group-label,.corsa-theme aside .side-group-label{color:#fff200b8}
 .cc-gnum{fill:#8d8d92;font:700 13px Bahnschrift,'Arial Narrow',sans-serif;text-anchor:middle}
 .cc-gnum.on{font-size:16px}.cc-gnum.on.up{fill:#20c46e}.cc-gnum.on.yellow{fill:#fff200}.cc-gnum.on.down{fill:#ff3b3b}
 .cc-knob{transform:translate(var(--kx),var(--ky));transition:transform .7s cubic-bezier(.3,1.3,.5,1)}
-.cc-knob-top{fill:#ed1c24}.cc-knob-top.up{fill:#009a4e}.cc-knob-top.yellow{fill:#fff200}
+.cc-knob-top{fill:#ed1c24}.cc-knob-top.up{fill:#009a4e}.cc-knob-top.yellow{fill:#fff200}.cc-knob-top.turbo{fill:#fff200;filter:drop-shadow(0 0 6px #ff8a00)}
 .cc-gear-read{text-align:center;line-height:1.25}
 .cc-gear-read b{display:block;font:800 18px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:1px;color:#fff}
 .cc-gear-read b.up{color:#20c46e}.cc-gear-read b.yellow{color:#fff200}.cc-gear-read b.down{color:#ff3b3b}
@@ -997,3 +997,20 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .grid>.panel:has(.xr-sbars){grid-column:1/-1}
 
 .os-detail .os-para{margin:0 0 8px;font:500 12px/1.5 "Segoe UI",Arial,sans-serif;color:#c8d3dd;break-inside:avoid}
+
+/* ES-meter gearbox: neutral mark and TURBO */
+.cc-gnum.cc-gn{font-size:11px}.cc-gnum.cc-gturbo{font-size:9px;letter-spacing:.5px}
+.cc-gnum.on.turbo{fill:#fff200;font-size:10px}
+.cc-gear-read b.turbo,.os-hero-gear.g-turbo b{color:#fff200;text-shadow:0 0 12px #ff8a00,0 0 26px #ed1c24}
+@media (prefers-reduced-motion: no-preference){body:not(.reduced) .cc-gate.turbo .cc-knob-ball{animation:ccTurbo 1.1s ease-in-out infinite}}
+@keyframes ccTurbo{50%{filter:drop-shadow(0 0 10px #ff8a00)}}
+
+/* Digital readouts under the cluster dials (replace the analog meters) */
+.cc-digital{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:4px;padding-top:14px;border-top:1px solid #1d1d1f}
+.cc-dig{display:flex;flex-direction:column;gap:5px;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid #ffffff14;background:linear-gradient(180deg,#0d141c,#070a0e);box-shadow:inset 0 1px 0 #ffffff0d}
+.cc-dig small{font:700 9px Consolas,monospace;letter-spacing:1px;color:#8aa0b4}
+.cc-dig b{font:700 17px/1.2 Consolas,"Lucida Console",monospace;letter-spacing:.5px;color:#e8eef5;text-shadow:0 0 10px currentColor}
+.cc-dig b.d-up{color:#20c46e}.cc-dig b.d-down{color:#ff3b3b}.cc-dig b.d-yellow{color:#fff200}.cc-dig b.d-white{color:#fff}.cc-dig b.d-na{color:#8aa0b4;text-shadow:none}
+.cc-dig span{font:500 10px "Segoe UI",Arial,sans-serif;color:#9fb0c0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1300px){.cc-digital{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.cc-digital{grid-template-columns:1fr 1fr}}

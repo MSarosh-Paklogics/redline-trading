@@ -137,35 +137,37 @@
   }
 
 
-  /* 6-speed gated shifter = risk-management level. The six gears are the six bands of the
-     MIRRORED 65/20/15 trade-permission read (market-xray.js permissionRead): 6 = long bias ...
-     1 = strong defensive. A risk level for sizing context, not a trade or a permission. */
+  /* Gated shifter driven by the ES Master meter (client spec 2026-11-11): R below 50 (defensive),
+     N 50-62 (neutral, yellow), gears 1-4 in 7-point steps from 63, TURBO at 90+ (full acceleration).
+     It reads the Engine 25 ES Master meter only: a market-pace gauge, not a trade or a permission. */
   const GEARS = [
-    { g: 1, min: -Infinity, tone: 'down', short: 'STRONG DEFENSIVE' },
-    { g: 2, min: 35, tone: 'down', short: 'DEFENSIVE' },
-    { g: 3, min: 45, tone: 'yellow', short: 'SHORT WATCH' },
-    { g: 4, min: 50, tone: 'yellow', short: 'NEUTRAL / WAIT' },
-    { g: 5, min: 55, tone: 'up', short: 'REDUCED SIZE' },
-    { g: 6, min: 65, tone: 'up', short: 'NORMAL LONG' }
+    { g: 'R', min: -Infinity, tone: 'down', short: 'DEFENSIVE' },
+    { g: 'N', min: 50, tone: 'yellow', short: 'NEUTRAL' },
+    { g: '1', min: 63, tone: 'up', short: 'PULLING AWAY' },
+    { g: '2', min: 70, tone: 'up', short: 'BUILDING' },
+    { g: '3', min: 77, tone: 'up', short: 'STRONG' },
+    { g: '4', min: 84, tone: 'up', short: 'FULL POWER' },
+    { g: 'T', min: 90, tone: 'turbo', short: 'TURBO · FULL ACCELERATION' }
   ];
+  const gearFor = x => { const v = n(x?.meter?.master); return v == null ? null : { ...[...GEARS].reverse().find(r => v >= r.min), value: v }; };
   function gate(x) {
-    const p = x?.permission || {}, score = n(p.score);
-    const cur = score == null ? null : [...GEARS].reverse().find(r => score >= r.min);
-    // H-pattern: 1-3-5 on top, 2-4-6 below, one neutral rail across the middle.
-    const col = g => 34 + Math.floor((g - 1) / 2) * 46, row = g => (g % 2 ? 34 : 114);
-    const slots = [1, 3, 5].map(g => `<path d="M${col(g)} ${row(g)} V74" class="cc-slot"/>`).join('') + [2, 4, 6].map(g => `<path d="M${col(g)} 74 V${row(g)}" class="cc-slot"/>`).join('');
-    const nums = GEARS.map(r => `<text x="${col(r.g)}" y="${r.g % 2 ? 18 : 140}" class="cc-gnum ${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g}</text>`).join('');
-    const kx = cur ? col(cur.g) : 80, ky = cur ? row(cur.g) : 74;
-    return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Risk gear from the 65/20/15 permission score. Not a trade permission — Engine 6 decides.">
-      <svg viewBox="0 0 160 150" class="cc-gate-svg" role="img" aria-label="Risk gear ${cur ? cur.g : 'unavailable'} of 6">
+    const cur = gearFor(x);
+    // H-pattern: R 1 3 T on top, 2 4 below, neutral on the centre rail.
+    const POS = { R: [26, 34], 1: [62, 34], 2: [62, 114], 3: [98, 34], 4: [98, 114], T: [134, 34], N: [80, 74] };
+    const slots = ['R', '1', '3', 'T'].map(g => `<path d="M${POS[g][0]} 34 V74" class="cc-slot"/>`).join('') + ['2', '4'].map(g => `<path d="M${POS[g][0]} 74 V114" class="cc-slot"/>`).join('');
+    const nums = GEARS.filter(r => r.g !== 'N').map(r => `<text x="${POS[r.g][0]}" y="${POS[r.g][1] < 74 ? 18 : 140}" class="cc-gnum ${r.g === 'T' ? 'cc-gturbo ' : ''}${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g === 'T' ? 'TURBO' : r.g}</text>`).join('');
+    const [kx, ky] = cur ? POS[cur.g] : POS.N;
+    const label = !cur ? 'GEAR —' : cur.g === 'T' ? 'TURBO' : cur.g === 'R' ? 'REVERSE' : cur.g === 'N' ? 'NEUTRAL' : `GEAR ${cur.g}`;
+    return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Gear from the ES Master meter: R <50 · N 50-62 · 1 63-69 · 2 70-76 · 3 77-83 · 4 84-89 · TURBO 90+. Not a trade permission — Engine 6 decides.">
+      <svg viewBox="0 0 160 150" class="cc-gate-svg" role="img" aria-label="ES meter gear ${label}">
         <defs><linearGradient id="cc-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5c60"/><stop offset=".45" stop-color="#2a2b2e"/><stop offset="1" stop-color="#46484c"/></linearGradient>
         <radialGradient id="cc-knob" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c9cbcf"/><stop offset="1" stop-color="#55575c"/></radialGradient></defs>
         <rect x="6" y="24" width="148" height="102" rx="12" fill="url(#cc-metal)" class="cc-plate"/>
         <rect x="6" y="24" width="148" height="102" rx="12" class="cc-plate-edge"/>
-        <path d="M34 74 H126" class="cc-slot"/>${slots}${nums}
+        <path d="M26 74 H134" class="cc-slot"/>${slots}${nums}<text x="80" y="66" class="cc-gnum cc-gn ${cur?.g === 'N' ? 'on yellow' : ''}">N</text>
         <g class="cc-knob" style="--kx:${kx}px;--ky:${ky}px"><circle r="13" fill="#000" opacity=".45" cx="1.5" cy="2.5"/><circle r="12" fill="url(#cc-knob)" class="cc-knob-ball"/><circle r="5.2" class="cc-knob-top ${cur ? cur.tone : ''}"/></g>
       </svg>
-      <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${cur ? `GEAR ${cur.g}` : 'GEAR —'}</b><span>${cur ? `${cur.short} · ${f(score, 0)}` : 'UNAVAILABLE'}</span><small>RISK LEVEL · 65/20/15</small></div>
+      <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${label}</b><span>${cur ? `${cur.short} · ${f(cur.value, 1)}` : 'UNAVAILABLE'}</span><small>ES MASTER METER GEAR</small></div>
     </div>`;
   }
 
@@ -303,7 +305,7 @@
   }
 
   /* ---------- Redline OS: simple car screen ----------
-     Home = the car (Enzo 3D model in local demo, F80 photo otherwise) with ES price, risk gear and the
+     Home = the car (Enzo 3D model in local demo, F80 photo otherwise) with ES price, ES gear and the
      three-step decision chain, plus ten info apps (named after Brian's X-Ray cards) that show their reading on the tile. Tapping a tile
      opens it full screen; the system bar has back and home only. Only the screen re-renders. Display only. */
   const csOS = { app: 'home', prev: [] };
@@ -371,7 +373,7 @@
       <div class="os-hero">
         <div class="os-hero-info">
           <div class="os-hero-price"><small>ES</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
-          <div class="os-hero-gear ${cur ? 'g-' + cur.tone : ''}"><small>RISK GEAR</small><b>${cur ? cur.g : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>
+          <div class="os-hero-gear ${cur ? 'g-' + cur.tone : ''}"><small>ES GEAR</small><b>${cur ? (cur.g === 'T' ? 'TURBO' : cur.g) : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>
         </div>
         <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}</div>
       </div>
@@ -391,8 +393,8 @@
 
 
   function screenInner(x, cm) {
-    const r = routeData(x, cm), p = x?.permission || {}, score = n(p.score);
-    const cur = score == null ? null : [...GEARS].reverse().find(g => score >= g.min);
+    const r = routeData(x, cm);
+    const cur = gearFor(x);
     const list = apps(x, cm, r);
     const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false });
     const title = csOS.app === 'home' ? 'HOME' : (list.find(q => q.id === csOS.app)?.name || '').toUpperCase();
@@ -423,6 +425,28 @@
   });
 
 
+  /* Digital readouts under the dials (client request 2026-11-11, replaces the four analog meters).
+     Same names, values and notes as Brian's Engine 25 X-Ray stat strip (Engine25MarketXrayPreview
+     BigStat row): health, 1H breadth, 1H stock volume, 4H distribution, 1H sectors, data status. */
+  function digitalStrip(x) {
+    if (!x) return '';
+    const h = x.headline || {}, hb = x.hourly || {}, sec = x.sectors || {}, d = x.distribution || {};
+    const up = n(hb.up), down = n(hb.down), bd = up != null && down != null ? up + down : null;
+    const buyB = bd ? up / bd * 100 : null, sellB = bd ? down / bd * 100 : null;
+    const av = n(hb.advVol), dv = n(hb.decVol), vd = av != null && dv != null ? av + dv : null;
+    const buyV = vd ? av / vd * 100 : null, sellV = vd ? dv / vd * 100 : null;
+    const p0 = v => `${Math.round(v)}%`, dRaw = n(d.raw);
+    const cells = [
+      ['MARKET HEALTH', f(h.score, 0), sTone(h.score), L(h.label)],
+      ['BREADTH', buyB == null ? '—' : `${p0(buyB)} ADVANCING / ${p0(sellB)} DECLINING`, buyB == null ? '' : buyB >= 55 ? 'up' : buyB <= 45 ? 'down' : 'yellow', '1H stocks advancing vs declining'],
+      ['STOCK VOLUME', buyV == null ? '—' : `${p0(buyV)} BUYING / ${p0(sellV)} SELLING`, buyV == null ? '' : 'white', '1H directional volume'],
+      ['DISTRIBUTION', dRaw == null ? '—' : p0(dRaw), dRaw == null ? '' : dRaw >= 70 ? 'down' : dRaw >= 50 ? 'yellow' : 'up', `4H structural · ${L(d.label)}`],
+      ['SECTORS', sec.weak == null ? '—' : `${sec.weak} WEAK`, 'yellow', sec.strong == null ? 'sector participation unavailable' : `${sec.strong} strong · ${sec.neutral} mixed`],
+      ['DATA', L(x.dataStatus), tTone(x.dataStatus), hb.coverage == null ? 'coverage unavailable' : `${n(hb.coverage).toFixed(1)}% volume coverage`]
+    ];
+    return `<div class="cc-digital">${cells.map(([k, v, t, note]) => `<div class="cc-dig"><small>${k}</small><b class="d-${t || 'na'}">${esc(v)}</b><span>${esc(note)}</span></div>`).join('')}</div>`;
+  }
+
   function cluster() {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
     if (!x && !cm) return '';
@@ -436,8 +460,8 @@
       <div class="cc-gauge cc-big">${tach}</div>
       <div class="cc-center">${gate(x)}</div>
       <div class="cc-gauge">${speedo}</div>
-      <div class="cc-meters">${typeof raceMetrics === 'function' && typeof raceMeter === 'function' && x ? raceMetrics().slice(0, 4).map((m, i) => raceMeter(m, i)).join('') : ''}</div>
-      <p class="cc-note">LIVE BACKEND · display only · ES Master and permission score are Engine 25 / market-meter readings; the 6-speed gear is the risk level from the 65/20/15 permission score, not a trade. Engine 6 decides.</p>
+      ${digitalStrip(x)}
+      <p class="cc-note">LIVE BACKEND · display only · ES Master and permission score are Engine 25 / market-meter readings; the gear follows the ES Master meter (R &lt;50 · N 50–62 · 1–4 in 7-point steps · TURBO 90+), not a trade. Engine 6 decides.</p>
     </section>`;
   }
 
