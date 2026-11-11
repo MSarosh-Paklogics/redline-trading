@@ -57,7 +57,15 @@
     const prior = key => { const rows = (dd.history?.[{ structural4h: '4h', tactical1h: '1h', confirmation30m: '30m', acceleration10m: '10m' }[key]] || []).filter(r => n(r?.pressure) != null); return rows.length >= 2 ? n(rows.at(-2).pressure) : null; };
     const frameName = { structural4h: ['4H', 'Structure', 'Structural selling pressure'], tactical1h: ['1H', 'Trend', 'Direction of selling pressure'], confirmation30m: ['30m', 'Confirmation', 'Confirms whether the transition is holding'], acceleration10m: ['10m', 'Acceleration', 'Fast acceleration or recovery signal'] };
     const imbalance = hb.buyVolume == null ? null : Math.abs(100 - 2 * hb.buyVolume);
-    const groups = x.sectorGroups?.[ui.sector];
+    const rawGroups = x.sectorGroups?.[ui.sector];
+    // Frye shows groups only when the backend marks them available and complete.
+    const groups = rawGroups && rawGroups.available === true && rawGroups.complete === true ? rawGroups : null;
+    const sectorCards = x.sectorCards?.[ui.sector] || [];
+    const sectorBars = sectorCards.length ? `<div class="xr-sbars">${sectorCards.map(c => {
+      const tone = !groups ? 'blue' : groups.strong?.includes(c.sector) ? 'up' : groups.weak?.includes(c.sector) ? 'down' : groups.neutral?.includes(c.sector) ? 'yellow' : 'blue';
+      const h = c.breadth == null ? 0 : Math.max(8, Math.min(100, c.breadth));
+      return `<div class="xr-sbar ${tone}" title="${esc(c.sector)} · breadth ${c.breadth == null ? 'unavailable' : c.breadth.toFixed(1) + '%'}"><div class="xr-sbar-track"><em>${c.breadth == null ? '—' : Math.round(c.breadth) + '%'}</em><i style="height:${h}%"></i></div><small>${esc(c.sector)}</small></div>`;
+    }).join('')}</div>` : '';
     const sectorList = names => names?.length ? names.map(s => `<span class="xr-chip">${esc(s)}</span>`).join('') : '<span class="xr-muted">None</span>';
     const mt = x.macroTrends || {};
     const macroRow = (label, t, unit) => { const c = unit === 'bp' ? t?.changesBps || {} : t?.changesPct || {}; const cur = n(t?.current); return `<tr><td>${esc(label)}</td><td class="number">${cur == null ? '—' : unit === 'bp' ? cur.toFixed(2) + '%' : cur.toFixed(2)}</td>${['2h', 'session', '1d', '2d', '5d'].map(k => `<td class="number ${n(c[k]) == null ? '' : n(c[k]) > 0 ? 'down' : 'up'}">${unit === 'bp' ? signed(c[k], 1, ' bp') : signed(c[k], 2, '%')}</td>`).join('')}</tr>`; };
@@ -103,7 +111,7 @@
     ${panel('Redline market briefing', body(`${tabs('brief', ui.brief, [['current', 'Current market'], ['intraday', 'Intraday']])}${briefParas.length ? briefParas.map(p => `<p class="xr-para">${esc(p)}</p>`).join('') : '<p class="xr-muted">Briefing unavailable.</p>'}`), '', 'Full plain-English read of current market conditions from canonical Redline evidence')}
 
     <div class="grid cols-2">
-      ${panel('11-sector participation', body(`${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : '<p class="xr-muted">Sector participation unavailable.</p>'}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
+      ${panel('11-sector participation', body(`${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
       ${panel('Financial stress', body(`${note('Credit, banks, bonds and liquidity')}${kv('Credit fragility', f(x.credit?.scores?.creditFragility))}${kv('Macro credit', f(x.credit?.scores?.creditStress))}${kv('Bond market', f(x.credit?.scores?.bondMarket))}${kv('Liquidity', f(x.credit?.scores?.liquidity))}<div class="notice">${esc(L(x.credit?.label))}</div>`))}
     </div>
 

@@ -134,6 +134,13 @@ html,body,#app{min-width:0;max-width:100%;overflow-x:hidden}.workspace,.main,.co
 .xr-tabs button.active{background:var(--red);color:#ffffff}
 .xr-para{margin:0 0 10px;color:#cdd3dc;font-size:12px;line-height:1.7}
 .xr-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.xr-sbars{display:grid;grid-template-columns:repeat(11,minmax(48px,1fr));gap:8px;align-items:end;overflow-x:auto;padding:4px 0 14px;margin-bottom:6px}
+.xr-sbar{text-align:center;min-width:48px}
+.xr-sbar-track{position:relative;height:150px;padding:3px;display:flex;align-items:flex-end;border:1px solid #ffffff14;border-radius:8px;background:linear-gradient(180deg,#0f172a8c,#05090ee6);overflow:hidden}
+.xr-sbar-track i{display:block;width:100%;min-height:0;border-radius:6px;--c:#3ad7ff;background:linear-gradient(180deg,var(--c),color-mix(in srgb,var(--c) 45%,transparent));box-shadow:0 0 18px color-mix(in srgb,var(--c) 35%,transparent);transition:height .5s ease}
+.xr-sbar.up i{--c:#20c46e}.xr-sbar.yellow i{--c:#f2c21b}.xr-sbar.down i{--c:#ff3b3b}
+.xr-sbar-track em{position:absolute;top:6px;left:0;right:0;font:700 10px Bahnschrift,Arial,sans-serif;font-style:normal;color:#e8eef5;text-shadow:0 1px 4px #000}
+.xr-sbar small{display:block;margin-top:6px;min-height:28px;font:600 9px/1.25 "Segoe UI",Arial,sans-serif;color:#c8d3dd}
 .xr-groups b{display:block;margin-bottom:6px;font:800 10px Bahnschrift,Arial;letter-spacing:.06em}
 .xr-chip{display:block;margin:0 0 4px;color:#cdd3dc;font-size:11px}
 .xr-trend{width:100%;height:160px;display:block}
@@ -987,3 +994,5 @@ body,#app{overflow-x:clip;overflow-y:visible}
 @media(max-width:1100px){.os-home{grid-template-columns:1fr}.os-bg-car>img{inset:0;width:100%}.os-bg-car .cs-model{right:0}.os-hero{min-height:340px}.os-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.os-tiles{grid-template-columns:1fr 1fr}.os-detail{column-count:1}.os-navkeys{position:static;transform:none;margin:0 auto}.os-sysbar .cs-dock-note{display:none}}
 @media(prefers-reduced-motion:reduce){.os-view{animation:none}}
+/* 11-sector participation chart takes the full row, like Frye */
+.grid>.panel:has(.xr-sbars){grid-column:1/-1}

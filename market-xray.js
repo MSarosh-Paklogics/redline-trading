@@ -7,6 +7,9 @@
    (hourly sector totals, strong/weak sector counts, broader-market blend and the
    65/20/15 permission read), copied as-is and marked MIRRORED. */
 (() => {
+  // MIRRORED from Frye canonicalSectorName (Engine25MarketXrayPreview.jsx).
+  const SECTOR_ALIASES = { technology: 'Information Technology', tech: 'Information Technology', 'information technology': 'Information Technology', 'communication services': 'Communication Services', communications: 'Communication Services', 'consumer staples': 'Consumer Staples', utilities: 'Utilities', 'real estate': 'Real Estate', financials: 'Financials', financial: 'Financials', healthcare: 'Health Care', 'health care': 'Health Care', industrials: 'Industrials', energy: 'Energy', materials: 'Materials', 'consumer discretionary': 'Consumer Discretionary' };
+  const sectorName = v => { const t = String(v || '').trim(); return SECTOR_ALIASES[t.toLowerCase()] || t || 'Unknown'; };
   const n = v => { const x = Number(v); return v == null || v === '' || !Number.isFinite(x) ? null : x; };
 
   function dataStatus(freshness) {
@@ -109,8 +112,17 @@
       sectorGroups: {
         '1H': e25?.sectorBreadth?.tactical1h?.groups || null,
         '4H': e25?.sectorBreadth?.regime4h?.groups || null,
-        EOD: (part.sectorParticipation?.eod?.cards || []).reduce((g, c) => { const b = String(c.bias || '').toLowerCase(); (b === 'bullish' ? g.strong : b === 'bearish' ? g.weak : g.neutral).push(c.sector); return g; }, { strong: [], neutral: [], weak: [], available: true, complete: true })
+        // MIRRORED from Frye eodSectorGroups: bullish/bearish/neutral bias only; anything else stays
+        // unclassified and the grouping is then incomplete (never folded into neutral).
+        EOD: (() => {
+          const cards = part.sectorParticipation?.eod?.cards || [];
+          const g = cards.reduce((o, c) => { const b = String(c.bias || '').toLowerCase(); (b === 'bullish' ? o.strong : b === 'bearish' ? o.weak : b === 'neutral' ? o.neutral : o.unclassified).push(sectorName(c.sector)); return o; }, { strong: [], neutral: [], weak: [], unclassified: [] });
+          return { ...g, available: cards.length > 0, complete: cards.length > 0 && !g.unclassified.length };
+        })()
       },
+      // Bars of the 11-sector participation chart: breadth % per sector (Frye Engine25MarketXrayPreview).
+      sectorCards: Object.fromEntries([['1H', e25?.sectorBreadth?.tactical1h?.cards], ['4H', e25?.sectorBreadth?.regime4h?.cards], ['EOD', part.sectorParticipation?.eod?.cards]]
+        .map(([k, cards]) => [k, Array.isArray(cards) ? cards.map(c => ({ sector: sectorName(c?.sector), breadth: n(c?.breadth_pct) })) : []])),
       macroTrends: e25?.intradayMacro?.trendComparisons || {},
       macroFresh: String(e25?.intradayMacro?.freshness?.status || '').toUpperCase() === 'FRESH',
       changes: e25?.underTheHood?.rows || [],
