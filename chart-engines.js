@@ -96,8 +96,18 @@
     const m = chart.model;
     if (!m) return null;
     const tr = m.timelineRead || {}, tcs = m.tcs || {}, e6 = m.e6 || {}, e27 = m.e27 || {}, e26 = m.e26 || {}, tl = m.timeline || {}, e15 = m.e15 || {};
-    const lines = arr => (arr || []).map(x => String(x).split('\n').filter(Boolean).map(s => `<p>${esc(s)}</p>`).join('')).join('');
-    const listOf = arr => Array.isArray(arr) && arr.length ? `<ul class="ce-list">${arr.map(x => `<li>${esc(typeof x === 'string' ? x.replace(/_/g, ' ') : x?.label || x?.headline || x?.code || JSON.stringify(x))}</li>`).join('')}</ul>` : '';
+    // Backend text lines: short "Label: value" / "23.6 = 7599.00" lines become aligned rows; longer
+    // sentences stay as text (a long "Read: ..." keeps its label in bold). Text is shown as published.
+    const lines = arr => (arr || []).map(x => String(x).split('\n').filter(Boolean).map(t => {
+      const m = t.match(/^\s*([^:=]{1,34}?)\s*[:=]\s*(.+)$/);
+      if (m && m[2].length <= 46) return `<div class="ce-kv ce-line"><span>${esc(m[1])}</span><b>${esc(m[2])}</b></div>`;
+      if (m) return `<p class="ce-para"><strong>${esc(m[1])}:</strong> ${esc(m[2])}</p>`;
+      return `<p class="ce-para">${esc(t)}</p>`;
+    }).join('')).join('');
+    // Long code lists (e.g. ~30 Engine 6 reason codes) show the first 4; the rest fold away.
+    const item = x => `<li>${esc(typeof x === 'string' ? x.replace(/_/g, ' ') : x?.label || x?.headline || x?.code || JSON.stringify(x))}</li>`;
+    const listOf = arr => !Array.isArray(arr) || !arr.length ? '' : arr.length <= 5 ? `<ul class="ce-list">${arr.map(item).join('')}</ul>`
+      : `<ul class="ce-list">${arr.slice(0, 4).map(item).join('')}</ul><details class="ce-more"><summary>Show all ${arr.length}</summary><ul class="ce-list">${arr.slice(4).map(item).join('')}</ul></details>`;
     const r3 = m.e3?.reaction || {}, v4 = m.e4?.engine4EsVolume || {};
     const smz = (m.smz || []).slice(0, 8);
     return {

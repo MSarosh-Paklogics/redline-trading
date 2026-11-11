@@ -1107,3 +1107,21 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .cc-dsplit .cc-dnum.s-down b,.cc-dsplit.d-down .cc-dnum.s-up b{font-size:20px}
 /* Speedometer reads the permission score in MPH (1 point = 1 mph) */
 .cc-dial.dark .cc-unit{font:700 11px Consolas,monospace;letter-spacing:2px;fill:#fff200}
+/* Strategy stack / engine detail cards: even grid, clear headers, aligned rows */
+.db-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;align-items:stretch}
+.db-grid .ce-card{display:flex;flex-direction:column;padding:16px 18px;border:1px solid #232325;border-left-width:3px;border-radius:12px;background:linear-gradient(160deg,#16171a,#0d0e10);box-shadow:0 6px 18px #0006}
+.db-grid .ce-card h4{margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid #ffffff12;font-size:12px;letter-spacing:.08em;line-height:1.3}
+.db-grid .ce-card h4 i{flex-shrink:0;width:20px;height:20px;border-color:#ed1c2499;color:#fff;background:#ed1c2422}
+.db-grid .ce-kv{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 0;border-bottom:1px solid #ffffff0d;font-size:12px}
+.db-grid .ce-kv span{flex-shrink:0;max-width:48%;color:#9aa3ad}
+.db-grid .ce-kv b{text-align:right;font-weight:700;line-height:1.35}
+.db-grid .ce-kv:last-child{border-bottom:0}
+.db-grid .ce-para{margin:8px 0 2px;font-size:12px;line-height:1.55;color:#d3d8de}
+.db-grid .ce-para strong{color:#fff200;font-weight:700}
+.db-grid .ce-list{margin:4px 0 0;padding-left:16px;font-size:11.5px;line-height:1.6}
+.db-grid .ce-sub,.db-grid .ce-card h5{margin:12px 0 4px;font:700 9.5px Consolas,monospace;letter-spacing:1.4px;color:#fff200b3;text-transform:uppercase}
+.ce-more{margin-top:4px}
+.ce-more summary{cursor:pointer;list-style:none;display:inline-block;padding:3px 10px;border:1px solid #ffffff1f;border-radius:999px;font:700 10px Consolas,monospace;letter-spacing:.6px;color:#c8d3dd}
+.ce-more summary::-webkit-details-marker{display:none}
+.ce-more summary:hover{border-color:#fff20080;color:#fff200}
+.ce-more[open] summary{margin-bottom:4px}
