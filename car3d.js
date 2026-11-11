@@ -2,9 +2,9 @@
 /* Optional interactive 3D car in the command screen (presentation only, LOCAL DEMO).
    If assets/local/enzo.glb exists (or window.REDLINE_CAR_MODEL points at a model), the car photo
    in the command screen is replaced by a rotatable 3D model rendered with Google's <model-viewer>
-   web component, loaded from a CDN only in that case. assets/local/ is git-ignored and excluded
-   from builds: the bundled Enzo model is CC-BY-NC-SA 4.0 (non-commercial), so it must never be
-   deployed. Without the file, nothing changes and the licensed F80 photo stays.
+   web component, loaded from a CDN only in that case. The model is committed (the owner confirmed
+   the licence on 2026-11-11) but build.mjs still leaves assets/local out of dist/ until it is cleared
+   for the public site. Without the file, nothing changes and the F80 photo stays.
    Speed: the model download starts as soon as this script runs (not when the screen renders), is
    kept in the browser's Cache Storage so later visits load it instantly, and the car photo stays
    on screen until the 3D model is ready, then cross-fades. One viewer element is created once and
