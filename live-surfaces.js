@@ -67,7 +67,8 @@
     const main = document.querySelector('#main'); if (!main) return;
     const key = routeKey();
     for (const [k, el] of Object.entries(surfaces)) {
-      if (k === key && !main.contains(el)) main.prepend(el);
+      // Live panel goes right under the page title (and its section bar), not above the title.
+      if (k === key && !main.contains(el)) { const after = main.querySelector(':scope > .page-nav') || main.querySelector(':scope > .page-head'); after ? after.after(el) : main.prepend(el); }
       if (k !== key) el.remove();
     }
   }
