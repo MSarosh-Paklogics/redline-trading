@@ -72,28 +72,43 @@
     const mt = x.macroTrends || {};
     const macroRow = (label, t, unit) => { const c = unit === 'bp' ? t?.changesBps || {} : t?.changesPct || {}; const cur = n(t?.current); return `<tr><td>${esc(label)}</td><td class="number">${cur == null ? '—' : unit === 'bp' ? cur.toFixed(2) + '%' : cur.toFixed(2)}</td>${['2h', 'session', '1d', '2d', '5d'].map(k => `<td class="number ${n(c[k]) == null ? '' : n(c[k]) > 0 ? 'down' : 'up'}">${unit === 'bp' ? signed(c[k], 1, ' bp') : signed(c[k], 2, '%')}</td>`).join('')}</tr>`; };
     const briefParas = x.briefs?.[ui.brief] || [];
+    // One bar split green | red with both counts (advancing vs declining, buying vs selling).
+    const splitBar = (label, a, b, la, lb) => {
+      const A = n(a), B = n(b), T = A != null && B != null ? A + B : null;
+      if (!T) return `<div class="xr-split na"><div class="xr-split-top"><span>${label}</span><b>—</b></div></div>`;
+      const pa = A / T * 100;
+      return `<div class="xr-split"><div class="xr-split-top"><span>${label}</span><b class="up">${pa.toFixed(0)}% ${la}</b><b class="down">${(100 - pa).toFixed(0)}% ${lb}</b></div><div class="xr-split-bar"><i class="up" style="width:${pa}%"></i><i class="down" style="width:${100 - pa}%"></i></div></div>`;
+    };
 
     return `
     <div class="race-section-label"><span>MARKET METERS</span><small>ES FUTURES · SPY · LIVE BACKEND</small></div>
     <div class="xr-strips">${meterStrip('ES FUTURES METER', x.meter?.lights && { '10m': x.meter.lights['10m'], '30m': x.meter.lights['30m'], '1h': x.meter.lights['1h'], '4h': x.meter.lights['4h'], eod: x.meter.lights['1d'] }, master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}${meterStrip('SPY MARKET METER', x.spy?.lights, x.spy?.master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}</div>
 
-    <div class="grid cols-2">
-      ${panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
-        ${note('Blended participation combines the latest valid 10m, 1H, 4H and EOD participation readings. Fast participation remains the raw 10-minute evidence.')}
-        ${kv('Blended participation', L(blend.state), tone(blend.state))}
-        ${kv('Surviving evidence', pct(n(blend.usableEffectiveWeight) == null ? null : n(blend.usableEffectiveWeight) * 100, 1))}
-        <div class="table-wrap"><table><thead><tr><th>Frame</th><th>Freshness</th><th>State</th><th>Sectors · weight</th><th>Last run</th></tr></thead><tbody>${['10m', '1h', '4h', 'eod'].map(k => { const s = sd[k] || {}; return `<tr><td>${k.toUpperCase()}</td><td class="${tone(s.freshnessState)}">${esc(L(s.freshnessState))}</td><td class="${tone(s.timeframeState)}">${esc(L(s.timeframeState))}</td><td>${s.sectorCount ?? '—'} · ${pct(n(s.effectiveWeight) == null ? null : n(s.effectiveWeight) * 100, 1)}</td><td>${esc(when(s.sourceTimestamp))}</td></tr>`; }).join('')}</tbody></table></div>
-        ${kv('Fast participation / 10m', L(x.fastParticipation?.state || sd['10m']?.timeframeState), tone(x.fastParticipation?.state))}
-      `))}
-      ${panel('Main 1H market evidence', body(`
-        ${kv('Stocks scanned', f(hb.scanned))}${kv('Stocks with volume', f(hb.withVol))}${kv('Volume coverage', pct(hb.coverage, 1))}
-        ${kv('Advancing', hb.up == null ? '—' : `${f(hb.up)} (${pct(hb.buyBreadth)})`, 'up')}${kv('Declining', hb.down == null ? '—' : `${f(hb.down)} (${pct(100 - hb.buyBreadth)})`, 'down')}
-        ${kv('New highs', f(x.hourlyNhNl?.nh), 'up')}${kv('New lows', f(x.hourlyNhNl?.nl), 'down')}
-        ${kv('Sector participation', sec.strong == null ? '—' : `${sec.strong} bullish · ${sec.neutral} neutral · ${sec.weak} bearish`)}
-        ${kv('Advancing volume', hb.advVol == null ? '—' : `${f(hb.advVol)} (${pct(hb.buyVolume, 1)})`, 'up')}${kv('Declining volume', hb.decVol == null ? '—' : `${f(hb.decVol)} (${pct(100 - hb.buyVolume, 1)})`, 'down')}
-        ${kv('Directional imbalance', imbalance == null ? '—' : `${pct(imbalance, 1)} toward ${hb.buyVolume < 50 ? 'selling' : 'buying'}`, hb.buyVolume < 50 ? 'down' : 'up')}
-      `))}
-    </div>
+    ${panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
+      <div class="xr-part">
+        <section class="xr-part-col">
+          <h5 class="xr-part-h">BLENDED PARTICIPATION</h5>
+          <div class="xr-part-big ${tone(blend.state)}">${E(blend.state)}</div>
+          ${kv('Surviving evidence', pct(n(blend.usableEffectiveWeight) == null ? null : n(blend.usableEffectiveWeight) * 100, 1))}
+          ${kv('Fast participation / 10m', L(x.fastParticipation?.state || sd['10m']?.timeframeState), tone(x.fastParticipation?.state))}
+          <div class="table-wrap"><table><thead><tr><th>Frame</th><th>Freshness</th><th>State</th><th>Sectors · weight</th><th>Last run</th></tr></thead><tbody>${['10m', '1h', '4h', 'eod'].map(k => { const s = sd[k] || {}; return `<tr><td>${k.toUpperCase()}</td><td class="${tone(s.freshnessState)}">${esc(L(s.freshnessState))}</td><td class="${tone(s.timeframeState)}">${esc(L(s.timeframeState))}</td><td>${s.sectorCount ?? '—'} · ${pct(n(s.effectiveWeight) == null ? null : n(s.effectiveWeight) * 100, 1)}</td><td>${esc(when(s.sourceTimestamp))}</td></tr>`; }).join('')}</tbody></table></div>
+          <p class="xr-muted">Blended combines the latest valid 10m, 1H, 4H and EOD readings; fast participation is the raw 10-minute evidence.</p>
+        </section>
+        <section class="xr-part-col">
+          <h5 class="xr-part-h">1H MARKET EVIDENCE</h5>
+          ${splitBar('Breadth', hb.up, hb.down, 'advancing', 'declining')}
+          ${splitBar('Volume', hb.advVol, hb.decVol, 'buying', 'selling')}
+          ${kv('Stocks scanned / with volume', `${f(hb.scanned)} / ${f(hb.withVol)}`)}${kv('Volume coverage', pct(hb.coverage, 1))}
+          ${kv('Advancing / declining', hb.up == null ? '—' : `${f(hb.up)} / ${f(hb.down)}`)}
+          ${kv('Advancing / declining volume', hb.advVol == null ? '—' : `${f(hb.advVol)} / ${f(hb.decVol)}`)}
+          ${kv('Directional imbalance', imbalance == null ? '—' : `${pct(imbalance, 1)} toward ${hb.buyVolume < 50 ? 'selling' : 'buying'}`, hb.buyVolume < 50 ? 'down' : 'up')}
+          ${kv('New highs / new lows · 1H', x.hourlyNhNl ? `${f(x.hourlyNhNl.nh)} / ${f(x.hourlyNhNl.nl)}` : '—')}${kv('Net new highs / lows · intraday', signed(x.nhnl?.intradayNetHighsLows, 0), n(x.nhnl?.intradayNetHighsLows) < 0 ? 'down' : 'up')}
+        </section>
+        <section class="xr-part-col xr-part-wide">
+          <h5 class="xr-part-h">11-SECTOR PARTICIPATION</h5>
+          ${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}
+        </section>
+      </div>`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
 
     <div class="grid cols-2">
       ${panel('Selling / distribution pressure', body(`
@@ -113,14 +128,12 @@
     ${skip.has('brief') ? '' : panel('Redline market briefing', body(`${tabs('brief', ui.brief, [['current', 'Current market'], ['intraday', 'Intraday']])}${briefParas.length ? briefParas.map(p => `<p class="xr-para">${esc(p)}</p>`).join('') : '<p class="xr-muted">Briefing unavailable.</p>'}`), '', 'Full plain-English read of current market conditions from canonical Redline evidence')}
 
     <div class="grid cols-2">
-      ${panel('11-sector participation', body(`${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
       ${skip.has('stress') ? '' : panel('Financial stress', body(`${note('Credit, banks, bonds and liquidity')}${kv('Credit fragility', f(x.credit?.scores?.creditFragility))}${kv('Macro credit', f(x.credit?.scores?.creditStress))}${kv('Bond market', f(x.credit?.scores?.bondMarket))}${kv('Liquidity', f(x.credit?.scores?.liquidity))}<div class="notice">${esc(L(x.credit?.label))}</div>`))}
     </div>
 
     ${skip.has('macro') ? '' : panel('Macro pressure — rates, dollar, oil', body(`${note('Red = increasing pressure on equities. Green = easing pressure.')}<div class="table-wrap"><table><thead><tr><th>Instrument</th><th>Current</th><th>2H</th><th>Session</th><th>1D</th><th>2D</th><th>5D</th></tr></thead><tbody>${macroRow('U.S. 10Y yield', mt.tenYearYield, 'bp')}${macroRow('U.S. 30Y yield', mt.thirtyYearYield, 'bp')}${macroRow('U.S. Dollar (UUP)', mt.dollarUup, 'pct')}${macroRow('WTI oil', mt.wti, 'pct')}${macroRow('Brent oil', mt.brent, 'pct')}</tbody></table></div>${kv('Macro pressure', `${f(x.macro?.score)} · ${L(x.macro?.label)}`, tone(x.macro?.label))}${x.macroFresh ? '' : '<div class="notice">Intraday macro data is not fresh.</div>'}`))}
 
     <div class="grid cols-3">
-      ${skip.has('leaders') ? '' : panel('Market leadership — new highs vs new lows', body(`${kv('New highs', f(x.hourlyNhNl?.nh), 'up')}${kv('New lows', f(x.hourlyNhNl?.nl), 'down')}${kv('Net new highs / lows', signed(x.nhnl?.intradayNetHighsLows, 0), n(x.nhnl?.intradayNetHighsLows) < 0 ? 'down' : 'up')}`))}
       ${panel('Active event risk', body(`${note('Only material events that can meaningfully affect market risk belong here.')}${(() => {
         // Same as Frye: the first active material Engine 25 event.
         const ev = x.newsEvents[0];

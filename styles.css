@@ -1149,3 +1149,17 @@ body,#app{overflow-x:clip;overflow-y:visible}
 @media(max-width:700px){.os-rec-body{column-count:1}.os-rec-head{grid-template-columns:auto 1fr auto}.os-rec-val{display:none}}
 .os-rec{min-height:0}.os-rec-body{flex:0 0 auto;min-height:220px}
 .cs-screen:has(.os-rec){min-height:0}
+/* Market participation: one screen (blended · 1H evidence · 11 sectors) */
+.xr-part{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px}
+.xr-part-col{min-width:0;padding:14px 16px;border-radius:12px;border:1px solid #ffffff10;background:#0c0d0f}
+.xr-part-wide{grid-column:1/-1}
+.xr-part-h{margin:0 0 10px;font:700 10px Consolas,monospace;letter-spacing:1.6px;color:#fff200}
+.xr-part-big{margin:0 0 8px;font:800 30px/1.1 Bahnschrift,"Segoe UI",sans-serif}
+.xr-part .table-wrap{margin:10px 0 6px}
+.xr-split{margin:0 0 12px}
+.xr-split-top{display:flex;align-items:baseline;gap:10px;margin-bottom:5px;font-size:12px}
+.xr-split-top span{flex:1;color:#9aa3ad}.xr-split-top b{font:800 14px Bahnschrift,sans-serif}
+.xr-split-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:#ffffff10}
+.xr-split-bar i{display:block;height:100%}.xr-split-bar i.up{background:linear-gradient(90deg,#0c8a4a,#20c46e)}.xr-split-bar i.down{background:linear-gradient(90deg,#ff3b3b,#9d1015)}
+.grid.cols-2>.panel:only-child{grid-column:1/-1}
+@media(max-width:900px){.xr-part{grid-template-columns:1fr}}
