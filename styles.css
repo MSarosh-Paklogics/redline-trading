@@ -1163,3 +1163,34 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .xr-split-bar i{display:block;height:100%}.xr-split-bar i.up{background:linear-gradient(90deg,#0c8a4a,#20c46e)}.xr-split-bar i.down{background:linear-gradient(90deg,#ff3b3b,#9d1015)}
 .grid.cols-2>.panel:only-child{grid-column:1/-1}
 @media(max-width:900px){.xr-part{grid-template-columns:1fr}}
+/* Market participation as a modern car screen (Brian's layout: blended, 4 frames, fast, 1H evidence, distribution) */
+.xr-pc{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:18px;border:1px solid #ffffff14;background:radial-gradient(ellipse at 20% 0%,#16202b,transparent 55%),linear-gradient(180deg,#0b1016,#05070a);box-shadow:inset 0 1px 0 #ffffff12,inset 0 0 40px #0009}
+.xr-pc small{font:700 9.5px Consolas,monospace;letter-spacing:1.4px;color:#7f93a6}
+.xr-pc-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:20px;padding:14px 18px;border-radius:14px;border:1px solid #ffffff12;background:#0a0f15cc}
+.xr-pc-top b{display:block;margin-top:4px;font:800 34px/1 Bahnschrift,"Segoe UI",sans-serif;text-shadow:0 0 18px currentColor}
+.xr-pc-top p{margin:0;font-size:11.5px;line-height:1.5;color:#9fb0c0}
+.xr-pc-surv{text-align:right}.xr-pc-surv b{font:italic 700 30px/1 Consolas,monospace;color:#3ad7ff;text-shadow:0 0 12px #3ad7ff99}
+.xr-pc-warn{padding:10px 14px;border-radius:10px;border:1px solid #fff20055;background:#fff2000d;color:#fff200;font-size:11.5px}
+.xr-pc-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.xr-pc-tile{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:14px;border:1px solid #ffffff12;background:linear-gradient(180deg,#101820,#080b0f)}
+.xr-pc-tile-h{display:flex;justify-content:space-between;align-items:center}.xr-pc-tile-h b{font:800 15px Bahnschrift,sans-serif;color:#fff}
+.xr-pc-state{font:800 20px/1.1 Bahnschrift,"Segoe UI",sans-serif}
+.xr-pc-tile small{letter-spacing:.4px;font-size:10px;color:#9fb0c0}
+.xr-pc-tile em{font:700 9px Consolas,monospace;font-style:normal;letter-spacing:.6px}
+.xr-pc-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;border:1px solid currentColor;font:800 9px Consolas,monospace;letter-spacing:.8px}
+.xr-pc-pill i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.xr-pc .up{color:#20c46e}.xr-pc .down{color:#ff3b3b}.xr-pc .yellow{color:#fff200}.xr-pc .orange{color:#ff9f1a}.xr-pc .na{color:#6d7e8e}
+.xr-pc-fast{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-radius:14px;border:1px solid #ffffff12;background:#0a0f15cc}
+.xr-pc-fast b{display:block;margin-top:3px;font:800 22px Bahnschrift,sans-serif}
+.xr-pc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.xr-pc-box{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-radius:14px;border:1px solid #ffffff12;border-top:3px solid var(--b,#3ad7ff);background:linear-gradient(180deg,#0e151c,#070a0d)}
+.xr-pc-box.blue{--b:#3ad7ff}.xr-pc-box.green{--b:#20c46e}.xr-pc-box.red{--b:#ff3b3b}.xr-pc-box.gold{--b:#fff200}
+.xr-pc-box h6{margin:0 0 10px;font:800 11px Bahnschrift,sans-serif;letter-spacing:1px;color:var(--b)}
+.xr-pc-box .kv{font-size:11.5px}
+.xr-pc-dig{margin-bottom:8px}.xr-pc-dig b{display:block;font:italic 700 36px/1 Consolas,monospace;color:#3ad7ff;text-shadow:0 0 14px #3ad7ff88}
+.xr-pc-imb{margin-top:10px;padding:12px;border-radius:12px;border:1px solid currentColor;text-align:center;background:color-mix(in srgb,currentColor 8%,transparent)}
+.xr-pc-imb small{color:#9fb0c0}.xr-pc-imb b{display:block;margin:4px 0;font:italic 700 30px/1 Consolas,monospace;text-shadow:0 0 14px currentColor}
+.xr-pc-imb span{font:800 10px Consolas,monospace;letter-spacing:1px}
+.xr-pc-sectors{padding:12px 14px;border-radius:14px;border:1px solid #ffffff12;background:#080b0f}
+@media(max-width:1200px){.xr-pc-tiles,.xr-pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.xr-pc-top{grid-template-columns:1fr auto}.xr-pc-top p{display:none}}
+@media(max-width:640px){.xr-pc-tiles,.xr-pc-grid{grid-template-columns:1fr}}
