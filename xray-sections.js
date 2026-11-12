@@ -63,7 +63,9 @@
     // Frye shows groups only when the backend marks them available and complete.
     const groups = rawGroups && rawGroups.available === true && rawGroups.complete === true ? rawGroups : null;
     const sectorCards = x.sectorCards?.[ui.sector] || [];
-    const sectorBars = sectorCards.length ? `<div class="xr-sbars">${sectorCards.map(c => {
+    // Mixed (neutral) sectors first, then strong, then weak (client request 2026-11-12).
+    const rank = c => !groups ? 1 : groups.neutral?.includes(c.sector) ? 0 : groups.strong?.includes(c.sector) ? 1 : groups.weak?.includes(c.sector) ? 2 : 3;
+    const sectorBars = sectorCards.length ? `<div class="xr-sbars">${sectorCards.map((c, i) => [c, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([c]) => {
       const tone = !groups ? 'blue' : groups.strong?.includes(c.sector) ? 'up' : groups.weak?.includes(c.sector) ? 'down' : groups.neutral?.includes(c.sector) ? 'yellow' : 'blue';
       const h = c.breadth == null ? 0 : Math.max(8, Math.min(100, c.breadth));
       return `<div class="xr-sbar ${tone}" title="${esc(c.sector)} · breadth ${c.breadth == null ? 'unavailable' : c.breadth.toFixed(1) + '%'}"><div class="xr-sbar-track"><em>${c.breadth == null ? '—' : Math.round(c.breadth) + '%'}</em><i style="height:${h}%"></i></div><small>${esc(c.sector)}</small></div>`;
@@ -118,7 +120,7 @@
           </section>
         </div>
         <h5 class="xr-part-h">11-SECTOR PARTICIPATION</h5>
-        <div class="xr-pc-sectors">${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}</div>
+        <div class="xr-pc-sectors">${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="yellow">MIXED (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}</div>
       </div>`;
     if (opt.only === 'participation') return partHtml;
 
