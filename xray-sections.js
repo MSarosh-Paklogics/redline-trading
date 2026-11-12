@@ -126,17 +126,17 @@
     <div class="race-section-label"><span>MARKET METERS</span><small>ES FUTURES · SPY · LIVE BACKEND</small></div>
     <div class="xr-strips">${meterStrip('ES FUTURES METER', x.meter?.lights && { '10m': x.meter.lights['10m'], '30m': x.meter.lights['30m'], '1h': x.meter.lights['1h'], '4h': x.meter.lights['4h'], eod: x.meter.lights['1d'] }, master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}${meterStrip('SPY MARKET METER', x.spy?.lights, x.spy?.master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}</div>
 
-    ${panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
+    ${skip.has('participation') ? '' : panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
 ${partHtml}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
 
     <div class="grid cols-2">
-      ${panel('Selling / distribution pressure', body(`
+      ${skip.has('distribution') ? '' : panel('Selling / distribution pressure', body(`
         ${note('4H owns the structural pressure score. 1H shows direction, 30m confirms transitions and 10m flags acceleration.')}
         ${kv('Breadth pressure — 4H', comp.breadthPressure == null ? '—' : `${f(comp.breadthPressure)} / 100`)}${kv('Volume pressure — 4H', comp.volumePressure == null ? '—' : `${f(comp.volumePressure)} / 100`)}${kv('NH/NL pressure — 4H', comp.highLowPressure == null ? '—' : `${f(comp.highLowPressure)} / 100`)}${kv('Sector pressure — 4H', comp.sectorPressure == null ? '—' : `${f(comp.sectorPressure)} / 100`)}
         <div class="table-wrap"><table><thead><tr><th>Frame</th><th>Role</th><th>Pressure</th><th>Read</th><th>Prior → current</th></tr></thead><tbody>${(dd.frames || []).map(fr => { const [tf, role, desc] = frameName[fr.key]; const p = prior(fr.key); const lastValid = fr.display?.lastValidEquityRead?.pressure ?? fr.display?.pressure; return `<tr><td>${tf}</td><td title="${esc(desc)}">${role}</td><td class="number">${fr.pressure == null ? '—' : f(fr.pressure, 1)}</td><td class="${tone(distRead(fr))}">${esc(distRead(fr))}</td><td>${fr.pressure != null && p != null ? `${f(p, 1)} → ${f(fr.pressure, 1)} · ${signed(fr.pressure - p)} ${fr.pressure >= p ? 'more' : 'less'} selling` : !fr.available && n(lastValid) != null ? `Last valid ${f(lastValid, 1)}` : '—'}</td></tr>`; }).join('')}</tbody></table></div>
         ${kv('Distribution pressure', x.distribution?.raw == null ? '—' : `${f(x.distribution.raw)} / 100 · ${L(x.distribution.label)}`, tone(x.distribution?.label))}
       `))}
-      ${panel('Index vs broader market', body(`
+      ${skip.has('index') ? '' : panel('Index vs broader market', body(`
         ${note('Is ES stronger or weaker than the stocks underneath it?')}
         ${kv('ES strength', f(master, 1))}${kv('Broader market strength', f(broader))}${kv('ES price', f(h.esClose, 2))}${kv('Participation', L(x.breadthLabel), tone(x.breadthLabel))}
         ${kv('Index / market difference', diff == null ? '—' : `${signed(diff)} pts`, diff == null ? '' : diff > 0 ? 'yellow' : 'up')}

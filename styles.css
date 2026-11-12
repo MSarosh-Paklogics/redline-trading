@@ -1196,3 +1196,5 @@ body,#app{overflow-x:clip;overflow-y:visible}
 @media(max-width:640px){.xr-pc-tiles,.xr-pc-grid{grid-template-columns:1fr}}
 .os-rec-body.os-rec-wide{column-count:1;padding:0;border:0;background:none}
 .os-rec-wide .xr-pc{border-radius:14px}
+.grid:not(:has(*)){display:none}
+.db-note{margin:14px 2px 0;font-size:11.5px}.db-note a{color:#fff200}

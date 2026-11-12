@@ -77,7 +77,10 @@
     const loading = '<div class="ce-empty">Loading the live ES engine read…</div>';
     const xs = window.redlineXraySections || {};
     const body = {
-      e25: x ? raceLiveOverview(x, { meters: false }) + (xs.e25 ? xs.e25(x, { skip: ['brief', 'stress', 'macro', 'leaders'] }) : '') : '<div class="ce-empty">Engine 25 unavailable.</div>',
+      // Each reading appears once on the dashboard: permission, stat cards, participation, distribution,
+      // index vs market, stress, macro and the briefing live in the cockpit / command screen above.
+      // The Market X-Ray page (#/xray) still shows every Engine 25 section.
+      e25: x ? (xs.e25 ? xs.e25(x, { skip: ['brief', 'stress', 'macro', 'leaders', 'participation', 'distribution', 'index'] }) : '') + '<p class="xr-muted db-note">Permission, participation, distribution, index vs market, stress and macro are in the cockpit and command screen above. Full detail: <a href="#/xray">Market X-Ray</a>.</p>' : '<div class="ce-empty">Engine 25 unavailable.</div>',
       e29: x && xs.e29 ? xs.e29(x) || '<div class="ce-empty">Engine 29 unavailable.</div>' : '<div class="ce-empty">Engine 29 unavailable.</div>',
       strategy: parts ? `<div class="db-grid">${parts.strategy}<div class="ce-section">MARKET CONTEXT · ENGINE 22 TIMELINE READ</div>${parts.context}${parts.side}</div>` : loading,
       evidence: parts ? `<div class="db-grid">${parts.evidence}${parts.zones}</div>` : loading
