@@ -308,7 +308,7 @@
      Home = the car (Enzo 3D model in local demo, F80 photo otherwise) with ES price, ES gear and the
      three-step decision chain, plus ten info apps (named after Brian's X-Ray cards) that show their reading on the tile. Tapping a tile
      opens it full screen; the system bar has back and home only. Only the screen re-renders. Display only. */
-  const csOS = { app: 'home', prev: [] };
+  const csOS = { app: 'home', prev: [], idx: 0 };
   const IC = {
     nav: '<path d="M12 2 L20 21 L12 17 L4 21 Z"/>',
     car: '<path d="M5 15 L6.5 9.5 C7 8 8 7 9.5 7 H14.5 C16 7 17 8 17.5 9.5 L19 15 V19 H17 V17.5 H7 V19 H5 Z M7.5 14.5 a1.4 1.4 0 1 0 0.01 0 M16.5 14.5 a1.4 1.4 0 1 0 0.01 0 M8.2 11 H15.8 L15 8.8 H9 Z"/>',
@@ -365,23 +365,28 @@
   }
 
 
+  /* Home = one full record at a time (client request 2026-11-12): each record is the complete
+     detail of one of Brian's X-Ray cards, paged with ‹ › arrows and dots. No car backdrop. */
   function homeView(x, cm, r, cur) {
-    const list = apps(x, cm, r);
+    const list = apps(x, cm, r).filter(a => a.page);
+    if (!list.length) return '<div class="os-home os-view"><p class="cc-na">Loading live X-Ray records…</p></div>';
+    csOS.idx = ((csOS.idx % list.length) + list.length) % list.length;
+    const a = list[csOS.idx];
     const pills = Object.fromEntries(cm?.pills || []), d22 = cm?.display?.degrees?.minute || {}, e6 = cm?.e6 || {}, e27 = cm?.e27 || {};
     const steps = [['WAVE', d22.badge || d22.direction || e27.decisionState], ['READY', pills.READINESS], ['PERMITTED', e6.permission]];
-    const tileHtml = a => `<button type="button" class="os-tile" data-os-open="${a.id}" title="${esc(a.sub)}"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><small>${a.name}</small><b class="g-${a.tone || 'na'}">${esc(a.value)}</b><span class="os-tsub">${esc(a.sub)}</span>${a.bar == null ? '' : `<i class="os-tbar g-${a.tone || 'na'}"><i style="width:${Math.max(2, Math.min(100, a.bar))}%"></i></i>`}${(a.details || []).length ? `<dl class="os-tdl">${a.details.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : ''}</button>`;
-    // Tiles fill the screen above and below; the car turns behind everything, visible in the middle band.
-    return `<div class="os-home os-view">
-      <div class="cs-car3d os-bg-car" aria-hidden="true"><img src="assets/car-3d.jpg?v=20261111" alt="" decoding="async"><i class="cs-car3d-floor"></i><i class="cs-car3d-sheen"></i></div>
-      <div class="os-tiles os-tiles-top">${list.slice(0, 5).map(tileHtml).join('')}</div>
-      <div class="os-band">
-        <div class="os-hero-price"><small>ES · LIVE</small><b>${r.price == null ? '—' : r.price.toFixed(2)}</b></div>
-        <div class="os-hero-gear ${cur ? 'g-' + cur.tone : ''}"><small>ES GEAR</small><b>${cur ? (cur.g === 'T' ? 'TURBO' : cur.g) : '—'}</b><span>${cur ? cur.short : 'UNAVAILABLE'}</span></div>
-      </div>
-      <div class="os-tiles os-tiles-bottom">${list.slice(5).map(tileHtml).join('')}</div>
-      <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}</div>
+    return `<div class="os-home os-rec os-view">
+      <header class="os-rec-head">
+        <button type="button" class="os-rec-arrow" data-os-step="-1" aria-label="Previous record">‹</button>
+        <div class="os-rec-title"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><div><b>${esc(a.name)}</b><small>${esc(a.page.head || '')} · ${csOS.idx + 1} / ${list.length}</small></div></div>
+        <div class="os-rec-val"><b class="g-${a.tone || 'na'}">${esc(a.value)}</b><small>${esc(a.sub)}</small></div>
+        <button type="button" class="os-rec-arrow" data-os-step="1" aria-label="Next record">›</button>
+      </header>
+      <div class="os-detail os-rec-body">${a.page.body}</div>
+      <nav class="os-rec-dots" aria-label="Records">${list.map((q, i) => `<button type="button" data-os-go="${i}" class="${i === csOS.idx ? 'on' : ''}" title="${esc(q.name)}"><span>${esc(q.name)}</span></button>`).join('')}</nav>
+      <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}<span class="os-rec-es"><small>ES · GEAR</small><b>${r.price == null ? '—' : r.price.toFixed(2)} · ${cur ? (cur.g === 'T' ? 'TURBO' : cur.g) : '—'}</b></span></div>
     </div>`;
   }
+
 
 
 
@@ -424,6 +429,9 @@
     const t = ev.target, open = t.closest?.('[data-os-open]');
     if (open) { if (csOS.app !== open.dataset.osOpen) { csOS.prev.push(csOS.app); csOS.app = open.dataset.osOpen; } return redrawScreen(); }
     if (t.closest?.('[data-os-back]')) { csOS.app = csOS.prev.pop() || 'home'; return redrawScreen(); }
+    const stepBtn = t.closest?.('[data-os-step]'), goBtn = t.closest?.('[data-os-go]');
+    if (stepBtn) { csOS.app = 'home'; csOS.idx += Number(stepBtn.dataset.osStep); return redrawScreen(); }
+    if (goBtn) { csOS.app = 'home'; csOS.idx = Number(goBtn.dataset.osGo); return redrawScreen(); }
     if (t.closest?.('[data-os-home]')) { csOS.app = 'home'; csOS.prev = []; return redrawScreen(); }
   });
 

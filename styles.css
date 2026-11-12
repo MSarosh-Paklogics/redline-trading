@@ -1125,3 +1125,27 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .ce-more summary::-webkit-details-marker{display:none}
 .ce-more summary:hover{border-color:#fff20080;color:#fff200}
 .ce-more[open] summary{margin-bottom:4px}
+/* Command screen records: one full X-Ray card at a time with ‹ › arrows (no car backdrop) */
+.os-rec{display:flex;flex-direction:column;gap:12px;padding:14px 16px;min-height:520px;background:radial-gradient(ellipse at 50% 0%,#141c24,#07090c 70%)}
+.os-rec-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:14px;padding:10px 12px;border-radius:14px;border:1px solid #ffffff14;background:#0b1118}
+.os-rec-title{display:flex;align-items:center;gap:12px;min-width:0}
+.os-rec-title .os-ic.sm{width:44px;height:44px;border-radius:14px}.os-rec-title .os-ic.sm svg{width:24px;height:24px}
+.os-rec-title b{display:block;font:800 20px Bahnschrift,"Segoe UI",sans-serif;color:#fff}
+.os-rec-title small{font:600 10px Consolas,monospace;letter-spacing:.8px;color:#8aa0b4}
+.os-rec-val{text-align:right}.os-rec-val b{display:block;font:800 30px/1 Bahnschrift,"Segoe UI",sans-serif}
+.os-rec-val small{font:600 10px Consolas,monospace;color:#b7c4d0}
+.os-rec-val .g-up{color:#20c46e}.os-rec-val .g-yellow{color:#fff200}.os-rec-val .g-down{color:#ff3b3b}.os-rec-val .g-na{color:#8aa0b4}
+.os-rec-arrow{width:46px;height:46px;border-radius:50%;border:1px solid #ffffff26;background:#141b23;color:#fff;font:700 26px/1 "Segoe UI",Arial,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,transform .15s}
+.os-rec-arrow:hover{background:#ed1c24;border-color:#ff5a60}.os-rec-arrow:active{transform:scale(.94)}
+.os-rec-head .os-rec-arrow[data-os-step="-1"]{order:-1}
+.os-rec-body{flex:1;max-height:none;column-count:3;column-gap:26px}
+.os-rec-dots{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.os-rec-dots button{padding:5px 10px;border-radius:999px;border:1px solid #ffffff1a;background:#0d141b;color:#9fb0c0;font:700 10px "Segoe UI",Arial,sans-serif;cursor:pointer}
+.os-rec-dots button:hover{color:#fff;border-color:#fff20066}
+.os-rec-dots button.on{color:#fff;background:#ed1c24;border-color:#ff5a60}
+.os-rec .os-hero-chain{pointer-events:auto}
+.os-rec-es{margin-left:auto;text-align:right}.os-rec-es small{display:block}.os-rec-es b{color:#fff!important}
+@media(max-width:1100px){.os-rec-body{column-count:2}}
+@media(max-width:700px){.os-rec-body{column-count:1}.os-rec-head{grid-template-columns:auto 1fr auto}.os-rec-val{display:none}}
+.os-rec{min-height:0}.os-rec-body{flex:0 0 auto;min-height:220px}
+.cs-screen:has(.os-rec){min-height:0}
