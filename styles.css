@@ -1194,3 +1194,5 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .xr-pc-sectors{padding:12px 14px;border-radius:14px;border:1px solid #ffffff12;background:#080b0f}
 @media(max-width:1200px){.xr-pc-tiles,.xr-pc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.xr-pc-top{grid-template-columns:1fr auto}.xr-pc-top p{display:none}}
 @media(max-width:640px){.xr-pc-tiles,.xr-pc-grid{grid-template-columns:1fr}}
+.os-rec-body.os-rec-wide{column-count:1;padding:0;border:0;background:none}
+.os-rec-wide .xr-pc{border-radius:14px}

@@ -80,12 +80,7 @@
       return `<div class="xr-split"><div class="xr-split-top"><span>${label}</span><b class="up">${pa.toFixed(0)}% ${la}</b><b class="down">${(100 - pa).toFixed(0)}% ${lb}</b></div><div class="xr-split-bar"><i class="up" style="width:${pa}%"></i><i class="down" style="width:${100 - pa}%"></i></div></div>`;
     };
 
-    return `
-    <div class="race-section-label"><span>MARKET METERS</span><small>ES FUTURES · SPY · LIVE BACKEND</small></div>
-    <div class="xr-strips">${meterStrip('ES FUTURES METER', x.meter?.lights && { '10m': x.meter.lights['10m'], '30m': x.meter.lights['30m'], '1h': x.meter.lights['1h'], '4h': x.meter.lights['4h'], eod: x.meter.lights['1d'] }, master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}${meterStrip('SPY MARKET METER', x.spy?.lights, x.spy?.master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}</div>
-
-    ${panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
-      <div class="xr-pc">
+    const partHtml = `      <div class="xr-pc">
         <div class="xr-pc-top">
           <div><small>BLENDED PARTICIPATION</small><b class="${tone(blend.state)}">${blend.state === 'INSUFFICIENT_DATA' ? 'INSUFFICIENT DATA' : E(blend.state)}</b></div>
           <p>Blends the latest valid 10m, 1H, 4H and EOD participation readings. Fast participation below stays the raw 10-minute evidence.</p>
@@ -124,7 +119,15 @@
         </div>
         <h5 class="xr-part-h">11-SECTOR PARTICIPATION</h5>
         <div class="xr-pc-sectors">${tabs('sector', ui.sector, [['1H', '1H'], ['4H', '4H'], ['EOD', 'EOD']])}${sectorBars}${groups ? `<div class="xr-groups"><div><b class="up">STRONG (${groups.strong?.length || 0})</b>${sectorList(groups.strong)}</div><div><b class="yellow">NEUTRAL (${groups.neutral?.length || 0})</b>${sectorList(groups.neutral)}</div><div><b class="down">WEAK (${groups.weak?.length || 0})</b>${sectorList(groups.weak)}</div></div>` : (sectorCards.length ? '<p class="xr-muted">Strong / neutral / weak grouping unavailable for this timeframe.</p>' : '<p class="xr-muted">Sector participation unavailable.</p>')}</div>
-      </div>`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
+      </div>`;
+    if (opt.only === 'participation') return partHtml;
+
+    return `
+    <div class="race-section-label"><span>MARKET METERS</span><small>ES FUTURES · SPY · LIVE BACKEND</small></div>
+    <div class="xr-strips">${meterStrip('ES FUTURES METER', x.meter?.lights && { '10m': x.meter.lights['10m'], '30m': x.meter.lights['30m'], '1h': x.meter.lights['1h'], '4h': x.meter.lights['4h'], eod: x.meter.lights['1d'] }, master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}${meterStrip('SPY MARKET METER', x.spy?.lights, x.spy?.master, [['10m', '10m'], ['30m', '30m'], ['1h', '1h'], ['4h', '4h'], ['eod', 'EOD']])}</div>
+
+    ${panel(`Market participation — ${hb.scanned == null ? 'UNAVAILABLE' : f(hb.scanned)} stocks`, body(`
+${partHtml}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
 
     <div class="grid cols-2">
       ${panel('Selling / distribution pressure', body(`
