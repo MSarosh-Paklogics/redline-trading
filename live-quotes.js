@@ -7,7 +7,7 @@
    written into the app.js `symbols` entries [name, label, price, changePct]; symbols
    whose read fails keep their demo values. */
 (() => {
-  const FUTURES = new Set(['ES', 'MES']);
+  const FUTURES = new Set(['ES', 'MES', 'MCL']);
   const BATCH = 3;
   const etDate = sec => new Date(sec * 1000).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   let busy = false;

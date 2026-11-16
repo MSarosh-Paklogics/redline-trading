@@ -10,15 +10,22 @@
      backend. Engine 6 alone decides whether a trade is permitted. */
 (() => {
   if (typeof overview !== 'function') return;
+  // [shown symbol, name, Engine 29 key, backend quote symbol, raw]. Fixed list (client request
+  // 2026-11-16): always shown, in this order. Indexes are read as I:SPX etc. CL1! has no backend
+  // feed of its own, so its price comes from MCL (micro crude, same price as CL) and is labelled so.
+  // raw = VIX, TLT, crude: a "breaking" state there is not a stock-market bull/bear call, so the
+  // Engine 29 state is shown as published instead of being grouped.
   const MARKETS = [
-    ['ES', 'S&P 500 futures', null],
-    ['SPY', 'S&P 500', 'SPY'],
-    ['QQQ', 'Nasdaq 100', 'QQQ'],
-    ['DIA', 'Dow Jones', 'DJI'],
-    ['IWM', 'Russell 2000', 'IWM'],
-    ['SMH', 'Semiconductors', 'SMH'],
-    ['XLK', 'Technology', 'XLK'],
-    ['XLF', 'Financials', 'XLF']
+    ['ES', 'S&P 500 futures', null, 'ES'],
+    ['QQQ', 'Nasdaq 100 ETF', 'QQQ', 'QQQ'],
+    ['SPX', 'S&P 500 index', 'SPX', 'I:SPX'],
+    ['NDX', 'Nasdaq 100 index', 'NDX', 'I:NDX'],
+    ['DOW', 'Dow Jones index', 'DJI', 'I:DJI'],
+    ['IWM', 'Russell 2000 ETF', 'IWM', 'IWM'],
+    ['MDY', 'S&P MidCap 400 ETF', 'MDY', 'MDY'],
+    ['VIX', 'Volatility index', 'VIX', 'I:VIX', true],
+    ['TLT', '20+ yr Treasury ETF', 'TLT', 'TLT', true],
+    ['CL1!', 'Crude oil · MCL feed', 'WTI', 'MCL', true]
   ];
   const quotes = {};
   let busy = false, loadedAt = null;
@@ -34,7 +41,7 @@
     return 'NEUTRAL';
   };
 
-  function row([sym, name, e29key]) {
+  function row([sym, name, e29key, , raw]) {
     const q = quotes[sym], ch = q?.change;
     const pct = ch == null ? '—' : `${ch > 0 ? '+' : ''}${ch.toFixed(2)}%`;
     const pctTone = ch == null ? 'na' : ch > 0 ? 'up' : ch < 0 ? 'down' : 'flat';
@@ -47,10 +54,10 @@
       sub = `E17 bias · E6 ${L(e6)}`;
     } else {
       const st = window.redlineXray?.model?.e29?.symbols?.[e29key]?.tactical?.state;
-      const d = dir(st);
+      const d = raw ? (st ? L(st) : null) : dir(st);
       signal = d || 'UNAVAILABLE';
-      tone = d === 'BULLISH' ? 'up' : d === 'BEARISH' ? 'down' : d ? 'yellow' : 'na';
-      sub = `E29 intraday · ${L(st)}`;
+      tone = raw ? (d ? 'yellow' : 'na') : d === 'BULLISH' ? 'up' : d === 'BEARISH' ? 'down' : d ? 'yellow' : 'na';
+      sub = raw ? 'E29 intraday state · as published' : `E29 intraday · ${L(st)}`;
     }
     return `<div class="mp-row"><div class="mp-name"><b>${esc(sym)}</b><small>${esc(name)}</small></div>
       <div class="mp-pct mp-${pctTone}">${pct}</div>
@@ -70,7 +77,7 @@
     try {
       for (let i = 0; i < MARKETS.length; i += 3) {
         const batch = MARKETS.slice(i, i + 3);
-        const res = await Promise.all(batch.map(([s]) => window.redlineQuoteRead(s)));
+        const res = await Promise.all(batch.map(m => window.redlineQuoteRead(m[3])));
         res.forEach((q, j) => { if (q) quotes[batch[j][0]] = q; else delete quotes[batch[j][0]]; });
       }
       loadedAt = Date.now();
