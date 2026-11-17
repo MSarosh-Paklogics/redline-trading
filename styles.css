@@ -1201,3 +1201,12 @@ body,#app{overflow-x:clip;overflow-y:visible}
 
 /* Market pulse: 10 fixed markets as 2 rows of 5 on wide screens (2026-11-16). */
 @media(min-width:1101px){.mp-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Gauge digits as a seven-segment digital display (client request 2026-11-17). Shapes unchanged;
+   only the dial numbers and the centre readout switch font. DSEG7 (SIL OFL) from jsDelivr, pinned;
+   falls back to the old face if the font cannot load. */
+@font-face{font-family:'DSEG7';src:url('https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+.cc-num{font-family:'DSEG7',Bahnschrift,'Arial Narrow',sans-serif;font-weight:700;font-size:12px;letter-spacing:.5px}
+.cc-num-sm{font-size:10px!important}
+.cc-read{font-family:'DSEG7',Bahnschrift,'Arial Narrow',sans-serif;font-size:17px;letter-spacing:1px;filter:drop-shadow(0 0 4px rgba(255,255,255,.45))}
+.cc-read.na{font-family:Bahnschrift,'Arial Narrow',sans-serif;filter:none}
