@@ -1278,3 +1278,5 @@ body,#app{overflow-x:clip;overflow-y:visible}
 /* video back (client 2026-11-18): red toned down so the copy and logo lead */
 .race-hero.rh-v2>.hero-video video{filter:saturate(.45) hue-rotate(-8deg) brightness(.95) contrast(1.05)!important}
 .race-hero.rh-v2>.hero-video:after{background:linear-gradient(90deg,#050506d9 0%,#050506a6 32%,#0505064d 58%,#05050614 100%),linear-gradient(0deg,#00000080,transparent 45%)!important}
+/* kicker now reads PRECISION / WITH ATTITUDE (longer): keep POWERED BY AI clear of it on narrower screens */
+@media(max-width:1400px){.race-hero.rh-v2>.hero-ai{left:auto;right:130px;transform:none;letter-spacing:4px}.race-hero.rh-v2>.hero-ai>i{width:40px}}
