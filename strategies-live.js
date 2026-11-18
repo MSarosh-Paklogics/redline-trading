@@ -65,32 +65,45 @@
 
   /* Engine 22 owner research counts (currentWavelength.degrees[deg].owner*Research, selectionStatus
      RESEARCH_ONLY). Brian's Strategies page shows the newest of these per degree ahead of the
-     canonical working count; priority order MIRRORED from Frye Engine22MarketStructureCard.jsx.
+     canonical working count. Priority MIRRORED from Frye Engine22MarketStructureCard.jsx (Nov 16).
+     Research objects the backend adds later are picked up automatically: the newest date in the
+     key (e.g. "Nov16") wins, then this list's order, so Redline does not go stale between updates.
      Engine 27's canonical working count stays visible next to it. */
   const RESEARCH = {
     submicro: ['ownerSubmicroW3Nov9InternalResearch', 'ownerSubmicroW3Nov9Research', 'ownerSubmicroNov6AbcResearch'],
-    micro: ['ownerMicroW3Nov9ReclassifiedResearch', 'ownerMicroW2Nov6Research'],
-    subminute: ['ownerSubminuteW1FormingNov9Research', 'ownerSubminuteNov5AbcResearch'],
+    micro: ['ownerMicroAbcDownNov16Research', 'ownerMicroW3Nov9ReclassifiedResearch', 'ownerMicroW2Nov6Research'],
+    subminute: ['ownerSubminuteAbcDownNov16Research', 'ownerSubminuteW1FormingNov9Research', 'ownerSubminuteNov5AbcResearch'],
     minute: ['ownerMinuteW1FormingNov9Research', 'ownerMinuteAbcResearch'],
     minor: ['ownerMinorW3Nov9Research', 'ownerMinorW2Research']
   };
   /* Which published level set is CURRENT for a research card, and its title. MIRRORED from Frye
-     Engine22MarketStructureCard.jsx (Nov 10): the other arrays on the same object are history
-     (w4Retracement, cDownExtension, w1PriorCorrectionRetracement) or superseded (w1LegacyProxy)
-     and are never shown as current. Keys without an entry fall back to the generic levels. */
+     Engine22MarketStructureCard.jsx (Nov 16). Other arrays on the same object are history and are
+     never shown as current. history:true = Brian shows the set only as past observations (Submicro
+     W2 ladder retired Nov 16: price went through it; new UP fibs wait for an owner-confirmed W2 low). */
   const CURRENT_FIBS = {
+    ownerMicroAbcDownNov16Research: { field: 'levels', title: 'Micro C down — B high minus A length extensions (watch)' },
+    ownerSubminuteAbcDownNov16Research: { field: 'levels', title: 'Subminute C down — B high minus A length Fib extensions (watch)' },
+    ownerMinuteW1FormingNov9Research: { field: 'levels', title: 'Minute W2 down — W1 retracements (provisional start)' },
+    ownerMinorW3Nov9Research: { field: 'levels', title: 'Minor W3 up — W2 low + W1 length Fib extensions' },
     ownerMicroW3Nov9ReclassifiedResearch: { field: 'w5UpExtensionLevels', title: 'Micro W5 up — W4 low + W1 length extensions (watch)' },
-    ownerSubmicroW3Nov9InternalResearch: { field: 'w2DownRetracementLevels', title: 'Submicro W2 down — retracements of completed W1 (watch)' }
+    ownerSubmicroW3Nov9InternalResearch: { field: 'w2DownRetracementLevels', title: 'Previous Submicro W2 fibs — historical observations', history: true, pending: 'New UP Fibs pending the owner-confirmed W2 low — no targets invented.' },
+    ownerMicroW2Nov6Research: { field: 'levels', title: 'Micro W2 retracement Fib levels' },
+    ownerSubmicroW3Nov9Research: { field: 'levels', title: 'Submicro W3 up — W2 low + W1 length Fib extensions' }
   };
   const researchLevels = rs => {
     const c = rs && CURRENT_FIBS[rs.key];
     const arr = c ? rs[c.field] : rs?.levels;
     return Array.isArray(arr) ? arr : [];
   };
+  const MONTHS = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+  const keyDate = k => { const m = String(k).match(/(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)(\d{1,2})/); return m ? MONTHS[m[1]] * 100 + Number(m[2]) : 0; };
   function research(m, deg) {
-    const cw = m.ws.currentWavelength?.degrees?.[deg] || {};
-    for (const k of RESEARCH[deg] || []) { const o = cw[k]; if (o && typeof o === 'object' && o.selectionStatus === 'RESEARCH_ONLY') return { key: k, ...o }; }
-    return null;
+    const cw = m.ws.currentWavelength?.degrees?.[deg] || {}, known = RESEARCH[deg] || [];
+    const found = Object.keys(cw).filter(k => /^owner.*Research$/.test(k) && cw[k] && typeof cw[k] === 'object' && cw[k].selectionStatus === 'RESEARCH_ONLY');
+    if (!found.length) return null;
+    const rank = k => { const i = known.indexOf(k); return i < 0 ? known.length : i; };
+    found.sort((x, y) => (keyDate(y) || keyDate(cw[y].version)) - (keyDate(x) || keyDate(cw[x].version)) || rank(x) - rank(y));
+    return { key: found[0], ...cw[found[0]] };
   }
   const words = k => String(k).replace(/^w(\d)/, 'W$1 ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([0-9])([A-Z])/g, '$1 $2').replace(/^./, c => c.toUpperCase()).replace(/\s+/g, ' ').trim();
   function anchorRows(a) {
@@ -203,9 +216,11 @@
       ${kv('Review reference', da.reviewZone ? px(da.reviewZone.low) : '—', '')}
       <p class="sl-muted">${esc(da.note || 'Directional observation only.')}</p>`, '', chip('READ ONLY'));
     const alts = rs ? [] : altFibs(m, deg);
+    const cf = CURRENT_FIBS[rs?.key];
     const rsEmpty = rs && !researchLevels(rs).length ? `<p class="sl-muted">Fibonacci pending: ${esc(L(rs.fibMethod || 'W1 and W2 anchors not published'))}. No targets are invented.</p>` : '';
+    const hist = cf?.history ? `<p class="sl-muted sl-hist">${researchLevels(rs).filter(l => String(l.status).toUpperCase() === 'TOUCHED').length} of ${researchLevels(rs).length} levels observed — history, not current targets. ${esc(cf.pending || '')}</p>` : '';
     const levelCards = alts.length ? alts.map((a, i) => card(a.title, fibTable(m, deg, a.levels), i ? 'gold' : 'green', chip(i ? 'ALTERNATIVE' : 'LEVELS', i ? 'gold' : 'green'))).join('')
-      : card(CURRENT_FIBS[rs?.key]?.title || `${L(deg)} ${rs ? 'research ' : ''}levels`, rsEmpty || fibTable(m, deg), 'green', chip(rs ? 'RESEARCH LEVELS' : 'LEVELS', 'green'));
+      : card(cf?.title || `${L(deg)} ${rs ? 'research ' : ''}levels`, rsEmpty || (hist + fibTable(m, deg)), cf?.history ? '' : 'green', chip(cf?.history ? 'HISTORY' : rs ? 'RESEARCH LEVELS' : 'LEVELS', cf?.history ? '' : 'green'));
     return `<div class="sl-detail"><div class="sl-stack">${researchCard}${structure}</div><div class="sl-stack">${levelCards}</div><div class="sl-stack">${riskCard(m, deg)}${direction}</div></div>`;
   }
 

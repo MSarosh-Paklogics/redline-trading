@@ -1320,3 +1320,18 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-rec .os-rec-title small{color:#c3ccd5;font-size:11px}
 .os-rec .os-rec-dots button span{font-size:12px;color:#e2e8ee}
 .os-rec .os-hero-chain small{color:#c3ccd5}
+
+/* Command screen Trade Permission: client X-Ray strip layout (2026-11-18) */
+.os-rec .os-detail .os-perm{display:grid;grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr)) minmax(0,1.6fr);border:1px solid #ff3b3b66;border-radius:12px;background:#0b0e14;column-span:all;break-inside:avoid}
+.os-perm>div{padding:14px 16px;border-left:1px solid #ffffff14;display:flex;flex-direction:column;gap:6px;min-width:0}
+.os-perm>div:first-child{border-left:0}
+.os-perm small{font:700 11px Consolas,monospace;letter-spacing:1px;color:#9fb0c2}
+.os-perm-main>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.os-perm-main b{font:800 40px/1 Bahnschrift,'Arial Narrow',sans-serif}
+.os-perm-main em,.os-perm-cell em{font:800 14px Bahnschrift,'Arial Narrow',sans-serif;font-style:normal;letter-spacing:.5px}
+.os-perm-cell b{font:800 30px/1 Bahnschrift,'Arial Narrow',sans-serif}
+.os-perm p{margin:0;font:500 12.5px/1.5 'Segoe UI',Arial,sans-serif;color:#d4dde6}
+.os-perm-size em{font-size:18px}
+.os-perm .g-yellow{color:#fff200}.os-perm .g-na{color:#9fb0c2}
+@media(max-width:1000px){.os-rec .os-detail .os-perm{grid-template-columns:repeat(2,minmax(0,1fr))}.os-perm-main,.os-perm-size{grid-column:1/-1}.os-perm>div{border-left:0;border-top:1px solid #ffffff14}.os-perm>div:first-child{border-top:0}}
+.os-perm .g-down,.os-perm b.g-down,.os-perm em.g-down{color:#ff4d4d}.os-perm .g-up,.os-perm b.g-up,.os-perm em.g-up{color:#2fe07f}.os-perm b.g-yellow,.os-perm em.g-yellow{color:#fff200}
