@@ -1221,7 +1221,7 @@ body,#app{overflow-x:clip;overflow-y:visible}
 @media(max-width:700px){.race-hero-brand{gap:12px}.race-hero-logo{width:64px;height:64px}}
 
 /* ===== Hero v2 (client mockup 2026-11-18): racing type, red banner, live track callouts ===== */
-.race-hero.rh-v2{border:1px solid #ed1c2499;border-radius:12px;padding:30px 34px 28px;min-height:300px;grid-template-columns:minmax(0,1.05fr) minmax(300px,1fr);background:radial-gradient(120% 90% at 0% 0%,#3a0a0e 0%,transparent 55%),radial-gradient(80% 70% at 100% 100%,#3a0608 0%,transparent 60%),linear-gradient(110deg,#140405,#0b0b0c 55%,#0d0607);box-shadow:inset 0 0 0 1px #ffffff08,0 0 40px #ed1c2418;overflow:hidden}
+.race-hero.rh-v2{border:1px solid #ed1c2499;border-radius:12px;padding:30px 34px 28px;min-height:300px;grid-template-columns:minmax(0,1.05fr) minmax(300px,1fr);background:radial-gradient(120% 90% at 0% 0%,#24090b 0%,transparent 55%),radial-gradient(80% 70% at 100% 100%,#1f0708 0%,transparent 60%),linear-gradient(110deg,#0e0708,#0b0b0c 55%,#0b0909);box-shadow:inset 0 0 0 1px #ffffff08,0 0 40px #ed1c2418;overflow:hidden}
 .race-hero.rh-v2:before{display:none}
 /* checkered floor + light streaks, bottom right (decoration) */
 .race-hero.rh-v2:after{content:'';position:absolute;right:-6%;bottom:-38%;width:62%;height:78%;z-index:0;pointer-events:none;background:repeating-conic-gradient(#ffffff 0 25%,#0b0b0c 0 50%) 0 0/34px 34px;transform:perspective(420px) rotateX(64deg) rotateZ(-14deg);opacity:.16;-webkit-mask:linear-gradient(100deg,transparent 0%,#000 45%,#000 80%,transparent 100%);mask:linear-gradient(100deg,transparent 0%,#000 45%,#000 80%,transparent 100%)}
@@ -1269,5 +1269,12 @@ body,#app{overflow-x:clip;overflow-y:visible}
 @media(max-width:1200px){.race-hero.rh-v2 .race-hero-session>strong{font-size:36px}}
 /* hero v2: transparent logo file (assets/redline-logo-clear.png) needs no blend; no car video behind
    the copy (mockup has a clean dark backdrop with the live candles) */
-.race-hero.rh-v2 .race-hero-logo{mix-blend-mode:normal;filter:drop-shadow(0 0 14px #ed1c2455)}
-.race-hero.rh-v2>.hero-video{display:none}
+.race-hero.rh-v2 .race-hero-brand{position:relative;isolation:isolate}
+/* logo: larger, brighter, with a soft dark halo so it sits in the video instead of on top of it */
+.race-hero.rh-v2 .race-hero-brand:before{content:'';position:absolute;left:-34px;top:50%;width:200px;height:200px;transform:translateY(-50%);border-radius:50%;background:radial-gradient(circle,#000000b3 0%,#00000066 45%,transparent 70%);pointer-events:none;z-index:-1}
+.race-hero.rh-v2 .race-hero-logo{width:136px;height:136px;mix-blend-mode:normal;filter:brightness(1.18) drop-shadow(0 0 1px #ffffffaa) drop-shadow(0 0 16px #ff3b3b80) drop-shadow(0 0 30px #ff3b3b33)}
+@media(max-width:1200px){.race-hero.rh-v2 .race-hero-logo{width:108px;height:108px}}
+@media(max-width:650px){.race-hero.rh-v2 .race-hero-logo{width:78px;height:78px}.race-hero.rh-v2 .race-hero-brand:before{width:130px;height:130px;left:-26px}}
+/* video back (client 2026-11-18): red toned down so the copy and logo lead */
+.race-hero.rh-v2>.hero-video video{filter:saturate(.45) hue-rotate(-8deg) brightness(.95) contrast(1.05)!important}
+.race-hero.rh-v2>.hero-video:after{background:linear-gradient(90deg,#050506d9 0%,#050506a6 32%,#0505064d 58%,#05050614 100%),linear-gradient(0deg,#00000080,transparent 45%)!important}
