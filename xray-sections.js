@@ -238,7 +238,9 @@ ${partHtml}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
     const needs = (trapTop.confirmationBlockedBy || []).map(c => TRAP_NEED[String(c).toUpperCase()] || L(c));
     const metricItems = [['Headline 10m', metrics.headline?.move10], ['Headline 20m', metrics.headline?.move20], ['Breadth 10m', metrics.breadth?.move10], ['Breadth 20m', metrics.breadth?.move20], ['Leadership 10m', metrics.leadership?.move10], ['Credit 10m', metrics.credit?.move10], ['Financials 10m', metrics.financials?.move10], ['VIX 10m', metrics.vix?.move10]];
     const groupRows = [['headlineIndex', 'Indexes', 'largeIndexes'], ['breadth', 'Breadth', 'breadth'], ['leadership', 'Leadership', 'techLeadership'], ['credit', 'Credit', 'credit'], ['ratesDuration', 'Rates', 'ratesBonds'], ['energyInflation', 'Energy', 'oil'], ['volatility', 'Volatility', 'volatility'], ['financialConditions', 'Financials', 'financialConditions']];
-    if (opt.screen) {
+    // Client layout (Brian Engine 29 card) everywhere: dashboard tab, Market X-Ray and the command screen.
+    // The older stat-card layout below is kept only behind opt.legacy.
+    if (!opt.legacy) {
       const bp = BIGGER_PICTURE[String(w.character?.state || w.state || '').toUpperCase()] || L(w.character?.state || w.state);
       const oh = OVERALL_HEALTH[String(e.overallState || d.overall || '').toUpperCase()] || L(e.overallState || d.overall);
       const pb = PRICE_BREADTH[String(w.priceBreadth?.state || '').toUpperCase()] || L(w.priceBreadth?.state);
