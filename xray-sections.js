@@ -258,7 +258,10 @@ ${partHtml}`), btn('Open all 11 sectors', 'sectors', false, 'arrow'))}
       const oh = OVERALL_HEALTH[String(e.overallState || d.overall || '').toUpperCase()] || L(e.overallState || d.overall);
       const pb = PRICE_BREADTH[String(w.priceBreadth?.state || '').toUpperCase()] || L(w.priceBreadth?.state);
       const sell = DISTRIBUTION(sp.distributionLabel), part = String(sp.breadth?.label || '').toUpperCase().replace(/^BREADTH_PARTICIPATION_/, '').replace(/_/g, ' ');
-      const top = (title, state, text, extra = '') => `<section class="x29-card ${dir29(state)}"><small>${title}</small><b>${esc(state || 'UNAVAILABLE')}</b>${text ? `<p>${esc(text)}</p>` : ''}${extra}</section>`;
+      // A card whose state is neutral ("NO ACTIVE MOVE") takes its colour from the backend's own summary
+      // lean (e.g. "internals are leaning negative", "possible down squeeze"); display only.
+      const lean = t => { const s = String(t || '').toUpperCase(); const dn = /LEANING NEGATIVE|LEAN(S|ING)? BEARISH|DOWN SQUEEZE|DOWNSIDE|SELLING PRESSURE/.test(s), up = /LEANING POSITIVE|LEAN(S|ING)? BULLISH|UP SQUEEZE|UPSIDE|BUYING PRESSURE/.test(s); return dn && !up ? 'down' : up && !dn ? 'up' : dn && up ? 'yellow' : 'grey'; };
+      const top = (title, state, text, extra = '') => `<section class="x29-card ${dir29(state) === 'grey' ? lean(text) : dir29(state)}"><small>${title}</small><b>${esc(state || 'UNAVAILABLE')}</b>${text ? `<p>${esc(text)}</p>` : ''}${extra}</section>`;
       const r = (k, v) => `<div class="x29-kv"><span>${k}</span><b class="${dir29(v)}">${esc(v || '—')}</b></div>`;
       return `<div class="x29">
         <header class="x29-head"><div><b>ENGINE 29 — MARKET CHARACTER</b><small>What kind of move is happening right now?</small></div><div class="x29-pills"><span>Data ${esc(when(e.timestamp))}</span>${e.dataDegraded ? '<span class="warn">DATA DEGRADED</span>' : ''}<span>ES ${esc(e.esResolvedSymbol || '—')}</span></div></header>
