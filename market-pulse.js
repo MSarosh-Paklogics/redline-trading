@@ -45,6 +45,9 @@
   function row([sym, name, e29key, , raw]) {
     const q = quotes[sym], ch = q?.change;
     const pct = ch == null ? '—' : `${ch > 0 ? '+' : ''}${ch.toFixed(2)}%`;
+    // Points moved vs the prior close (same base as the %), plus the live price.
+    const pts = q?.points == null ? '—' : `${q.points > 0 ? '+' : q.points < 0 ? '−' : ''}${Math.abs(q.points).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} pts`;
+    const last = q?.last == null ? '—' : q.last.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const pctTone = ch == null ? 'na' : ch > 0 ? 'up' : ch < 0 ? 'down' : 'flat';
     let signal, sub, tone;
     if (!e29key) {
@@ -61,14 +64,14 @@
       sub = raw ? 'E29 intraday state · as published' : `E29 intraday · ${L(st)}`;
     }
     return `<div class="mp-row"><div class="mp-name"><b>${esc(sym)}</b><small>${esc(name)}</small></div>
-      <div class="mp-pct mp-${pctTone}">${pct}</div>
+      <div class="mp-pct mp-${pctTone}">${pct}<small class="mp-pts">${pts}</small><small class="mp-last">${last}</small></div>
       <div class="mp-sig mp-${tone}"><b>${esc(signal)}</b><small>${esc(sub)}</small></div></div>`;
   }
 
   function inner() {
     const live = Object.keys(quotes).length;
     return `<div class="mp-grid">${MARKETS.map(row).join('')}</div>
-      <p class="mp-note">${live ? `LIVE BACKEND · % vs prior close · updated ${new Date(loadedAt).toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false })} AZ` : 'Loading live quotes…'} · Direction reads are market evidence, not trade calls. Engine 6 alone permits a trade.</p>`;
+      <p class="mp-note">${live ? `LIVE BACKEND · % and points vs prior close · updated ${new Date(loadedAt).toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false })} AZ` : 'Loading live quotes…'} · Direction reads are market evidence, not trade calls. Engine 6 alone permits a trade.</p>`;
   }
   const section = () => `<div class="race-section-label"><span>MARKET PULSE · STOCK MARKETS</span><small>% CHANGE · DIRECTION READ · LIVE BACKEND</small></div><section class="mp-panel" data-mp>${inner()}</section>`;
 

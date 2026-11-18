@@ -26,7 +26,8 @@
         // current session is always the last bar; equities may not have today's bar yet.
         const prior = FUTURES.has(s) ? days.at(-2) : days.filter(d => etDate(d.time) < today).at(-1);
         const prev = Number(prior?.close);
-        return { last, change: Number.isFinite(prev) && prev ? (last - prev) / prev * 100 : null };
+        const ok = Number.isFinite(prev) && prev;
+        return { last, prev: ok ? prev : null, points: ok ? last - prev : null, change: ok ? (last - prev) / prev * 100 : null };
       } catch { /* retry once */ }
     }
     return null;

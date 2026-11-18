@@ -1406,3 +1406,8 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .os-rec .os-rec-arrow{border-color:color-mix(in srgb,var(--tc) 60%,transparent)}
 .os-rec .os-rec-dots button.on{background:var(--tc);border-color:var(--tc);color:#111}
 .os-rec .os-detail{border-color:color-mix(in srgb,var(--tc) 35%,transparent)}
+
+/* Market pulse: points moved + live price under the % (client 2026-11-18) */
+.mp-pct{display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+.mp-pct .mp-pts{display:block;margin-top:3px;font:800 13px Consolas,monospace;color:inherit}
+.mp-pct .mp-last{display:block;margin-top:2px;font:600 11px Consolas,monospace;color:#9fb0c2}
