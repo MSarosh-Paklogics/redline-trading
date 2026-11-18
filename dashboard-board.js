@@ -8,14 +8,15 @@
 (() => {
   if (typeof overview !== 'function') return;
   const TABS = [
-    ['e25', 'Engine 25', 'Market X-Ray'],
+    // Engine 25 'Market X-Ray' tab removed at the client's request (2026-11-18); its 6-month market
+    // health trend stays on the dashboard below the tabs, everything else is on the Market X-Ray page.
     ['e29', 'Engine 29', 'Market character'],
     ['strategy', 'E15 · E22 · E26 · E27 · E6', 'Strategy stack'],
     ['evidence', 'E3 · E4 · SMZ', 'Evidence & zones']
   ];
   const KEY = 'redline-dashboard-tab';
-  let tab = (() => { try { return localStorage.getItem(KEY) || 'e25'; } catch { return 'e25'; } })();
-  if (!TABS.some(t => t[0] === tab)) tab = 'e25';
+  let tab = (() => { try { return localStorage.getItem(KEY) || 'e29'; } catch { return 'e29'; } })();
+  if (!TABS.some(t => t[0] === tab)) tab = 'e29';
 
   const L = v => v == null || v === '' ? '—' : String(v).replace(/_/g, ' ').toUpperCase();
   const yn = v => v == null ? '—' : v ? 'YES' : 'NO';
@@ -80,7 +81,6 @@
       // Each reading appears once on the dashboard: permission, stat cards, participation, distribution,
       // index vs market, stress, macro and the briefing live in the cockpit / command screen above.
       // The Market X-Ray page (#/xray) still shows every Engine 25 section.
-      e25: x ? (xs.e25 ? xs.e25(x, { skip: ['brief', 'stress', 'macro', 'leaders', 'participation', 'distribution', 'index'] }) : '') + '<p class="xr-muted db-note">Permission, participation, distribution, index vs market, stress and macro are in the cockpit and command screen above. Full detail: <a href="#/xray">Market X-Ray</a>.</p>' : '<div class="ce-empty">Engine 25 unavailable.</div>',
       e29: x && xs.e29 ? xs.e29(x) || '<div class="ce-empty">Engine 29 unavailable.</div>' : '<div class="ce-empty">Engine 29 unavailable.</div>',
       strategy: parts ? `<div class="db-grid">${parts.strategy}<div class="ce-section">MARKET CONTEXT · ENGINE 22 TIMELINE READ</div>${parts.context}${parts.side}</div>` : loading,
       evidence: parts ? `<div class="db-grid">${parts.evidence}${parts.zones}</div>` : loading
@@ -92,7 +92,8 @@
   overview = function () {
     const x = window.redlineXray?.model, cm = window.redlineChart?.model;
     if (!x && !cm) return baseOverview.apply(this, arguments);
-    return raceHero() + tabBar() + panes(x);
+    const trend = x && window.redlineXraySections?.e25 ? window.redlineXraySections.e25(x, { only: 'trend' }) : '';
+    return raceHero() + tabBar() + panes(x) + trend;
   };
 
   // Switching tabs only toggles the panes, so the page doesn't rebuild or jump.

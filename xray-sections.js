@@ -146,6 +146,7 @@
     const nhv = x.hourlyNhNl?.nh, nlv = x.hourlyNhNl?.nl, net = x.nhnl?.intradayNetHighsLows;
     const leadHtml = `<div class="xr-lc"><p class="xr-dc-note">Shows whether more stocks are breaking to new highs or falling to new lows.</p><div class="xr-lc-pair"><div><b class="up">${nhv == null ? '—' : f(nhv, 0)}</b><small>New Highs</small></div><div><b class="down">${nlv == null ? '—' : f(nlv, 0)}</b><small>New Lows</small></div></div>${splitBar('New highs vs new lows', nhv, nlv, 'highs', 'lows')}${kv('Net New Highs / Lows', n(net) == null ? 'UNAVAILABLE' : signed(net, 0), n(net) == null ? '' : n(net) < 0 ? 'down' : 'up')}</div>`;
     if (opt.only === 'leaders') return leadHtml;
+    if (opt.only === 'trend') return `<div class="race-section-label"><span>MARKET HEALTH TREND — 6 MONTHS</span><small>ENGINE 25 COMPOSITE · LIVE BACKEND</small></div>${panel('Market health trend — 6 months', body(trendChart(x.trend || [])))}`;
 
     return `
     <div class="race-section-label"><span>MARKET METERS</span><small>ES FUTURES · SPY · LIVE BACKEND</small></div>
