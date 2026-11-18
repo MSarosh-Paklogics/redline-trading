@@ -367,6 +367,10 @@
     const paras = list => list.length ? list.map(t => `<p class="cc-na os-para">${esc(t)}</p>`).join('') : '<p class="cc-na">Brief unavailable.</p>';
     return [
       { id: 'partic', details: [['Scanned', f(hb.scanned, 0)], ['With volume', f(hb.withVol, 0)]], name: 'Market Participation', tile: 't-purple', value: L(b.state), sub: `Surviving ${pct(n(b.usableEffectiveWeight) == null ? null : n(b.usableEffectiveWeight) * 100, 0)}`, tone: tTone(b.state), wide: true, page: { head: `${f(hb.scanned, 0)} STOCKS · BLENDED · 1H EVIDENCE · DISTRIBUTION · SECTORS`, body: window.redlineXraySections?.e25 ? window.redlineXraySections.e25(x, { only: 'participation' }) : pg['PARTICIPATION'].body } },
+      { id: 'dist', details: [], name: 'Selling Pressure', tile: 't-red', value: x?.distribution?.raw == null ? '—' : f(x.distribution.raw, 0), sub: L(x?.distribution?.label), tone: n(x?.distribution?.raw) == null ? '' : n(x.distribution.raw) >= 70 ? 'down' : n(x.distribution.raw) >= 40 ? 'yellow' : 'up', wide: true,
+        page: { head: 'SELLING / DISTRIBUTION PRESSURE · 4H · 1H · 30M · 10M', body: (window.redlineXraySections?.e25 && window.redlineXraySections.e25(x, { only: 'distribution' })) || '' } },
+      { id: 'leaders', details: [], name: 'Market Leadership', tile: 't-cyan', value: x?.hourlyNhNl ? `${f(x.hourlyNhNl.nh, 0)} / ${f(x.hourlyNhNl.nl, 0)}` : '—', sub: 'New highs vs new lows', tone: !x?.hourlyNhNl ? '' : x.hourlyNhNl.nh >= x.hourlyNhNl.nl ? 'up' : 'down', wide: true,
+        page: { head: 'NEW HIGHS VS NEW LOWS · 1H', body: (window.redlineXraySections?.e25 && window.redlineXraySections.e25(x, { only: 'leaders' })) || '' } },
       { id: 'permit', details: [['ES master 65%', f(p.master, 1)], ['4H 20% · Recon 15%', `${f(p.m4h, 1)} · ${f(p.recon, 1)}`]], bar: score, name: 'Trade Permission', tile: 't-yellow', value: f(score, 0), sub: L(p.label), tone: sTone(score), page: pg['TRADE PERMISSION'] },
       // Market Health record removed from the command screen at the client's request (2026-11-18);
       // health stays in the digital readout strip and on Market X-Ray.
@@ -375,8 +379,8 @@
         page: { head: 'CREDIT · BANKS · BONDS · LIQUIDITY', body: big(f(cr.creditFragility, 0), L(x?.credit?.label), stressTone(cr.creditFragility)) + kv('CREDIT FRAGILITY', f(cr.creditFragility), stressTone(cr.creditFragility)) + kv('MACRO CREDIT', f(cr.creditStress), stressTone(cr.creditStress)) + kv('BOND MARKET', f(cr.bondMarket), stressTone(cr.bondMarket)) + kv('LIQUIDITY', f(cr.liquidity), stressTone(cr.liquidity)) + '<p class="cc-na">Engine 25 credit stress detail. Higher = more stress on equities.</p>' } },
       { id: 'macro', details: [['10Y yield', n(mt.tenYearYield?.current) == null ? '—' : `${f(mt.tenYearYield.current, 2)}%`], ['WTI oil', n(mt.wti?.current) == null ? '—' : f(mt.wti.current, 2)]], bar: n(mac.score), name: 'Macro Pressure', tile: 't-yellow', value: f(mac.score, 0), sub: L(mac.label), tone: stressTone(mac.score),
         page: { head: 'RATES · DOLLAR · OIL', body: big(f(mac.score, 0), L(mac.label), stressTone(mac.score)) + Object.entries(x?.macroTrends || {}).slice(0, 8).map(([k, t]) => kv(L(k), n(t?.current) == null ? '—' : f(t.current, 2))).join('') + `<p class="cc-na">Engine 25 macro pressure${x?.macroFresh ? '' : ' · intraday macro feed not fresh'}.</p>` } },
-      { id: 'intraday', details: [['Structural', L(e29.structuralState)], ['Fast tactical', L(e29.fastTacticalState)]], name: 'Intraday', tile: 't-purple', value: L(e29.overallState), sub: 'Engine 29 live market character', tone: tTone(e29.overallState),
-        page: { head: 'ENGINE 29 · INTRADAY BRIEF', body: big(L(e29.overallState), `TACTICAL ${L(e29.tacticalState)}`, tTone(e29.overallState)) + kv('STRUCTURAL', L(e29.structuralState), tTone(e29.structuralState)) + kv('TACTICAL', L(e29.tacticalState), tTone(e29.tacticalState)) + kv('FAST TACTICAL', L(e29.fastTacticalState), tTone(e29.fastTacticalState)) + '<p class="cc-kv"><span>INTRADAY BRIEF</span></p>' + paras(brief) } }
+      { id: 'intraday', details: [['Structural', L(e29.structuralState)], ['Fast tactical', L(e29.fastTacticalState)]], name: 'Intraday', tile: 't-purple', value: L(e29.overallState), sub: 'Engine 29 live market character', tone: tTone(e29.overallState), wide: true,
+        page: { head: 'ENGINE 29 · LIVE MARKET CHARACTER', body: (window.redlineXraySections?.e29 && window.redlineXraySections.e29(x, { screen: true })) || '<p class="cc-na">Engine 29 unavailable.</p>' } }
     ];
   }
 
@@ -390,7 +394,7 @@
     const a = list[csOS.idx];
     const pills = Object.fromEntries(cm?.pills || []), d22 = cm?.display?.degrees?.minute || {}, e6 = cm?.e6 || {}, e27 = cm?.e27 || {};
     const steps = [['WAVE', d22.badge || d22.direction || e27.decisionState], ['READY', pills.READINESS], ['PERMITTED', e6.permission]];
-    return `<div class="os-home os-rec os-view">
+    return `<div class="os-home os-rec os-view os-trend-${cur?.tone || 'na'}">
       <header class="os-rec-head">
         <button type="button" class="os-rec-arrow" data-os-step="-1" aria-label="Previous record">‹</button>
         <div class="os-rec-title"><span class="os-ic ${a.tile} sm">${svgIcon(a.id)}</span><div><b>${esc(a.name)}</b><small>${esc(a.page.head || '')} · ${csOS.idx + 1} / ${list.length}</small></div></div>
