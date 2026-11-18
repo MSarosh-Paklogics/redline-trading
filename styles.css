@@ -1214,7 +1214,8 @@ body,#app{overflow-x:clip;overflow-y:visible}
 /* Gearbox: bull 1-4 on top, bear 1-4 underneath (2026-11-18). Unlit numbers keep a hint of their side. */
 .cc-gnum.cc-gbull:not(.on){fill:#5f8f74}.cc-gnum.cc-gbear:not(.on){fill:#9a5a5a}
 /* Hero: Redline logo beside PRECISION / IN EVERY MOVE. */
-.race-hero-brand{display:flex;align-items:center;gap:18px}
+.race-hero-brand{display:flex;align-items:center;gap:10px}
 .race-hero-brand h1{margin:0}
-.race-hero-logo{width:96px;height:96px;flex:0 0 auto;object-fit:contain;filter:drop-shadow(0 6px 18px rgba(237,28,36,.35))}
+/* The logo PNG has a solid black square; screen blending drops the black so only the badge shows. */
+.race-hero-logo{width:104px;height:104px;flex:0 0 auto;object-fit:contain;mix-blend-mode:screen}
 @media(max-width:700px){.race-hero-brand{gap:12px}.race-hero-logo{width:64px;height:64px}}
