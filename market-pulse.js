@@ -28,6 +28,7 @@
     ['CL1!', 'Crude oil · MCL feed', 'WTI', 'MCL', true]
   ];
   const quotes = {};
+  window.redlineMarketQuotes = quotes; // read by the hero callouts (corsa.js)
   let busy = false, loadedAt = null;
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const L = v => v == null || v === '' ? 'UNAVAILABLE' : String(v).replace(/_/g, ' ').toUpperCase();

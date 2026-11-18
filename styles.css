@@ -1219,3 +1219,55 @@ body,#app{overflow-x:clip;overflow-y:visible}
 /* The logo PNG has a solid black square; screen blending drops the black so only the badge shows. */
 .race-hero-logo{width:104px;height:104px;flex:0 0 auto;object-fit:contain;mix-blend-mode:screen}
 @media(max-width:700px){.race-hero-brand{gap:12px}.race-hero-logo{width:64px;height:64px}}
+
+/* ===== Hero v2 (client mockup 2026-11-18): racing type, red banner, live track callouts ===== */
+.race-hero.rh-v2{border:1px solid #ed1c2499;border-radius:12px;padding:30px 34px 28px;min-height:300px;grid-template-columns:minmax(0,1.05fr) minmax(300px,1fr);background:radial-gradient(120% 90% at 0% 0%,#3a0a0e 0%,transparent 55%),radial-gradient(80% 70% at 100% 100%,#3a0608 0%,transparent 60%),linear-gradient(110deg,#140405,#0b0b0c 55%,#0d0607);box-shadow:inset 0 0 0 1px #ffffff08,0 0 40px #ed1c2418;overflow:hidden}
+.race-hero.rh-v2:before{display:none}
+/* checkered floor + light streaks, bottom right (decoration) */
+.race-hero.rh-v2:after{content:'';position:absolute;right:-6%;bottom:-38%;width:62%;height:78%;z-index:0;pointer-events:none;background:repeating-conic-gradient(#ffffff 0 25%,#0b0b0c 0 50%) 0 0/34px 34px;transform:perspective(420px) rotateX(64deg) rotateZ(-14deg);opacity:.16;-webkit-mask:linear-gradient(100deg,transparent 0%,#000 45%,#000 80%,transparent 100%);mask:linear-gradient(100deg,transparent 0%,#000 45%,#000 80%,transparent 100%)}
+.race-hero.rh-v2 .race-hero-content{position:relative;z-index:2}
+.race-hero.rh-v2 .race-hero-visual{z-index:1}
+.race-hero.rh-v2 .race-hero-visual:before{content:'';position:absolute;left:-30%;right:-10%;bottom:6%;height:40%;pointer-events:none;background:repeating-linear-gradient(-8deg,transparent 0 14px,#ff2a2a14 14px 15px,transparent 15px 34px);filter:blur(.4px);z-index:-1}
+.race-hero.rh-v2 .race-kicker{font:900 italic 15px/1 Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:2.2px;color:#fff;gap:10px}
+.race-hero.rh-v2 .race-kicker>span{width:44px;height:12px;background:linear-gradient(105deg,#ed1c24 0 28%,transparent 28% 36%,#ed1c24 36% 64%,transparent 64% 72%,#fff200 72%);transform:skew(-22deg)}
+.race-hero.rh-v2 .race-kicker>i{color:#ed1c24;font-style:italic}
+.race-hero.rh-v2 .race-kicker>em{color:#fff200;font-style:italic}
+.race-hero.rh-v2 .race-hero-brand{gap:18px;margin:22px 0 14px}
+.race-hero.rh-v2 .race-hero-logo{width:120px;height:120px}
+.race-hero.rh-v2 .rh-divider{width:1px;align-self:stretch;margin:6px 0;background:linear-gradient(#ffffff00,#ffffff38,#ffffff00)}
+.race-hero.rh-v2 h1{margin:0;font:900 italic 64px/.92 Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:-1px;color:#fff;text-transform:uppercase;text-shadow:0 2px 0 #00000080}
+.race-hero.rh-v2 h1>span{position:relative;display:inline-block;margin-top:10px;padding:4px 46px 4px 18px;font-size:36px;letter-spacing:0;color:#120203;background:linear-gradient(90deg,#c8101a,#ff2a32 60%,#e0141c);clip-path:polygon(4% 0,100% 0,96% 100%,0 100%);text-shadow:none;box-shadow:0 0 24px #ed1c2466}
+.race-hero.rh-v2 h1>span:after{content:'';position:absolute;right:4%;top:0;bottom:0;width:30px;background:repeating-conic-gradient(#120203 0 25%,transparent 0 50%) 0 0/10px 10px;opacity:.85;transform:skew(-14deg)}
+.race-hero.rh-v2 p{font:italic 500 15px/1.5 'Segoe UI',Inter,sans-serif;color:#d9d3d3;margin:0 0 22px;letter-spacing:.2px}
+.race-hero.rh-v2 .head-actions{gap:16px}
+.race-hero.rh-v2 .head-actions .btn{font:800 italic 15px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:.3px;padding:15px 30px;border-radius:9px;transform:skewX(-8deg);min-height:0}
+.race-hero.rh-v2 .head-actions .btn>*{transform:skewX(8deg)}
+.race-hero.rh-v2 .head-actions .btn.primary{background:linear-gradient(180deg,#ff3a40,#c10d16);border:1px solid #ff6a6e;box-shadow:0 0 22px #ed1c2470,inset 0 1px 0 #ffffff40;color:#fff}
+.race-hero.rh-v2 .head-actions .btn:not(.primary){background:linear-gradient(180deg,#2a2a2d,#141416);border:1px solid #ffffff2a;color:#fff}
+.race-hero.rh-v2 .race-hero-session>strong{font:900 italic 46px/1 Bahnschrift,'Arial Narrow',sans-serif;color:#fff200;text-shadow:0 0 18px #fff20040}
+.race-hero.rh-v2 .race-hero-session>strong>span{font:italic 600 13px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:3px;color:#d9d3d3}
+.race-hero.rh-v2>.hero-ai{top:22px;left:50%;transform:translateX(-50%);padding:0;border:0;background:none;box-shadow:none;animation:none;font:italic 700 13px Bahnschrift,'Arial Narrow',sans-serif;letter-spacing:6px;color:#fff;gap:14px}
+.race-hero.rh-v2>.hero-ai>i{display:block;width:110px;height:2px;background:linear-gradient(90deg,transparent,#ed1c24)}
+.race-hero.rh-v2>.hero-ai>i:last-child{background:linear-gradient(90deg,#ed1c24,transparent)}
+/* live callouts over the track */
+.rh-callouts{position:absolute;inset:0;pointer-events:none;z-index:3}
+.rh-co{position:absolute;display:flex;flex-direction:column;align-items:center;pointer-events:auto}
+.rh-co>b{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid #ff3b3bb0;border-radius:6px;background:#140405e6;font:700 12px Bahnschrift,'Arial Narrow',sans-serif;color:#fff;letter-spacing:.3px;white-space:nowrap;box-shadow:0 0 14px #ed1c2440;transform:skewX(-6deg)}
+.rh-co>b.up{color:#3ee08a}.rh-co>b.down{color:#ff5a5a}
+.rh-co>b svg{width:14px;height:14px;color:#fff}
+.rh-co>i{display:block;width:1px;height:30px;background:linear-gradient(#ff7a2a,#ffb02a)}
+.rh-co>i:after{content:'';display:block;width:9px;height:9px;margin:30px 0 0 -4px;border-radius:50%;background:#ffb02a;box-shadow:0 0 10px 3px #ff7a2a}
+.rh-co-pct{left:16%;top:6%}.rh-co-risk{left:58%;top:0}.rh-co-vol{right:0;top:22%}.rh-co-setup{left:30%;top:46%}
+@media(max-width:1200px){.race-hero.rh-v2 h1{font-size:52px}.race-hero.rh-v2 h1>span{font-size:30px}.race-hero.rh-v2 .race-hero-logo{width:96px;height:96px}}
+@media(max-width:950px){.race-hero.rh-v2{grid-template-columns:1fr}.rh-callouts{display:none}.race-hero.rh-v2>.hero-ai>i{width:50px}}
+@media(max-width:650px){.race-hero.rh-v2{padding:22px 18px}.race-hero.rh-v2 h1{font-size:40px}.race-hero.rh-v2 h1>span{font-size:22px;padding-right:34px}.race-hero.rh-v2 .race-hero-logo{width:70px;height:70px}.race-hero.rh-v2 p{font-size:13px}.race-hero.rh-v2 .head-actions .btn{font-size:13px;padding:11px 16px}.race-hero.rh-v2>.hero-ai{display:none}}
+/* hero v2 fixes: solid banner (an older rule paints h1 spans as gradient text), logo blend needs no
+   stacking context on the copy, darker video on the copy side, price clear of the buttons */
+.race-hero.rh-v2 h1>span{-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#120203!important;color:#120203!important;background:linear-gradient(90deg,#c8101a,#ff2a32 60%,#e0141c)!important;white-space:nowrap}
+.race-hero.rh-v2 .race-hero-content{z-index:auto}
+.race-hero.rh-v2>.hero-video:after{background:linear-gradient(90deg,#000000f5 0%,#000000e0 40%,#00000099 62%,#00000059 100%),linear-gradient(0deg,#000000a0,transparent 45%)!important}
+@media(max-width:1200px){.race-hero.rh-v2 .race-hero-session>strong{font-size:36px}}
+/* hero v2: transparent logo file (assets/redline-logo-clear.png) needs no blend; no car video behind
+   the copy (mockup has a clean dark backdrop with the live candles) */
+.race-hero.rh-v2 .race-hero-logo{mix-blend-mode:normal;filter:drop-shadow(0 0 14px #ed1c2455)}
+.race-hero.rh-v2>.hero-video{display:none}
