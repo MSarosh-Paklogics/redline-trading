@@ -1304,3 +1304,19 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .cc-gear-read small:after{background:linear-gradient(90deg,#ff2a2a,transparent)}
 /* hero title: RED in red, LINE in white (matches the logo) */
 .race-hero.rh-v2 h1 .rh-red{font:inherit;color:#ed1c24;-webkit-text-fill-color:#ed1c24;text-shadow:0 0 18px #ed1c2455}
+
+/* Command screen: content more visible (client 2026-11-18) — larger, brighter type and clearer rows */
+.os-rec .os-detail{background:#ffffff09;border-color:#ffffff1a}
+.os-rec .os-detail .cc-kv{font-size:14px;padding:9px 2px;border-bottom:1px solid #ffffff17}
+.os-rec .os-detail .cc-kv span{color:#d4dde6;letter-spacing:.4px;font-weight:600}
+.os-rec .os-detail .cc-kv b{font-size:15px;font-weight:800}
+.os-rec .os-detail .cc-big-read b{font-size:48px}
+.os-rec .os-detail .cc-big-read span{font-size:14px;font-weight:700}
+.os-rec .os-detail .cc-na,.os-rec .os-detail .os-para{font-size:14px;line-height:1.6;color:#e2e8ee}
+.os-rec .os-detail .up{color:#2fe07f}.os-rec .os-detail .down{color:#ff4d4d}
+.os-rec .os-detail .xr-muted,.os-rec .os-detail small{color:#c3ccd5}
+.os-rec .os-detail .xr-pc-box h6,.os-rec .os-detail .xr-part-h{font-size:12px;color:#fff;letter-spacing:1.4px}
+.os-rec .os-detail .xr-pc-box .cc-kv span,.os-rec .os-detail .kv span{color:#d4dde6}
+.os-rec .os-rec-title small{color:#c3ccd5;font-size:11px}
+.os-rec .os-rec-dots button span{font-size:12px;color:#e2e8ee}
+.os-rec .os-hero-chain small{color:#c3ccd5}
