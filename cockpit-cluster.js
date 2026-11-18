@@ -156,27 +156,32 @@
   const gearFor = x => { const v = n(x?.meter?.master); return v == null ? null : { ...[...GEARS].reverse().find(r => v >= r.min), value: v }; };
   function gate(x) {
     const cur = gearFor(x);
-    // Gate: bullish 1 2 3 4 TURBO up from the neutral rail, bearish 1 2 3 4 down from it.
-    const COLS = [30, 58, 86, 114], TX = 140, UP = 34, DN = 114, MID = 74;
-    const POS = { N: [72, MID], T: [TX, UP] };
-    ['1', '2', '3', '4'].forEach((g, i) => { POS[g] = [COLS[i], UP]; POS['B' + g] = [COLS[i], DN]; });
-    const slots = COLS.map(x0 => `<path d="M${x0} ${UP} V${DN}" class="cc-slot"/>`).join('') + `<path d="M${TX} ${UP} V${MID}" class="cc-slot"/>`;
-    const nums = GEARS.filter(r => r.g !== 'N').map(r => {
-      const [gx, gy] = POS[r.g], bear = r.g[0] === 'B';
-      return `<text x="${gx}" y="${gy < MID ? 18 : 140}" class="cc-gnum ${r.g === 'T' ? 'cc-gturbo ' : ''}${bear ? 'cc-gbear ' : 'cc-gbull '}${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g === 'T' ? 'TURBO' : r.g.replace('B', '')}</text>`;
-    }).join('');
+    // Twin H-gate (client mockup 2026-11-18): bearish 1-4 on the left, N in the centre, bullish 1-4 on
+    // the right; 1 and 3 up, 2 and 4 down. TURBO (90+) sits in bull 4 and lights the whole gate.
+    const COL = { B1: 62, B2: 62, B3: 102, B4: 102, 1: 198, 2: 198, 3: 238, 4: 238, T: 238 };
+    const TOP = 42, BOT = 108, MID = 75;
+    const POS = { N: [150, MID] };
+    Object.keys(COL).forEach(g => { POS[g] = [COL[g], /[13]$/.test(g) ? TOP : BOT]; });
+    const slot = x0 => `<path d="M${x0} ${TOP} V${BOT}" class="cc-slot"/><path d="M${x0} ${TOP} V${BOT}" class="cc-slot-glow"/>`;
+    const num = (g, txt) => { const [gx, gy] = POS[g], on = cur?.g === g || (g === '4' && cur?.g === 'T'); return `<text x="${gx}" y="${gy < MID ? 26 : 132}" class="cc-gnum ${g[0] === 'B' ? 'cc-gbear' : 'cc-gbull'} ${on ? 'on ' + cur.tone : ''}">${txt}</text>`; };
     const [kx, ky] = cur ? POS[cur.g] : POS.N;
     const label = !cur ? 'GEAR —' : cur.label;
+    const [lw, ln] = !cur ? ['GEAR', '—'] : cur.g === 'T' ? ['TURBO', ''] : cur.g === 'N' ? ['NEUTRAL', ''] : [cur.label.split(' ')[0], cur.label.split(' ')[1]];
     return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Gear from the ES Master meter: bull 1 63-69 · 2 70-76 · 3 77-83 · 4 84-89 · TURBO 90+ · N 50-62 · bear 1 43-49 · 2 36-42 · 3 29-35 · 4 below 29. Not a trade permission — Engine 6 decides.">
-      <svg viewBox="0 0 160 150" class="cc-gate-svg" role="img" aria-label="ES meter gear ${label}">
-        <defs><linearGradient id="cc-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5c60"/><stop offset=".45" stop-color="#2a2b2e"/><stop offset="1" stop-color="#46484c"/></linearGradient>
-        <radialGradient id="cc-knob" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c9cbcf"/><stop offset="1" stop-color="#55575c"/></radialGradient></defs>
-        <rect x="6" y="24" width="148" height="102" rx="12" fill="url(#cc-metal)" class="cc-plate"/>
-        <rect x="6" y="24" width="148" height="102" rx="12" class="cc-plate-edge"/>
-        <path d="M${COLS[0]} ${MID} H${TX}" class="cc-slot"/>${slots}${nums}<text x="${POS.N[0]}" y="${MID - 8}" class="cc-gnum cc-gn ${cur?.g === 'N' ? 'on yellow' : ''}">N</text>
-        <g class="cc-knob" style="--kx:${kx}px;--ky:${ky}px"><circle r="13" fill="#000" opacity=".45" cx="1.5" cy="2.5"/><circle r="12" fill="url(#cc-knob)" class="cc-knob-ball"/><circle r="5.2" class="cc-knob-top ${cur ? cur.tone : ''}"/></g>
+      <svg viewBox="0 0 300 150" class="cc-gate-svg" role="img" aria-label="ES meter gear ${label}">
+        <defs><linearGradient id="cc-metal" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d1d20"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient>
+        <radialGradient id="cc-knob" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c9cbcf"/><stop offset="1" stop-color="#55575c"/></radialGradient>
+        <pattern id="cc-carbon" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#141416"/><rect width="3" height="3" fill="#1b1b1e"/><rect x="3" y="3" width="3" height="3" fill="#1b1b1e"/></pattern>
+        <filter id="cc-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2.4"/></filter></defs>
+        <rect x="6" y="6" width="288" height="138" rx="26" fill="url(#cc-metal)" class="cc-plate"/>
+        <rect x="6" y="6" width="288" height="138" rx="26" class="cc-plate-edge"/>
+        <rect x="34" y="12" width="96" height="126" rx="18" fill="url(#cc-carbon)" class="cc-hbox"/><rect x="170" y="12" width="96" height="126" rx="18" fill="url(#cc-carbon)" class="cc-hbox"/>
+        <path d="M62 ${MID} H238" class="cc-slot"/><path d="M62 ${MID} H238" class="cc-slot-glow"/>${[62, 102, 198, 238].map(slot).join('')}
+        ${num('B1', '1')}${num('B3', '3')}${num('B2', '2')}${num('B4', '4')}${num('1', '1')}${num('3', '3')}${num('2', '2')}${num('4', cur?.g === 'T' ? 'T' : '4')}
+        <rect x="136" y="${MID - 13}" width="28" height="26" rx="6" class="cc-nbox ${cur?.g === 'N' ? 'on' : ''}"/><text x="150" y="${MID + 5}" class="cc-gnum cc-gn ${cur?.g === 'N' ? 'on yellow' : ''}">N</text>
+        <g class="cc-knob" style="--kx:${kx}px;--ky:${ky}px"><circle r="13" fill="#000" opacity=".5" cx="1.5" cy="2.5"/><circle r="12" fill="url(#cc-knob)" class="cc-knob-ball"/><circle r="5.2" class="cc-knob-top ${cur ? cur.tone : ''}"/></g>
       </svg>
-      <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${label}</b><span>${cur ? `${cur.short} · ${f(cur.value, 1)}` : 'UNAVAILABLE'}</span><small>ES MASTER METER GEAR</small></div>
+      <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}"><i class="cc-flag" aria-hidden="true"></i>${lw}${ln ? ` <em>${ln}</em>` : ''}<i class="cc-flag" aria-hidden="true"></i></b><span>${cur ? `${cur.short} <i>•</i> ${f(cur.value, 1)}` : 'UNAVAILABLE'}</span><small>ES MASTER METER GEAR</small></div>
     </div>`;
   }
 
