@@ -71,7 +71,7 @@
   /* NAV pages: the Engine 25 Market X-Ray top section (same fields as Frye Engine25MarketXrayPreview),
      one page per block, cycling like a sat-nav display. Display only. */
   const L = v => v == null || v === '' ? 'UNAVAILABLE' : String(v).replace(/_/g, ' ').toUpperCase();
-  const tTone = v => /BEAR|RISK.?OFF|WEAK|DANGER|EXTREME|HIGH|SEVERE|STALE|UNAVAILABLE|SELLING|DEFENSIVE|STRONGER THAN ES/i.test(v || '') ? 'down' : /BULL|RISK.?ON|STRONG|HEALTHY|LIVE|FRESH|EASING|BUYING|LONG BIAS/i.test(v || '') ? 'up' : 'yellow';
+  const tTone = v => /RECOVER|IMPROV/i.test(v || '') && !/NO.RECOVER|FAIL/i.test(v || '') ? 'up' : /BEAR|RISK.?OFF|WEAK|DANGER|EXTREME|HIGH|SEVERE|STALE|UNAVAILABLE|SELLING|DEFENSIVE|STRONGER THAN ES/i.test(v || '') ? 'down' : /BULL|RISK.?ON|STRONG|HEALTHY|LIVE|FRESH|EASING|BUYING|LONG BIAS/i.test(v || '') ? 'up' : 'yellow';
   const sTone = v => n(v) == null ? '' : n(v) >= 65 ? 'up' : n(v) >= 50 ? 'yellow' : 'down';
   const kv = (k, v, t = '') => `<div class="cc-kv"><span>${k}</span><b class="${t}">${v}</b></div>`;
   const pct = (v, d = 0) => n(v) == null ? '—' : `${n(v).toFixed(d)}%`;
@@ -137,34 +137,43 @@
   }
 
 
-  /* Gated shifter driven by the ES Master meter (client spec 2026-11-11): R below 50 (defensive),
-     N 50-62 (neutral, yellow), gears 1-4 in 7-point steps from 63, TURBO at 90+ (full acceleration).
+  /* Gated shifter driven by the ES Master meter. Client spec 2026-11-11, bear side 2026-11-18:
+     bullish gears 1-4 on top (63-69 · 70-76 · 77-83 · 84-89) and TURBO at 90+; N 50-62 (yellow);
+     bearish gears 1-4 underneath, mirrored in 7-point steps below 50 (43-49 · 36-42 · 29-35 · <29).
      It reads the Engine 25 ES Master meter only: a market-pace gauge, not a trade or a permission. */
   const GEARS = [
-    { g: 'R', min: -Infinity, tone: 'down', short: 'DEFENSIVE' },
-    { g: 'N', min: 50, tone: 'yellow', short: 'NEUTRAL' },
-    { g: '1', min: 63, tone: 'up', short: 'PULLING AWAY' },
-    { g: '2', min: 70, tone: 'up', short: 'BUILDING' },
-    { g: '3', min: 77, tone: 'up', short: 'STRONG' },
-    { g: '4', min: 84, tone: 'up', short: 'FULL POWER' },
-    { g: 'T', min: 90, tone: 'turbo', short: 'TURBO · FULL ACCELERATION' }
+    { g: 'B4', min: -Infinity, tone: 'down', short: 'FULL DOWNSIDE PRESSURE', label: 'BEAR 4' },
+    { g: 'B3', min: 29, tone: 'down', short: 'STRONG DOWNSIDE', label: 'BEAR 3' },
+    { g: 'B2', min: 36, tone: 'down', short: 'BUILDING DOWNSIDE', label: 'BEAR 2' },
+    { g: 'B1', min: 43, tone: 'down', short: 'SLIPPING', label: 'BEAR 1' },
+    { g: 'N', min: 50, tone: 'yellow', short: 'NEUTRAL', label: 'NEUTRAL' },
+    { g: '1', min: 63, tone: 'up', short: 'PULLING AWAY', label: 'BULL 1' },
+    { g: '2', min: 70, tone: 'up', short: 'BUILDING', label: 'BULL 2' },
+    { g: '3', min: 77, tone: 'up', short: 'STRONG', label: 'BULL 3' },
+    { g: '4', min: 84, tone: 'up', short: 'FULL POWER', label: 'BULL 4' },
+    { g: 'T', min: 90, tone: 'turbo', short: 'FULL ACCELERATION', label: 'TURBO' }
   ];
   const gearFor = x => { const v = n(x?.meter?.master); return v == null ? null : { ...[...GEARS].reverse().find(r => v >= r.min), value: v }; };
   function gate(x) {
     const cur = gearFor(x);
-    // H-pattern: R 1 3 T on top, 2 4 below, neutral on the centre rail.
-    const POS = { R: [26, 34], 1: [62, 34], 2: [62, 114], 3: [98, 34], 4: [98, 114], T: [134, 34], N: [80, 74] };
-    const slots = ['R', '1', '3', 'T'].map(g => `<path d="M${POS[g][0]} 34 V74" class="cc-slot"/>`).join('') + ['2', '4'].map(g => `<path d="M${POS[g][0]} 74 V114" class="cc-slot"/>`).join('');
-    const nums = GEARS.filter(r => r.g !== 'N').map(r => `<text x="${POS[r.g][0]}" y="${POS[r.g][1] < 74 ? 18 : 140}" class="cc-gnum ${r.g === 'T' ? 'cc-gturbo ' : ''}${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g === 'T' ? 'TURBO' : r.g}</text>`).join('');
+    // Gate: bullish 1 2 3 4 TURBO up from the neutral rail, bearish 1 2 3 4 down from it.
+    const COLS = [30, 58, 86, 114], TX = 140, UP = 34, DN = 114, MID = 74;
+    const POS = { N: [72, MID], T: [TX, UP] };
+    ['1', '2', '3', '4'].forEach((g, i) => { POS[g] = [COLS[i], UP]; POS['B' + g] = [COLS[i], DN]; });
+    const slots = COLS.map(x0 => `<path d="M${x0} ${UP} V${DN}" class="cc-slot"/>`).join('') + `<path d="M${TX} ${UP} V${MID}" class="cc-slot"/>`;
+    const nums = GEARS.filter(r => r.g !== 'N').map(r => {
+      const [gx, gy] = POS[r.g], bear = r.g[0] === 'B';
+      return `<text x="${gx}" y="${gy < MID ? 18 : 140}" class="cc-gnum ${r.g === 'T' ? 'cc-gturbo ' : ''}${bear ? 'cc-gbear ' : 'cc-gbull '}${cur?.g === r.g ? 'on ' + r.tone : ''}">${r.g === 'T' ? 'TURBO' : r.g.replace('B', '')}</text>`;
+    }).join('');
     const [kx, ky] = cur ? POS[cur.g] : POS.N;
-    const label = !cur ? 'GEAR —' : cur.g === 'T' ? 'TURBO' : cur.g === 'R' ? 'REVERSE' : cur.g === 'N' ? 'NEUTRAL' : `GEAR ${cur.g}`;
-    return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Gear from the ES Master meter: R <50 · N 50-62 · 1 63-69 · 2 70-76 · 3 77-83 · 4 84-89 · TURBO 90+. Not a trade permission — Engine 6 decides.">
+    const label = !cur ? 'GEAR —' : cur.label;
+    return `<div class="cc-gate ${cur ? cur.tone : ''}" title="Gear from the ES Master meter: bull 1 63-69 · 2 70-76 · 3 77-83 · 4 84-89 · TURBO 90+ · N 50-62 · bear 1 43-49 · 2 36-42 · 3 29-35 · 4 below 29. Not a trade permission — Engine 6 decides.">
       <svg viewBox="0 0 160 150" class="cc-gate-svg" role="img" aria-label="ES meter gear ${label}">
         <defs><linearGradient id="cc-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5a5c60"/><stop offset=".45" stop-color="#2a2b2e"/><stop offset="1" stop-color="#46484c"/></linearGradient>
         <radialGradient id="cc-knob" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c9cbcf"/><stop offset="1" stop-color="#55575c"/></radialGradient></defs>
         <rect x="6" y="24" width="148" height="102" rx="12" fill="url(#cc-metal)" class="cc-plate"/>
         <rect x="6" y="24" width="148" height="102" rx="12" class="cc-plate-edge"/>
-        <path d="M26 74 H134" class="cc-slot"/>${slots}${nums}<text x="80" y="66" class="cc-gnum cc-gn ${cur?.g === 'N' ? 'on yellow' : ''}">N</text>
+        <path d="M${COLS[0]} ${MID} H${TX}" class="cc-slot"/>${slots}${nums}<text x="${POS.N[0]}" y="${MID - 8}" class="cc-gnum cc-gn ${cur?.g === 'N' ? 'on yellow' : ''}">N</text>
         <g class="cc-knob" style="--kx:${kx}px;--ky:${ky}px"><circle r="13" fill="#000" opacity=".45" cx="1.5" cy="2.5"/><circle r="12" fill="url(#cc-knob)" class="cc-knob-ball"/><circle r="5.2" class="cc-knob-top ${cur ? cur.tone : ''}"/></g>
       </svg>
       <div class="cc-gear-read"><b class="${cur ? cur.tone : ''}">${label}</b><span>${cur ? `${cur.short} · ${f(cur.value, 1)}` : 'UNAVAILABLE'}</span><small>ES MASTER METER GEAR</small></div>
@@ -379,7 +388,7 @@
       </header>
       <div class="os-detail os-rec-body${a.wide ? ' os-rec-wide' : ''}">${a.page.body}</div>
       <nav class="os-rec-dots" aria-label="Records">${list.map((q, i) => `<button type="button" data-os-go="${i}" class="${i === csOS.idx ? 'on' : ''}" title="${esc(q.name)}"><span>${esc(q.name)}</span></button>`).join('')}</nav>
-      <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}<span class="os-rec-es"><small>ES · GEAR</small><b>${r.price == null ? '—' : r.price.toFixed(2)} · ${cur ? (cur.g === 'T' ? 'TURBO' : cur.g) : '—'}</b></span></div>
+      <div class="os-hero-chain">${steps.map(([k, v], i) => `<span class="g-${tTone(v)}"><i>${i + 1}</i><small>${k}</small><b>${L(v)}</b></span>`).join('<em>›</em>')}<span class="os-rec-es"><small>ES · GEAR</small><b>${r.price == null ? '—' : r.price.toFixed(2)} · ${cur ? cur.label : '—'}</b></span></div>
     </div>`;
   }
 

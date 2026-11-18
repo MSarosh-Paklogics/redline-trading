@@ -19,7 +19,7 @@
 
   const L = v => v == null || v === '' ? '—' : String(v).replace(/_/g, ' ').toUpperCase();
   const yn = v => v == null ? '—' : v ? 'YES' : 'NO';
-  const tone = v => /BEAR|SHORT|DOWN|BLOCK|STAND.DOWN|NO.TRADE|NOT.ALLOWED|INVALID|RISK.OFF|DANGER|WEAK|FAIL|STALE|PRESSURE|STRESS|BREAKING/i.test(v || '') ? 'down'
+  const tone = v => /RECOVER|IMPROV/i.test(v || '') && !/NO.RECOVER|FAIL/i.test(v || '') ? 'up' : /BEAR|SHORT|DOWN|BLOCK|STAND.DOWN|NO.TRADE|NOT.ALLOWED|INVALID|RISK.OFF|DANGER|WEAK|FAIL|STALE|PRESSURE|STRESS|BREAKING/i.test(v || '') ? 'down'
     : /BULL|LONG|\bUP\b|\bGO\b|ALLOW|READY|TRIGGERED|FULL|CONFIRMED|STRONG|ACTIVE|HEALTHY|RISK.ON/i.test(v || '') ? 'up'
     : /WATCH|WAIT|REDUCE|PARTIAL|CAUTION|NEUTRAL|SETTING|MIXED|WEAKNESS/i.test(v || '') ? 'yellow' : '';
   const clock = t => { const d = Date.parse(t || ''); return Number.isFinite(d) ? new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '—'; };

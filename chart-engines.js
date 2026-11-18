@@ -11,7 +11,7 @@
   const n = v => { const x = Number(v); return v == null || v === '' || !Number.isFinite(x) ? null : x; };
   const L = v => v == null || v === '' ? '—' : String(v).replace(/_/g, ' ').toUpperCase();
   const E = v => esc(L(v));
-  const tone = v => /BEAR|SHORT|DOWN|BLOCK|STAND.DOWN|NO.TRADE|INVALID|RISK|DANGER|WEAK|FAIL|STALE/i.test(v || '') ? 'down' : /BULL|LONG|UP\b|GO|ALLOW|READY|FULL|CONFIRMED|STRONG|ACTIVE/i.test(v || '') ? 'up' : /WATCH|WAIT|REDUCE|PARTIAL|CAUTION|NEUTRAL|SETTING/i.test(v || '') ? 'yellow' : '';
+  const tone = v => /RECOVER|IMPROV/i.test(v || '') && !/NO.RECOVER|FAIL/i.test(v || '') ? 'up' : /BEAR|SHORT|DOWN|BLOCK|STAND.DOWN|NO.TRADE|INVALID|RISK|DANGER|WEAK|FAIL|STALE/i.test(v || '') ? 'down' : /BULL|LONG|UP\b|GO|ALLOW|READY|FULL|CONFIRMED|STRONG|ACTIVE/i.test(v || '') ? 'up' : /WATCH|WAIT|REDUCE|PARTIAL|CAUTION|NEUTRAL|SETTING/i.test(v || '') ? 'yellow' : '';
   const kv = (k, v, t) => `<div class="ce-kv"><span>${esc(k)}</span><b class="${t ?? tone(v)}">${E(v)}</b></div>`;
   const card = (num, title, body, accent = '') => `<section class="ce-card ${accent}"><h4>${num ? `<i>${num}</i>` : ''}${esc(title)}</h4>${body}</section>`;
   const ui = { degree: 'minute' };

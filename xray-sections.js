@@ -9,7 +9,7 @@
   const f = (v, d = 0) => n(v) == null ? '—' : n(v).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
   const pct = (v, d = 0) => n(v) == null ? '—' : `${n(v).toFixed(d)}%`;
   const signed = (v, d = 1, unit = '') => n(v) == null ? '—' : `${n(v) > 0 ? '+' : ''}${n(v).toFixed(d)}${unit}`;
-  const tone = v => /BEAR|RISK.?OFF|WEAK|DETERIORATION|NEGATIVE|DEFENSIVE|EXTREME|SEVERE|STRESS|DANGER|HIGH|SELLING|DOWN|STALE|UNAVAILABLE/i.test(v || '') ? 'down' : /BULL|RISK.?ON|STRONG|POSITIVE|LIVE|FRESH|EASING|UP\b/i.test(v || '') ? 'up' : 'yellow';
+  const tone = v => /RECOVER|IMPROV/i.test(v || '') && !/NO.RECOVER|FAIL/i.test(v || '') ? 'up' : /BEAR|RISK.?OFF|WEAK|DETERIORATION|NEGATIVE|DEFENSIVE|EXTREME|SEVERE|STRESS|DANGER|HIGH|SELLING|DOWN|STALE|UNAVAILABLE/i.test(v || '') ? 'down' : /BULL|RISK.?ON|STRONG|POSITIVE|LIVE|FRESH|EASING|UP\b/i.test(v || '') ? 'up' : 'yellow';
   const toneNum = v => n(v) == null ? '' : n(v) >= 55 ? 'up' : n(v) <= 45 ? 'down' : 'yellow';
   const E = v => esc(L(v));
   const kv = (k, v, t = '') => `<div class="kv"><span>${esc(k)}</span><strong class="${t}">${esc(v)}</strong></div>`;
