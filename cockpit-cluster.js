@@ -161,9 +161,9 @@
   const gearFor = x => { const v = n(x?.meter?.master); return v == null ? null : { ...[...GEARS].reverse().find(r => v >= r.min), value: v }; };
   function gate(x) {
     const cur = gearFor(x);
-    // Twin H-gate (client mockup 2026-11-18): bearish 1-4 on the left, N in the centre, bullish 1-4 on
+    // Twin H-gate (client mockup 2026-11-18): bearish 1-4 on the left (mirrored, 1/2 next to N), N in the centre, bullish 1-4 on
     // the right; 1 and 3 up, 2 and 4 down. TURBO (90+) sits in bull 4 and lights the whole gate.
-    const COL = { B1: 62, B2: 62, B3: 102, B4: 102, 1: 198, 2: 198, 3: 238, 4: 238, T: 238 };
+    const COL = { B1: 102, B2: 102, B3: 62, B4: 62, 1: 198, 2: 198, 3: 238, 4: 238, T: 238 }; // bear side mirrored: 3 1 | N | 1 3 over 4 2 | 2 4 (client 2026-11-18)
     const TOP = 42, BOT = 108, MID = 75;
     const POS = { N: [150, MID] };
     Object.keys(COL).forEach(g => { POS[g] = [COL[g], /[13]$/.test(g) ? TOP : BOT]; });
