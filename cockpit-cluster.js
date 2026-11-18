@@ -45,13 +45,29 @@
     return `<div class="cc-bar"><span>${label}</span><i><b style="width:${w}%"></b>${[25, 50, 75].map(t => `<em style="left:${t}%"></em>`).join('')}</i><strong>${v == null ? '—' : `${Math.round(v)}${unit}`}</strong></div>`;
   }
 
+  // Live ES price: the newest bar of the hero's live ES 10m feed (Backend 2 SSE ticks, 5 s poll fallback);
+  // the strategy snapshot / Engine 25 close only until that feed has bars.
+  const liveEs = () => { const b = window.redlineHeroCandles?.bars; const last = Array.isArray(b) && b.length ? b[b.length - 1] : null; return last ? n(last.c ?? last.close) : null; };
   function tft(x, cm) {
-    const hb = x?.hourly || {}, h = x?.headline || {}, price = n(cm?.currentPrice) ?? n(h.esClose), net = n(x?.nhnl?.intradayNetHighsLows);
-    const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', hour12: false });
-    return `<div class="cc-screen cc-tft"><div class="cc-scr-head"><b>${time}</b><span>AZ</span><em class="${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</em></div>
+    const hb = x?.hourly || {}, h = x?.headline || {}, price = liveEs() ?? n(cm?.currentPrice) ?? n(h.esClose), net = n(x?.nhnl?.intradayNetHighsLows);
+    const nh = n(x?.hourlyNhNl?.nh), nl = n(x?.hourlyNhNl?.nl);
+    const time = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    return `<div class="cc-screen cc-tft"><div class="cc-scr-head"><b data-cc-clock>${time}</b><span>AZ</span><em class="${x ? 'on' : ''}">${x ? 'LIVE' : '—'}</em></div>
       ${bar('BREADTH', hb.buyBreadth)}${bar('BUY VOL', hb.buyVolume)}${bar('HEALTH', h.score, '')}${bar('DIST', x?.distribution?.raw, '')}
-      <div class="cc-odo"><div><small>ES</small><b>${price == null ? '—' : price.toFixed(2)}</b></div><div><small>NET NH/NL</small><b class="${net == null ? '' : net < 0 ? 'down' : 'up'}">${net == null ? '—' : (net > 0 ? '+' : '') + net}</b></div></div></div>`;
+      <div class="cc-odo cc-odo4"><div><small>ES</small><b data-cc-es>${price == null ? '—' : price.toFixed(2)}</b></div>
+        <div><small>NEW HIGHS</small><b class="up">${nh == null ? '—' : nh.toLocaleString('en-US')}</b></div>
+        <div><small>NEW LOWS</small><b class="down">${nl == null ? '—' : nl.toLocaleString('en-US')}</b></div>
+        <div><small>NET NH/NL</small><b class="${net == null ? '' : net < 0 ? 'down' : 'up'}">${net == null ? '—' : (net > 0 ? '+' : '') + net}</b></div></div></div>`;
   }
+  // Tick the clock and the live ES price every second without re-rendering the page.
+  setInterval(() => {
+    if (document.hidden) return;
+    const c = document.querySelector('[data-cc-clock]');
+    if (c) c.textContent = new Date().toLocaleTimeString('en-US', { timeZone: 'America/Phoenix', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    // Every live ES readout (hero price + cockpit screen) follows the live ES feed.
+    const p = liveEs();
+    if (p != null) document.querySelectorAll('[data-cc-es],[data-live-es]').forEach(e => { const t = p.toFixed(2); if (e.textContent !== t) { const up = p > Number(e.textContent); e.classList.remove('cc-tick-up', 'cc-tick-down'); void e.offsetWidth; e.classList.add(up ? 'cc-tick-up' : 'cc-tick-down'); e.textContent = t; } });
+  }, 1000);
 
   function routePage(x, cm) {
     const price = n(cm?.currentPrice) ?? n(x?.headline?.esClose);

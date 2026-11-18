@@ -1446,3 +1446,23 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .sl-v3{margin-top:10px;padding:9px;border:1px solid #475569;border-radius:8px;background:#101823}.sl-v3>b{display:block;margin-bottom:4px;font:900 12px Bahnschrift,'Arial Narrow',sans-serif;color:#c4b5fd}
 .sl-warnline{margin:4px 0;font:700 11px Consolas,monospace;color:#fbbf24}
 @media(max-width:1000px){.sl-deg{grid-template-columns:1fr}}
+
+/* TFT odometer: ES live + new highs / new lows / net (client 2026-11-18) */
+.cc-odo.cc-odo4{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:10px}
+.cc-odo.cc-odo4 b.up{color:#2fe07f}.cc-odo.cc-odo4 b.down{color:#ff4d4d}
+@keyframes ccTickUp{0%{color:#2fe07f;text-shadow:0 0 10px #2fe07f}100%{color:inherit}}
+@keyframes ccTickDown{0%{color:#ff4d4d;text-shadow:0 0 10px #ff4d4d}100%{color:inherit}}
+.cc-tick-up{animation:ccTickUp 1s ease-out}.cc-tick-down{animation:ccTickDown 1s ease-out}
+@media(max-width:700px){.cc-odo.cc-odo4{grid-template-columns:1fr 1fr}}
+
+/* Engine 29: every value and card coloured by market direction (client 2026-11-18) */
+.x29 .grey{color:#9fb0c2}
+.x29-card.grey{border-color:#ffffff24;background:#0b0e14}.x29-card.grey>b{color:#cbd5e1}
+.x29-live.down{border-color:#ff4d4d99;background:linear-gradient(160deg,#2a0b0e,#0b0e14 60%)}.x29-live.down>small{color:#ff4d4d}
+.x29-live.up{border-color:#2fe07f99;background:linear-gradient(160deg,#0b2a18,#0b0e14 60%)}.x29-live.up>small{color:#2fe07f}
+.x29-live.grey{border-color:#ffffff30;background:#0b0e14}.x29-live.grey>small{color:#cbd5e1}
+.x29-state.down{color:#ff4d4d}.x29-state.up{color:#2fe07f}.x29-state.yellow{color:#ffcc00}.x29-state.grey{color:#cbd5e1}
+.x29-map td.up{color:#2fe07f}.x29-map td.down{color:#ff4d4d}.x29-map td.yellow{color:#ffcc00}.x29-map td.grey{color:#9fb0c2}
+
+.race-hero-session>strong>b[data-live-es]{font:inherit;color:inherit}
+.x29 .num{color:#f1f5f9}
