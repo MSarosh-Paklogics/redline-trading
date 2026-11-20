@@ -75,6 +75,7 @@ Scripts load in order from [index.html](index.html), each an IIFE attaching to `
 | `sectors-live.js` | Live Sectors page (`window.fryePages.sectors`): 10m/1H/4H/EOD sector cards in Frye's fixed order + `/live/pills` deltas; loads after engines.js (which resets `fryePages`) |
 | `live-stream.js` | Real-time candles: Backend 2 SSE bars merged into the live bar cache, chart SVG redrawn ≤1/s; requested same-origin `/stream/...` (proxied by `server.mjs` and the `vercel.json` rewrite, because Backend 2 only allows Frye's origins); 5 s Backend 1 polling fallback |
 | `chart-interact.js` | TradingView-style controls: drag pan (time + price), price-axis drag to scale, wheel zoom, Shift+wheel scroll, keys, double-click axis reset; `window.redlineChartView` feeds `chartGeometry()`; keeps panel scroll across re-renders |
+| `chart-drawings.js` | Chart drawing tools (client 2026-11-19): rail button + flyout like TradingView (Brushes: Brush, Highlighter · Arrows: Arrow marker, Arrow, Arrow mark up/down · Shapes: Rectangle, Rotated rectangle, Path, Circle, Ellipse, Polyline, Triangle, Arc, Curve, Double curve), ? help and favourites star per tool. Points anchored to bar time + price (live bars; demo bars fall back to index per symbol+tf) on an overlay `.rd-layer` inside `.chart-frame` (never a direct child svg). Select to move/drag points/recolour/width/delete; Esc, Delete, Enter, Ctrl+Z, Alt+Shift+R. Window-capture listeners so drawing never pans the chart or opens the price-level dialog. Saved in localStorage only; visual only, no backend calls. Pure geometry unit-tested by `npm test`; browser QA in `qa-drawings.cjs` |
 | `live-surfaces.js` | Live panels for strategies, chart and meters; re-attaches them after app.js re-renders |
 | `page-nav.js` | SaaS-style sticky "On this page" section navigator built after each render from visible `.race-section-label` / tab bars (or top-level panel titles), scroll-spy highlight, smooth jump, back-to-top button. Presentation only |
 | `motion-pro.js` | Presentation-only motion on top of `motion.js`: staggered reveal of each element type the first time it appears on a page visit (never on live refreshes), gauge needle sweep, yellow flash on values that change between renders. Off with prefers-reduced-motion / `state.settings.reduced` |
@@ -94,6 +95,7 @@ changing a script that's deployed.
 ```bash
 npm run dev      # static server on http://127.0.0.1:4173 (PORT env to change)
 npm run check    # node --check on all scripts — run after every JS edit
+npm test         # node:test unit tests (tests/*.test.cjs, no dependencies)
 npm run build    # copies app into dist/ (Vercel serves dist/)
 ```
 
