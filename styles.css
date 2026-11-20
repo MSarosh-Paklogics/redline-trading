@@ -1519,3 +1519,42 @@ body,#app{overflow-x:clip;overflow-y:visible}
 .rd-bar-del:hover{background:#3a1a1d;border-color:#ff4d4d}
 .rd-manager{margin-top:14px}
 @media(max-width:650px){.rd-fly{width:min(272px,calc(100vw - 70px))}.rd-bar-name{display:none}}
+
+/* Drawing toolbar v2 (TradingView layout) + popovers + lines group (chart-drawings.js, client 2026-11-20) */
+.rd-bar{gap:2px;padding:4px 6px;flex-wrap:nowrap}
+.rd-grip{display:flex;align-items:center;justify-content:center;width:18px;height:30px;color:#6f7d92;cursor:grab;touch-action:none}
+.rd-grip:active{cursor:grabbing}
+.rd-tb{position:relative;min-width:32px;height:32px;border:1px solid transparent;border-radius:5px;background:none;color:#d6dce5;padding:0 5px;display:flex;align-items:center;justify-content:center;gap:4px}
+.rd-tb:hover,.rd-tb[aria-expanded="true"]{background:#2a2b2d;color:#ffffff}
+.rd-tb.on{color:#ffcc00}
+.rd-tb.rd-del{color:#ff6b6b}.rd-tb.rd-del:hover{background:#3a1a1d}
+.rd-tb.rd-wide{min-width:52px}
+.rd-uline{position:absolute;left:8px;right:8px;bottom:3px;height:3px;border-radius:2px}
+.rd-wlabel{display:flex;align-items:center;gap:6px;font-size:12px;color:inherit;white-space:nowrap}
+.rd-wlabel i{display:block;width:14px;background:currentColor;border-radius:2px}
+.rd-pop{position:fixed;z-index:70;min-width:150px;max-width:300px;background:#1b1b1c;border:1px solid #333436;border-radius:8px;box-shadow:0 18px 40px rgba(0,0,0,.55);padding:6px}
+.rd-pop[data-kind="more"]{min-width:230px}
+.rd-pop-sub{min-width:220px}
+.rd-pop-title{font-size:10px;letter-spacing:1.3px;color:#7d8899;font-weight:700;padding:6px 6px 4px;text-transform:uppercase}
+.rd-swatches{display:grid;grid-template-columns:repeat(8,22px);gap:6px;padding:4px 6px 8px}
+.rd-swatches button{width:22px;height:22px;border-radius:5px;border:2px solid #1b1b1c;background:var(--sw);padding:0;box-shadow:0 0 0 1px #4a4b4d}
+.rd-swatches button.on{box-shadow:0 0 0 2px #ffffff}
+.rd-custom{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 6px;color:#c9ced6;font-size:12px}
+.rd-custom input{width:44px;height:24px;border:0;background:none;padding:0}
+.rd-row{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:#e3e7ee;padding:8px 10px;border-radius:6px;text-align:left;font-size:13px;white-space:nowrap}
+.rd-row:hover,.rd-row.open{background:#2a2b2d}
+.rd-row.on{color:#ffcc00}
+.rd-row>span:not(.rd-noicon){flex:1}
+.rd-row kbd{font:inherit;font-size:11px;color:#8b95a5}
+.rd-noicon{display:inline-block;width:18px;flex:none}
+.rd-has-sub>svg:last-child{margin-left:auto;color:#8b95a5}
+.rd-sep{height:1px;background:#2e2f31;margin:5px 2px}
+.rd-wsample{display:block;width:34px;background:currentColor;border-radius:2px}
+.rd-textin{width:100%;box-sizing:border-box;margin:0 0 6px;padding:8px 10px;border-radius:6px;border:1px solid #3a3b3d;background:#111214;color:#ffffff;font-size:13px}
+.rd-textin:focus{border-color:#ed1c24;outline:none}
+.rd-layer .rd-locked{fill:#101010;stroke:#ffcc00;cursor:not-allowed;pointer-events:all}
+.rd-layer .rd-axis{pointer-events:none}
+.rd-text{paint-order:stroke;stroke:#0b0b0c;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.rd-hidden-row{opacity:.55}
+.rd-manager .drawing-row{gap:8px}
+@media(max-width:650px){.rd-tb{min-width:28px;padding:0 3px}.rd-tb.rd-wide{min-width:44px}.rd-bar{max-width:calc(100% - 8px);overflow-x:auto}}
