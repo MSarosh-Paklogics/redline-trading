@@ -40,6 +40,16 @@
     request,
     health: () => request('/api/health'),
     snapshot: (symbol = 'ES') => request(`/api/v1/dashboard-snapshot?symbol=${q(symbol)}&includeContext=1`),
+    // Trader View v1 (Brian 2026-11-24): display-only plain-English read of Strategy 1 (Engine 26 → 3 → 4 → 6 + E22 / market context).
+    traderView: (symbol = 'ES') => request(`/api/v1/trader-view?symbol=${q(symbol)}`, { timeout: 15000 }),
+    // Engine 11 / 2C owner-only ES history archive (licensed research data, read-only). The owner key is
+    // typed by the owner into the browser at run time and sent only in X-Engine2C-Access; it is never
+    // stored in this repo, logged, or sent anywhere else. Same contract as Frye engine11HistoricalAdapter.js.
+    engine11Page: ({ frame, cursor = null, datasetVersion, priceBasisVersion }, accessKey) => {
+      const p = new URLSearchParams({ view: 'UNADJUSTED', frame, limit: '1000', direction: 'DESC', datasetVersion, priceBasisVersion });
+      if (cursor != null) p.set('cursor', cursor);
+      return request(`/engine2c-private-history/page?${p}`, { timeout: 30000, cache: 'no-store', credentials: 'omit', headers: { 'X-Engine2C-Access': accessKey } });
+    },
     marketMeter: (symbol = 'ES') => request(`/api/v1/futures/market-meter?symbol=${q(symbol)}`),
     futuresOhlc: (symbol = 'ES', timeframe = '10m', limit = 500) => request(`/api/v1/futures/ohlc?symbol=${q(symbol)}&timeframe=${q(timeframe)}&limit=${limit}`),
     ohlc: (symbol = 'SPY', timeframe = '10m', limit = 500) => request(`/api/v1/ohlc?symbol=${q(symbol)}&timeframe=${q(timeframe)}&limit=${limit}`),

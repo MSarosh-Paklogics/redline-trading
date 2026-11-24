@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Redline Trading — Market Intelligence</title>
+<meta name="description" content="Redline Trading brings broad-market participation, Elliott Wave structure, institutional zones and your trade journal into one connected workflow.">
+<link rel="icon" href="assets/redline-mark.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,800;0,900;1,800;1,900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="landing.css?v=20261123g">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="top">
+  <a class="brand" href="#top" aria-label="Redline Trading home"><img src="assets/redline-logo-clear.png?v=2" alt=""><span><b>REDLINE</b> TRADING<small>MARKET INTELLIGENCE</small></span></a>
+  <nav aria-label="Sections"><a href="#challenges">10 Essentials</a><a href="#cockpit">The Cockpit</a><a href="#engines">The Platform</a><a href="#turnkey">Why Redline</a></nav>
+  <a class="btn btn-red" href="index.html#/overview">Open Redline</a>
+  <div class="nav-progress" aria-hidden="true"><i></i></div>
+</header>
+
+<main id="main">
+  <!-- 1 · HERO: live ES candles, video, title; scroll revs the tach to the redline -->
+  <section class="hero" id="hero" aria-labelledby="heroTitle">
+    <div class="hero-bg" aria-hidden="true">
+      <video class="hero-video" src="assets/hero-bg.mp4" autoplay muted loop playsinline preload="metadata"></video>
+      <svg class="hero-candles" preserveAspectRatio="none"></svg>
+      <div class="hero-shade"></div>
+      <div class="hero-flash"></div>
+    </div>
+    <div class="hero-inner">
+      <p class="kicker"><i></i>REDLINE TRADING <span>/</span> SIGNALS, NOT GUESSES</p>
+      <h1 id="heroTitle" class="hero-title"><span class="line" data-split>Trade with</span><span class="line red" data-split>market intelligence.</span></h1>
+      <p class="hero-sub">What if you could see what’s happening <em>underneath the market</em> before your next trading decision?</p>
+      <div class="hero-cta"><a class="btn btn-red" href="#cockpit">Explore market intelligence <span aria-hidden="true">↘</span></a><a class="btn btn-ghost" href="#engines">See the engines <span aria-hidden="true">→</span></a></div>
+      <p class="fine">Professional market analysis. Signal-only: Redline never places orders.</p>
+    </div>
+    <div class="hero-tach" aria-hidden="true"><div data-gauge="tach"></div><div class="rev-readout"><b data-rpm>0</b><span>× 1000 RPM</span></div></div>
+    <div class="hero-live" data-live hidden><span class="dot"></span><span>ES 10m · LIVE BACKEND</span><b data-live-price>—</b></div>
+    <div class="scroll-cue" aria-hidden="true"><span>Scroll to start the engine</span><i></i></div>
+  </section>
+
+  <!-- 2 · STATS: counters -->
+  <section class="stats" aria-label="Redline at a glance">
+    <div class="stat"><b data-count="5740" data-format="comma">0</b><sup>*</sup><span>Stock monitoring universe</span></div>
+    <div class="stat"><b class="red"><span data-count="10">0</span> MIN</b><span>Fastest scan timeframe</span></div>
+    <div class="stat"><b><span data-count="5">0</span> VIEWS</b><span class="tf-cycle" aria-label="10m, 30m, 1h, 4h and EOD"><i>10M</i><i>30M</i><i>1H</i><i>4H</i><i>EOD</i></span></div>
+    <div class="stat"><b class="red"><span data-count="3">0</span> ENGINES</b><span>E22 structure · E25 health · E29 character</span></div>
+    <p class="fine stats-note">*Target stock universe; actual coverage and freshness vary.</p>
+  </section>
+
+  <!-- 3 · CHALLENGES: pinned horizontal track, each card turns to "how Redline helps" -->
+  <section class="challenges" id="challenges" aria-labelledby="chTitle">
+    <div class="ch-pin">
+      <div class="ch-head">
+        <p class="eyebrow">THE REDLINE TURNKEY ADVANTAGE</p>
+        <h2 id="chTitle">10 challenges every serious trader faces. <span class="red">One connected platform.</span></h2>
+        <div class="ch-meter" aria-hidden="true"><b data-ch-index>01</b><span>/ 10</span><i><em></em></i></div>
+      </div>
+      <div class="ch-track" data-track></div>
+    </div>
+  </section>
+
+  <!-- 4 · COCKPIT: LIVE Engine 25 market meter; scrolling sweeps the needles to the real values -->
+  <section class="cockpit" id="cockpit" aria-labelledby="ckTitle">
+    <div class="ck-pin">
+      <div class="ck-copy">
+        <p class="eyebrow">THE REDLINE COCKPIT</p>
+        <h2 id="ckTitle">Market intelligence <span class="red">at a glance.</span></h2>
+        <ol class="ck-steps">
+          <li data-step="0"><b>01 / Understand</b><span>See the market underneath price — health, breadth, stock volume and sector participation in one readout.</span></li>
+          <li data-step="1"><b>02 / Context</b><span>Know the current gear. The ES Master meter sets it: bull 1–4 above 63, neutral 50–62, bear 1–4 below 50.</span></li>
+          <li data-step="2"><b>03 / Decide</b><span>Follow your rules, not your impulse — cockpit evidence supports a plan, never replaces risk control.</span></li>
+        </ol>
+      </div>
+      <div class="ck-dash">
+        <p class="live-chip" data-live-chip="x"><i></i><span>Connecting to the Redline backend…</span></p>
+        <div class="ck-cluster" aria-hidden="true">
+          <div class="ck-tach" data-gauge="ckTach"></div>
+          <div class="ck-gear">
+            <svg viewBox="0 0 240 140" class="gate">
+              <g class="gate-lines"><path d="M30 30V110M70 30V110M30 70H210M170 30V110M210 30V110"/></g>
+              <g class="gate-nums"><text x="30" y="20">3</text><text x="70" y="20">1</text><text x="30" y="132">4</text><text x="70" y="132">2</text><text x="120" y="60" class="n">N</text><text x="170" y="20">1</text><text x="210" y="20">3</text><text x="170" y="132">2</text><text x="210" y="132">4</text></g>
+              <g class="knob" data-knob><circle r="11"/><circle r="4"/></g>
+            </svg>
+            <p class="gear-word" data-gear-word>—</p>
+            <p class="gear-sub" data-gear-sub>ES master meter gear</p>
+          </div>
+          <div class="ck-speedo" data-gauge="ckSpeedo"></div>
+        </div>
+        <div class="ck-readouts">
+          <div><small>MARKET HEALTH</small><b data-read="health">—</b><i><em data-bar="health"></em></i><span data-read-sub="health"></span></div>
+          <div><small>STOCKS ADVANCING</small><b data-read="breadth">—</b><i><em data-bar="breadth"></em></i><span data-read-sub="breadth"></span></div>
+          <div><small>BUY VOLUME</small><b data-read="volume">—</b><i><em data-bar="volume"></em></i><span data-read-sub="volume"></span></div>
+          <div><small>SECTORS STRONG</small><b data-read="sectors">—</b><i><em data-bar="sectors"></em></i><span data-read-sub="sectors"></span></div>
+        </div>
+        <p class="fine ck-note">Real Engine 25 readings from the Redline backend · display only · the gear is a market-pace read, not a trade. Engine 6 decides permission.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · UNDER THE HOOD: every scanned stock as a dot; scrolling splits advancing / declining; 11 sectors -->
+  <section class="hood" id="hood" aria-labelledby="hdTitle">
+    <div class="hd-pin">
+      <div class="hd-copy">
+        <p class="eyebrow">BENEATH THE PRICE CHART</p>
+        <h2 id="hdTitle">Don’t just watch the market. <span class="red">See what’s happening under the hood.</span></h2>
+        <p>One index can hide what thousands of stocks are revealing. Every dot below is one stock in the latest scan.</p>
+        <div class="hd-count"><div><b class="up" data-hd="up">—</b><span>advancing</span></div><div><b class="down" data-hd="down">—</b><span>declining</span></div><div><b data-hd="scanned">—</b><span>scanned</span></div></div>
+        <p class="live-chip" data-live-chip="hood"><i></i><span>Connecting…</span></p>
+      </div>
+      <div class="hd-field"><canvas data-dots aria-label="Each scanned stock as a dot, advancing in green and declining in red"></canvas><div class="hd-index" aria-hidden="true"><span>ES · the index headline</span></div></div>
+    </div>
+    <div class="sectors">
+      <div class="sec-head"><p class="eyebrow">REAL REDLINE MARKET DATA</p><h3>When the index hides weakness, <span class="red">see the 11 sectors underneath.</span></h3></div>
+      <div class="sec-grid" data-sectors></div>
+      <p class="fine" data-sectors-note>1-hour sector participation · share of each sector’s stocks advancing.</p>
+    </div>
+  </section>
+
+  <!-- 6 · ENGINES: stacked cards, each with its real current reading -->
+  <section class="engines" id="engines" aria-labelledby="enTitle">
+    <div class="en-head">
+      <p class="eyebrow">SIX CONNECTED CAPABILITIES + TWO DISTINCT AI SYSTEMS</p>
+      <h2 id="enTitle">Everything belongs in <span class="red">one trading workflow.</span></h2>
+      <p>The differentiator isn’t the number of indicators. It’s market structure, market health, market character, your chart, your trade history and your strategy development in one connected environment.</p>
+    </div>
+    <div class="en-stack" data-engines></div>
+  </section>
+
+  <!-- 7 · STRUCTURE: real ES 1h candles, real institutional zones, real Engine 22 degree reads -->
+  <section class="structure" id="structure" aria-labelledby="stTitle">
+    <div class="st-pin">
+      <div class="st-copy">
+        <p class="eyebrow">STRUCTURE + PRICE LEVELS</p>
+        <h2 id="stTitle">Know the wave. <span class="red">See the zones.</span> Plan the next decision.</h2>
+        <p>Engine 22 reads Elliott Wave structure on six degrees at once. Institutional zones mark where price has met real participation.</p>
+        <ol class="st-ladder" data-ladder></ol>
+        <p class="fine">Wave counts are analytical interpretations, not guaranteed future paths. A zone is a potential area of interest, not proof of institutional intent.</p>
+      </div>
+      <div class="st-chart-wrap">
+        <p class="live-chip" data-live-chip="st"><i></i><span>Connecting…</span></p>
+        <svg class="st-chart" viewBox="0 0 800 440" preserveAspectRatio="none" aria-label="ES 1-hour candles with institutional zones"><defs><clipPath id="stReveal"><rect data-reveal-rect x="0" y="0" width="0" height="440"/></clipPath></defs><g class="st-grid"></g><g class="st-zones"></g><g class="st-candles" clip-path="url(#stReveal)"></g><g class="st-price"></g></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · STRATEGY AI BOT (planned) -->
+  <section class="aibot" id="ai" aria-labelledby="aiTitle">
+    <div class="ai-head">
+      <p class="eyebrow">TWO DISTINCT AI SYSTEMS · THE FIRST IS YOUR PRIVATE STRATEGY AI BOT</p>
+      <h2 id="aiTitle">Meet the AI bot that studies <span class="red">YOUR trading strategy every day.</span></h2>
+      <p>Every customer is planned to receive a dedicated, private Strategy AI Bot — a background research system that studies the strategies you develop, evaluates recorded trades and the market conditions around them, and researches ways to improve your process. <b>This is not ENZO.</b></p>
+    </div>
+    <div class="ai-body">
+      <div class="ai-orb-card"><div class="ai-orb" aria-hidden="true"><span>AI</span><i></i><i></i><i></i></div><h3>Your Strategy AI Bot</h3><p class="ai-tag">ONE PER CUSTOMER · PRIVATE STRATEGY RESEARCH</p><p>Your rules. Your journal. Your results. A research assistant dedicated to how your strategies actually perform.</p><span class="planned">PLANNED PRODUCT CAPABILITY</span></div>
+      <ol class="ai-steps">
+        <li><b>01 / Understand</b><h4>Learn your methods</h4><p>Document your entry rules, exits, risk limits and the setups you choose to trade.</p></li>
+        <li><b>02 / Observe</b><h4>Study every trade</h4><p>Connect each journaled trade to your strategy and the Engine 22, 25 and 29 conditions at the time.</p></li>
+        <li><b>03 / Diagnose</b><h4>Find the patterns</h4><p>Identify where a strategy performs consistently, struggles, or drifts from its rules.</p></li>
+        <li><b>04 / Research</b><h4>Test improvements</h4><p>Explore adjustments with historical and out-of-sample evidence before proposing them.</p></li>
+        <li class="ai-daily"><b>Your daily strategy review</b><p>What worked? What failed? Under which market conditions? Which possible improvements deserve testing next?</p></li>
+      </ol>
+    </div>
+    <p class="fine ai-note"><b>Product status:</b> a dedicated Strategy AI Bot and daily personalized learning are planned, not verified launch capabilities. Findings would be suggestions — never self-modifying strategies, automated orders or guaranteed improvements. Your data stays isolated and every change needs your approval.</p>
+  </section>
+
+  <!-- 9 · ENZO (concept preview) -->
+  <section class="enzo" id="enzo" aria-labelledby="ezTitle">
+    <div class="ez-copy">
+      <p class="eyebrow">THE SECOND AI SYSTEM · MEET ENZO</p>
+      <h2 id="ezTitle">Your trading intelligence. <span class="red">Now you can talk to it.</span></h2>
+      <p>You bring the strategies. Redline brings the market intelligence. ENZO is designed to connect them — answering questions about your wave structure, market health, market character, institutional zones and your own journal, using only your authorized data and citing the reading and time behind every answer.</p>
+      <ul class="ez-points"><li><b>Your questions</b>Ask what’s happening in the market and why.</li><li><b>Your strategies</b>Discuss the setups and rules you’ve developed.</li><li><b>Your history</b>Review completed trades and recurring patterns.</li><li><b>Your control</b>Approve any strategy change yourself.</li></ul>
+    </div>
+    <div class="ez-chat" aria-label="ENZO concept preview">
+      <div class="ez-top"><span class="ez-av">E</span><div><b>ENZO</b><small>REDLINE PERSONAL INTELLIGENCE · CONCEPT PREVIEW</small></div><span class="planned">PREVIEW</span></div>
+      <div class="ez-log">
+        <div class="ez-msg me" data-ez="q"><small>TRADER</small><p>Why is the market weak when the index barely moved?</p></div>
+        <div class="ez-typing" data-ez="typing"><i></i><i></i><i></i></div>
+        <div class="ez-msg bot" data-ez="a"><small>ENZO · EXAMPLE RESPONSE</small><p data-ez-text>Look beyond the index. Your market-participation view shows 79% of measured stocks declining, 77% of directional stock volume on the selling side, and 11 weak sectors in this captured example. Engine 29 also indicates strong larger-timeframe downside pressure, even as short-term momentum stabilizes.</p><span class="fine">Illustrative answer based on a historical screenshot · not live data</span></div>
+      </div>
+      <div class="ez-chips"><span>Explain this wave</span><span>Review my last trade</span><span>Where are the zones?</span></div>
+      <div class="ez-input"><span>Ask ENZO about your market, your strategy, your trades</span><b aria-hidden="true">↗</b></div>
+    </div>
+    <p class="fine ez-note">ENZO and daily customer strategy learning are planned product experiences. This preview is illustrative — not a live AI assistant or a released integration.</p>
+  </section>
+
+  <!-- 10 · TURNKEY: scattered tools snap into one connected process -->
+  <section class="turnkey" id="turnkey" aria-labelledby="tkTitle">
+    <div class="tk-pin">
+      <div class="tk-copy">
+        <p class="eyebrow">WHY TURNKEY MATTERS</p>
+        <h2 id="tkTitle"><span data-tk-a>From scattered tools</span> <span class="red" data-tk-b>to a connected process.</span></h2>
+        <p>For serious traders, the cost of a fragmented setup isn’t just another subscription. It’s context-switching, manual reconciliation, and decisions made with pieces of the picture missing.</p>
+        <p class="tk-quote">The goal isn’t to take thinking away from traders. <span class="red">It’s to give serious traders a better system for thinking.</span></p>
+      </div>
+      <div class="tk-stage" aria-hidden="true">
+        <div class="tk-frame"><span>REDLINE · ONE WORKFLOW</span></div>
+        <div class="tk-win" data-win="0"><b>Charts</b><i>Separate analysis windows</i><em>Structure + chart together</em></div>
+        <div class="tk-win" data-win="1"><b>Breadth</b><i>Checked somewhere else</i><em>Engines 25 + 29 in one view</em></div>
+        <div class="tk-win" data-win="2"><b>Journal</b><i>Disconnected from strategy</i><em>Linked to your approach</em></div>
+        <div class="tk-win" data-win="3"><b>Notes</b><i>Lessons buried in notes</i><em>Structured strategy review</em></div>
+        <div class="tk-win" data-win="4"><b>Spreadsheet</b><i>Manual reconciliation</i><em>Every transaction accounted</em></div>
+        <div class="tk-win" data-win="5"><b>Setup</b><i>Repeated across tools</i><em>One workflow with ENZO</em></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 · IMPROVEMENT LOOP -->
+  <section class="loop" id="loop" aria-labelledby="lpTitle">
+    <div class="lp-pin">
+      <div class="lp-copy">
+        <p class="eyebrow">THE CONTINUOUS IMPROVEMENT LOOP</p>
+        <h2 id="lpTitle">Every trading decision <span class="red">should teach you something.</span></h2>
+        <div class="lp-now"><b data-lp-name>Analyze</b><span data-lp-desc>Market structure</span></div>
+        <p class="fine lp-note"><b>Launch transparency:</b> the launch target is an analysis and decision-support platform. Automated execution is planned as a separate later release, about six months after November 2026. Some capabilities shown require launch verification. Historical analysis cannot guarantee profitable trades.</p>
+      </div>
+      <svg class="lp-ring" viewBox="-220 -220 440 440" aria-hidden="true"><circle class="lp-track" r="170"/><circle class="lp-prog" r="170" data-lp-prog/><g data-lp-nodes></g></svg>
+    </div>
+  </section>
+
+  <!-- 6 · CTA -->
+  <section class="cta" id="cta" aria-labelledby="ctaTitle">
+    <div class="cta-line" aria-hidden="true"></div>
+    <p class="eyebrow">ONE PLATFORM. ONE CONNECTED TRADING PROCESS.</p>
+    <h2 id="ctaTitle">Don’t just watch the market. <span class="red">Understand your trading.</span></h2>
+    <p>Professional market intelligence, advanced charting, transaction accountability and strategy development — designed to work together.</p>
+    <a class="btn btn-red btn-big" href="index.html#/overview">Explore Redline Trading</a>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>© 2026 Redline Trading — Powered by AI.</p>
+  <p>Trading futures and other financial products involves substantial risk. No performance or profit is guaranteed. Some capabilities shown are planned and require launch verification. Automated execution is planned as a later release.</p>
+</footer>
+
+<script src="backend-api.js?v=20261117a"></script>
+<script src="market-xray.js?v=20261117a"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.4/dist/lenis.min.js"></script>
+<script src="landing.js?v=20261123g"></script>
+</body>
+</html>

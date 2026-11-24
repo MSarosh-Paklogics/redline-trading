@@ -30,7 +30,8 @@
     } else if (t > last.t) {
       arr.push({ t, o, h, l, c, v });
       if (typeof chartOffset !== 'undefined' && chartOffset > 0 && key === `${symbol}:${tf}`) chartOffset++;
-      if (arr.length > 1000) arr.shift();
+      // Recent-only sets stay bounded; Engine 11 archive-backed sets (2020+) are never trimmed.
+      if (!arr.engine11 && arr.length > 6000) arr.shift();
     } else return;
     s.dirty = true;
   }
