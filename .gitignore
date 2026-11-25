@@ -4,3 +4,6 @@
 
 # Enzo model: committed (owner confirmed licence 2026-11-11). Keep the pre-repack backup out.
 /assets/local/*.orig.glb
+
+# Claude Code local config
+.claude/
